@@ -18,10 +18,10 @@
 set -eu
 
 TIYAZO_HOME="${TIYAZO_HOME:-/opt/data}"
-INSTALL_DIR="/opt/hermes"
+INSTALL_DIR="/opt/tiyazo"
 
-# Drop to hermes via s6-setuidgid, but skip it when already non-root.
-as_hermes() { [ "$(id -u)" = 0 ] || { "$@"; return; }; s6-setuidgid hermes "$@"; }
+# Drop to tiyazo via s6-setuidgid, but skip it when already non-root.
+as_tiyazo() { [ "$(id -u)" = 0 ] || { "$@"; return; }; s6-setuidgid tiyazo "$@"; }
 
 # --- Reject the unsupported `docker run --user <uid>:<gid>` start ---
 # Detect the case where the container was launched with `--user` pinned to an
@@ -30,43 +30,43 @@ as_hermes() { [ "$(id -u)" = 0 ] || { "$@"; return; }; s6-setuidgid hermes "$@";
 #
 # Under s6-overlay this no longer works: the bootstrap (UID remap, data-volume
 # ownership, config seeding) requires root, and it is skipped when the container
-# starts non-root. The baked install tree under /opt/hermes is intentionally
+# starts non-root. The baked install tree under /opt/tiyazo is intentionally
 # root-owned and non-writable; mutable runtime state must live under
 # $TIYAZO_HOME. An arbitrary `--user` UID therefore cannot repair or populate
 # the data volume, and startup fails with EACCES. See #34837 for the
 # supervision-tree side of this.
 #
 # The supported way to match host-side ownership is to start as root (the image
-# default) and pass HERMES_UID/HERMES_GID — or the PUID/PGID aliases — which the
+# default) and pass TIYAZO_UID/TIYAZO_GID — or the PUID/PGID aliases — which the
 # remap block below consumes via usermod/groupmod + targeted chown. That gives
 # the exact same outcome (files owned by your host UID) without breaking s6.
 #
 # preinit runs setuid-root (euid=0) but cont-init.d hooks run with the real UID
 # the container was started as, so `id -u` here is the host UID (e.g. 1000), and
-# `id -u hermes` is the unremapped build UID (10000) because no root-only remap
+# `id -u tiyazo` is the unremapped build UID (10000) because no root-only remap
 # could run. root starts (id -u = 0) and the normal supervised drop to the
-# hermes UID are both unaffected.
+# tiyazo UID are both unaffected.
 cur_uid="$(id -u)"
-if [ "$cur_uid" != 0 ] && [ "$cur_uid" != "$(id -u hermes)" ]; then
+if [ "$cur_uid" != 0 ] && [ "$cur_uid" != "$(id -u tiyazo)" ]; then
     cat >&2 <<EOF
-[stage2] ERROR: container started with --user $cur_uid (an arbitrary, non-hermes UID).
+[stage2] ERROR: container started with --user $cur_uid (an arbitrary, non-tiyazo UID).
 
 This is not supported under the s6-overlay image. The container bootstrap
 (UID remap, data-volume ownership, config seeding) needs to start as root,
-and the baked /opt/hermes install tree is intentionally root-owned and
+and the baked /opt/tiyazo install tree is intentionally root-owned and
 non-writable, so a pinned --user UID cannot repair startup state — startup
 will fail.
 
 To make container-written files match your HOST user, DON'T use --user.
 Start the container as root (the default) and pass your host UID/GID instead:
 
-    docker run -e HERMES_UID=\$(id -u) -e HERMES_GID=\$(id -g) ...
+    docker run -e TIYAZO_UID=\$(id -u) -e TIYAZO_GID=\$(id -g) ...
 
 NAS users (Synology / unRAID / UGOS) can use the PUID/PGID aliases:
 
     docker run -e PUID=\$(id -u) -e PGID=\$(id -g) ...
 
-The image remaps the hermes user to that UID/GID at boot and chowns the data
+The image remaps the tiyazo user to that UID/GID at boot and chowns the data
 volume accordingly, so files land owned by your host user — the same outcome
 --user was being used for, without breaking the supervision tree.
 EOF
@@ -76,9 +76,9 @@ fi
 # --- Bootstrap TIYAZO_HOME as root ---
 # Create the directory (and any missing parents) while we still have root
 # privileges so the chown checks below see real metadata and the later
-# `s6-setuidgid hermes mkdir -p` block doesn't EACCES on root-owned
+# `s6-setuidgid tiyazo mkdir -p` block doesn't EACCES on root-owned
 # ancestors. Without this, custom TIYAZO_HOME paths whose parents only
-# root can create (e.g. `TIYAZO_HOME=/home/hermes/.tiyazo` in a Compose
+# root can create (e.g. `TIYAZO_HOME=/home/tiyazo/.tiyazo` in a Compose
 # file, or any path under a fresh / not pre-populated by the image)
 # fail on first boot with `mkdir: cannot create directory '/...': Permission
 # denied` and the cont-init hook exits non-zero. Idempotent — `mkdir -p`
@@ -95,31 +95,31 @@ validate_uid_gid() {
 }
 
 # --- UID/GID remap ---
-# Accept PUID/PGID as aliases for HERMES_UID/HERMES_GID.  NAS users (UGOS,
+# Accept PUID/PGID as aliases for TIYAZO_UID/TIYAZO_GID.  NAS users (UGOS,
 # Synology, unRAID) expect the LinuxServer.io PUID/PGID convention and
 # bind-mount /opt/data from a host directory owned by their own UID; without
 # this alias those vars are silently ignored and the s6-setuidgid drop to
-# UID 10000 leaves the runtime unable to read the volume.  HERMES_UID/
-# HERMES_GID still win when both are set.  See #15290, salvages #25872.
-HERMES_UID="${HERMES_UID:-${PUID:-}}"
-HERMES_GID="${HERMES_GID:-${PGID:-}}"
+# UID 10000 leaves the runtime unable to read the volume.  TIYAZO_UID/
+# TIYAZO_GID still win when both are set.  See #15290, salvages #25872.
+TIYAZO_UID="${TIYAZO_UID:-${PUID:-}}"
+TIYAZO_GID="${TIYAZO_GID:-${PGID:-}}"
 
-if [ -n "${HERMES_UID:-}" ] && validate_uid_gid "$HERMES_UID" && [ "$HERMES_UID" != "$(id -u hermes)" ]; then
-    echo "[stage2] Changing hermes UID to $HERMES_UID"
-    usermod -u "$HERMES_UID" hermes
+if [ -n "${TIYAZO_UID:-}" ] && validate_uid_gid "$TIYAZO_UID" && [ "$TIYAZO_UID" != "$(id -u tiyazo)" ]; then
+    echo "[stage2] Changing tiyazo UID to $TIYAZO_UID"
+    usermod -u "$TIYAZO_UID" tiyazo
 fi
-if [ -n "${HERMES_GID:-}" ] && validate_uid_gid "$HERMES_GID" && [ "$HERMES_GID" != "$(id -g hermes)" ]; then
-    echo "[stage2] Changing hermes GID to $HERMES_GID"
+if [ -n "${TIYAZO_GID:-}" ] && validate_uid_gid "$TIYAZO_GID" && [ "$TIYAZO_GID" != "$(id -g tiyazo)" ]; then
+    echo "[stage2] Changing tiyazo GID to $TIYAZO_GID"
     # -o allows non-unique GID (e.g. macOS GID 20 "staff" may already
     # exist as "dialout" in the Debian-based container image).
-    groupmod -o -g "$HERMES_GID" hermes 2>/dev/null || true
+    groupmod -o -g "$TIYAZO_GID" tiyazo 2>/dev/null || true
 fi
 
 # --- Docker socket group membership (docker-in-docker / DooD) ---
 # When the user bind-mounts the host Docker daemon socket
 # (`-v /var/run/docker.sock:/var/run/docker.sock`) to use the `docker`
 # terminal backend from inside the container, the socket is owned by the
-# host's `docker` group (or root). The supervised hermes user (UID 10000)
+# host's `docker` group (or root). The supervised tiyazo user (UID 10000)
 # is not a member of any group that matches the socket's GID, so every
 # `docker` invocation EACCES'es and `check_terminal_requirements()` fails.
 # See #16703.
@@ -131,26 +131,26 @@ fi
 # /etc/group entry whose GID matches the socket, the kernel-granted
 # supp group is silently wiped between PID 1 and the dropped process.
 # Confirmed empirically: `--group-add 998` alone leaves the dropped
-# hermes process with `Groups: 10000` (998 gone); after this hook adds
+# tiyazo process with `Groups: 10000` (998 gone); after this hook adds
 # the entry, the dropped process has `Groups: 998 10000` as expected.
 #
 # Fix: detect the socket's GID at boot and ensure /etc/group has a
-# matching entry that includes hermes. Idempotent across container
+# matching entry that includes tiyazo. Idempotent across container
 # restarts. Skipped silently when no socket is bind-mounted.
 #
 # Handles the awkward corner cases:
 #   - socket owned by GID 0 (root) — some Podman setups; usermod -aG root
 #   - socket GID already used by a known container group (e.g. tty=5):
 #     reuse that group's name rather than creating a duplicate
-#   - hermes is already a member of the right group (idempotent restart)
+#   - tiyazo is already a member of the right group (idempotent restart)
 #   - chown/groupadd failures under rootless containers — non-fatal
 for sock in /var/run/docker.sock /run/docker.sock; do
     [ -S "$sock" ] || continue
     sock_gid=$(stat -c '%g' "$sock" 2>/dev/null) || continue
     [ -n "$sock_gid" ] || continue
     # Already a member? Nothing to do.
-    if id -G hermes 2>/dev/null | tr ' ' '\n' | grep -qx "$sock_gid"; then
-        echo "[stage2] hermes already in group $sock_gid for $sock"
+    if id -G tiyazo 2>/dev/null | tr ' ' '\n' | grep -qx "$sock_gid"; then
+        echo "[stage2] tiyazo already in group $sock_gid for $sock"
         break
     fi
     # Resolve or create a group name for this GID.
@@ -163,24 +163,24 @@ for sock in /var/run/docker.sock /run/docker.sock; do
         fi
         echo "[stage2] Created group $sock_group (GID $sock_gid) for Docker socket"
     fi
-    if usermod -aG "$sock_group" hermes 2>/dev/null; then
-        echo "[stage2] Added hermes to group $sock_group (GID $sock_gid) for $sock"
+    if usermod -aG "$sock_group" tiyazo 2>/dev/null; then
+        echo "[stage2] Added tiyazo to group $sock_group (GID $sock_gid) for $sock"
     else
-        echo "[stage2] Warning: usermod -aG $sock_group hermes failed; docker backend may fail with EACCES"
+        echo "[stage2] Warning: usermod -aG $sock_group tiyazo failed; docker backend may fail with EACCES"
     fi
     break
 done
 
 # --- Fix ownership of data volume ---
-# When HERMES_UID is remapped or the top-level $TIYAZO_HOME isn't owned by
-# the runtime hermes UID, restore ownership to hermes — but ONLY for the
-# directories hermes actually writes to. The full $TIYAZO_HOME may be a
+# When TIYAZO_UID is remapped or the top-level $TIYAZO_HOME isn't owned by
+# the runtime tiyazo UID, restore ownership to tiyazo — but ONLY for the
+# directories tiyazo actually writes to. The full $TIYAZO_HOME may be a
 # host-mounted bind containing unrelated user files; `chown -R` would
 # silently destroy host ownership of those (see issue #19788).
 #
 # The canonical list of tiyazo-owned subdirs is the same one the s6-setuidgid
 # mkdir -p block below seeds. Keep them in sync if the seed list changes.
-actual_tiyazo_uid=$(id -u hermes)
+actual_tiyazo_uid=$(id -u tiyazo)
 
 path_has_symlink_component() {
     path="$1"
@@ -216,7 +216,7 @@ chown_tiyazo_tree() {
     if refuse_symlinked_path "recursive chown" "$target"; then
         return 0
     fi
-    chown -R hermes:hermes "$target" 2>/dev/null || \
+    chown -R tiyazo:tiyazo "$target" 2>/dev/null || \
         echo "[stage2] Warning: chown $target failed (rootless container?) — continuing"
 }
 
@@ -225,22 +225,22 @@ if [ "$(stat -c %u "$TIYAZO_HOME" 2>/dev/null)" != "$actual_tiyazo_uid" ]; then
     needs_chown=true
 fi
 if [ "$needs_chown" = true ]; then
-    echo "[stage2] Fixing ownership of $TIYAZO_HOME (targeted) to hermes ($actual_tiyazo_uid)"
+    echo "[stage2] Fixing ownership of $TIYAZO_HOME (targeted) to tiyazo ($actual_tiyazo_uid)"
     # In rootless Podman the container's "root" is mapped to an
     # unprivileged host UID — chown will fail. That's fine: the volume
     # is already owned by the mapped user on the host side.
     #
     # Top-level $TIYAZO_HOME: chown the directory itself (not its contents)
-    # so hermes can mkdir new subdirs but bind-mounted host files keep
+    # so tiyazo can mkdir new subdirs but bind-mounted host files keep
     # their existing ownership.
     if refuse_symlinked_path "chown" "$TIYAZO_HOME"; then
         :
     else
-        chown hermes:hermes "$TIYAZO_HOME" 2>/dev/null || \
+        chown tiyazo:tiyazo "$TIYAZO_HOME" 2>/dev/null || \
             echo "[stage2] Warning: chown $TIYAZO_HOME failed (rootless container?) — continuing"
     fi
-    # Hermes-owned subdirs: recursive chown is safe here because these are
-    # created and managed exclusively by hermes (see the s6-setuidgid mkdir
+    # Tiyazo-owned subdirs: recursive chown is safe here because these are
+    # created and managed exclusively by tiyazo (see the s6-setuidgid mkdir
     # -p block below for the canonical list).
     for sub in cron sessions logs hooks memories skills skins plans workspace home profiles pairing platforms/pairing lazy-packages; do
         if [ -e "$TIYAZO_HOME/$sub" ]; then
@@ -251,28 +251,28 @@ fi
 
 # --- Immutable install tree ---
 # Do not chown runtime code or dependency trees under $INSTALL_DIR back to the
-# hermes user. Hosted/container instances keep mutable state under
+# tiyazo user. Hosted/container instances keep mutable state under
 # $TIYAZO_HOME (/opt/data) and run with PYTHONDONTWRITEBYTECODE plus
-# HERMES_DISABLE_LAZY_INSTALLS=1. Keeping /opt/hermes root-owned and
+# TIYAZO_DISABLE_LAZY_INSTALLS=1. Keeping /opt/tiyazo root-owned and
 # non-writable prevents an agent session from self-modifying the installed
 # source, venv, TUI bundle, or node_modules and bricking the gateway.
 #
 # Lazy-installable optional backends (Firecrawl, Exa, Feishu, etc.) cannot
 # install into the sealed venv, so they are redirected to the writable
 # $TIYAZO_HOME/lazy-packages dir on the data volume (Dockerfile sets
-# HERMES_LAZY_INSTALL_TARGET). That dir is appended to the END of sys.path,
+# TIYAZO_LAZY_INSTALL_TARGET). That dir is appended to the END of sys.path,
 # so a package installed there can only ADD modules — it can never shadow or
 # break a core module, which is what keeps the sealed-venv guarantee intact
-# even though installs are re-enabled. The dir is seeded + chowned to hermes
+# even though installs are re-enabled. The dir is seeded + chowned to tiyazo
 # in the mkdir/chown blocks above so first-use installs succeed as the
 # unprivileged runtime user, and it persists across container recreates /
 # image updates (an ABI stamp wipes it if a rebuild bumps the interpreter).
 
-# Always reset ownership of $TIYAZO_HOME/profiles to hermes on every
+# Always reset ownership of $TIYAZO_HOME/profiles to tiyazo on every
 # boot. Profile dirs and files can land owned by root when commands
-# are invoked via `docker exec <container> hermes …` (which defaults
+# are invoked via `docker exec <container> tiyazo …` (which defaults
 # to root unless `-u` is passed), and that breaks the cont-init
-# reconciler (02-reconcile-profiles) which runs as hermes and walks
+# reconciler (02-reconcile-profiles) which runs as tiyazo and walks
 # the profiles dir. Idempotent; skipped on rootless containers where
 # chown would fail.
 if [ -d "$TIYAZO_HOME/profiles" ]; then
@@ -281,7 +281,7 @@ fi
 
 # Always reset ownership of $TIYAZO_HOME/cron on every boot for the same
 # docker-exec/root-write reason as profiles/. The cron scheduler state
-# (jobs.json) must stay readable by the unprivileged hermes runtime even
+# (jobs.json) must stay readable by the unprivileged tiyazo runtime even
 # after root-context maintenance commands or scheduler writes.
 if [ -d "$TIYAZO_HOME/cron" ]; then
     chown_tiyazo_tree "$TIYAZO_HOME/cron"
@@ -289,8 +289,8 @@ fi
 
 # Always reset ownership of pairing data on every boot, same docker-exec/
 # root-write reason as profiles/ and cron/. `docker exec <container>
-# hermes pairing approve …` defaults to uid=0 and writes 0600 root-owned
-# approval files that the unprivileged hermes gateway cannot read,
+# tiyazo pairing approve …` defaults to uid=0 and writes 0600 root-owned
+# approval files that the unprivileged tiyazo gateway cannot read,
 # silently leaving the approved user unauthorized (#10270). The targeted
 # data-volume chown above only runs when the top-level $TIYAZO_HOME is
 # mis-owned, so warm boots skip it — this block makes a container restart
@@ -308,8 +308,8 @@ fi
 # The targeted data-volume chown above only covers tiyazo-owned
 # *subdirectories*; loose state files living directly under $TIYAZO_HOME
 # are missed. When those files are created or rewritten by
-# `docker exec <container> hermes …` (root unless `-u` is passed) they
-# land root-owned, and the unprivileged hermes runtime then hits
+# `docker exec <container> tiyazo …` (root unless `-u` is passed) they
+# land root-owned, and the unprivileged tiyazo runtime then hits
 # PermissionError on next startup (e.g. gateway.lock / state.db /
 # auth.json), producing a gateway restart loop.
 #
@@ -330,31 +330,31 @@ for f in \
         if refuse_symlinked_path "chown" "$TIYAZO_HOME/$f"; then
             :
         else
-            chown hermes:hermes "$TIYAZO_HOME/$f" 2>/dev/null || true
+            chown tiyazo:tiyazo "$TIYAZO_HOME/$f" 2>/dev/null || true
         fi
     fi
 done
 
 # --- config.yaml permissions ---
-# Ensure config.yaml is readable by the hermes runtime user even if it
+# Ensure config.yaml is readable by the tiyazo runtime user even if it
 # was edited on the host after initial ownership setup.
 if [ -f "$TIYAZO_HOME/config.yaml" ]; then
     if refuse_symlinked_path "chown/chmod" "$TIYAZO_HOME/config.yaml"; then
         :
     else
-        chown hermes:hermes "$TIYAZO_HOME/config.yaml" 2>/dev/null || true
+        chown tiyazo:tiyazo "$TIYAZO_HOME/config.yaml" 2>/dev/null || true
         chmod 640 "$TIYAZO_HOME/config.yaml" 2>/dev/null || true
     fi
 fi
 
-# --- Seed directory structure as hermes user ---
-# Run as hermes via s6-setuidgid so dirs end up owned correctly (matters
+# --- Seed directory structure as tiyazo user ---
+# Run as tiyazo via s6-setuidgid so dirs end up owned correctly (matters
 # under rootless Podman where chown back to root would fail).
 #
 # Use direct `mkdir -p` invocation (no `sh -c "..."` wrapper) so the
 # shell isn't a second interpreter — defends against $TIYAZO_HOME values
 # containing shell metacharacters. PR #30136 review item O2.
-as_hermes mkdir -p \
+as_tiyazo mkdir -p \
     "$TIYAZO_HOME/backups" \
     "$TIYAZO_HOME/cron" \
     "$TIYAZO_HOME/sessions" \
@@ -373,17 +373,17 @@ as_hermes mkdir -p \
 
 # --- Install-method stamp ---
 # The 'docker' stamp is baked into the immutable install tree at
-# /opt/hermes/.install_method (see Dockerfile), NOT written here into
+# /opt/tiyazo/.install_method (see Dockerfile), NOT written here into
 # $TIYAZO_HOME. detect_install_method() reads the code-scoped stamp first.
 #
 # Why we no longer stamp $TIYAZO_HOME: it is a shared DATA volume, commonly
 # bind-mounted from the host (~/.tiyazo:/opt/data) and sometimes shared with a
 # host-side Desktop/CLI install. Stamping 'docker' here clobbered that host
 # install's marker, so its in-app updater read 'docker' and refused to run
-# 'hermes update'. To heal homes already poisoned by older images, remove a
+# 'tiyazo update'. To heal homes already poisoned by older images, remove a
 # stale 'docker' stamp from $TIYAZO_HOME if one is present (the host install's
 # own installer re-creates its code-scoped stamp; a genuine container relies on
-# the baked /opt/hermes stamp, so deleting the data-dir copy is safe).
+# the baked /opt/tiyazo stamp, so deleting the data-dir copy is safe).
 if [ -f "$TIYAZO_HOME/.install_method" ]; then
     stamped="$(tr -d '[:space:]' < "$TIYAZO_HOME/.install_method" 2>/dev/null || true)"
     if [ "$stamped" = "docker" ]; then
@@ -399,7 +399,7 @@ seed_one() {
         if refuse_symlinked_path "seed" "$TIYAZO_HOME/$dest"; then
             :
         else
-            as_hermes cp "$INSTALL_DIR/$src" "$TIYAZO_HOME/$dest"
+            as_tiyazo cp "$INSTALL_DIR/$src" "$TIYAZO_HOME/$dest"
         fi
     fi
 }
@@ -414,7 +414,7 @@ if [ -f "$TIYAZO_HOME/.env" ]; then
     if refuse_symlinked_path "chown/chmod" "$TIYAZO_HOME/.env"; then
         :
     else
-        chown hermes:hermes "$TIYAZO_HOME/.env" 2>/dev/null || true
+        chown tiyazo:tiyazo "$TIYAZO_HOME/.env" 2>/dev/null || true
         chmod 600 "$TIYAZO_HOME/.env" 2>/dev/null || true
     fi
 fi
@@ -422,23 +422,23 @@ fi
 # --- Migrate persisted config schema ---
 # Docker image upgrades replace the code under $INSTALL_DIR but preserve
 # $TIYAZO_HOME on the mounted volume. Run the same safe, non-interactive
-# config-schema migrations that `hermes update` runs for non-Docker installs,
+# config-schema migrations that `tiyazo update` runs for non-Docker installs,
 # after first-boot seeding and before supervised gateway services start.
-# Set HERMES_SKIP_CONFIG_MIGRATION=1 for controlled/manual migrations.
+# Set TIYAZO_SKIP_CONFIG_MIGRATION=1 for controlled/manual migrations.
 if [ -f "$TIYAZO_HOME/config.yaml" ]; then
-    s6-setuidgid hermes "$INSTALL_DIR/.venv/bin/python" "$INSTALL_DIR/scripts/docker_config_migrate.py" \
+    s6-setuidgid tiyazo "$INSTALL_DIR/.venv/bin/python" "$INSTALL_DIR/scripts/docker_config_migrate.py" \
         || echo "[stage2] Warning: docker_config_migrate.py failed; continuing"
 fi
 
 # auth.json: bootstrap from env on first boot only. Same semantics as the
 # pre-s6 entrypoint — the [ ! -f ] guard is critical to avoid clobbering
 # rotated refresh tokens on container restart.
-if [ ! -f "$TIYAZO_HOME/auth.json" ] && [ -n "${HERMES_AUTH_JSON_BOOTSTRAP:-}" ]; then
+if [ ! -f "$TIYAZO_HOME/auth.json" ] && [ -n "${TIYAZO_AUTH_JSON_BOOTSTRAP:-}" ]; then
     if refuse_symlinked_path "seed" "$TIYAZO_HOME/auth.json"; then
         :
     else
-        printf '%s' "$HERMES_AUTH_JSON_BOOTSTRAP" > "$TIYAZO_HOME/auth.json"
-        chown hermes:hermes "$TIYAZO_HOME/auth.json" 2>/dev/null || true
+        printf '%s' "$TIYAZO_AUTH_JSON_BOOTSTRAP" > "$TIYAZO_HOME/auth.json"
+        chown tiyazo:tiyazo "$TIYAZO_HOME/auth.json" 2>/dev/null || true
         chmod 600 "$TIYAZO_HOME/auth.json"
     fi
 fi
@@ -453,14 +453,14 @@ fi
 # freshly-provisioned container comes up with the gateway down until
 # someone starts it (e.g. from the dashboard). An orchestrator that
 # provisions a fresh volume and wants the gateway running from first boot
-# can set HERMES_GATEWAY_BOOTSTRAP_STATE=running; we seed the state file
+# can set TIYAZO_GATEWAY_BOOTSTRAP_STATE=running; we seed the state file
 # here, BEFORE 02-reconcile-profiles runs (cont-init.d scripts run in
 # lexicographic order), so the reconciler sees prior_state=running and
 # brings the supervised slot up on the very first boot.
 #
 # This is a generic container contract, not specific to any host: it seeds
 # the SAME gateway_state.json the reconciler already consults, exactly as
-# HERMES_AUTH_JSON_BOOTSTRAP seeds auth.json. The [ ! -f ] guard is the
+# TIYAZO_AUTH_JSON_BOOTSTRAP seeds auth.json. The [ ! -f ] guard is the
 # load-bearing part — on every subsequent boot the persisted state wins,
 # so a gateway the operator deliberately stopped stays stopped across
 # restarts and we never clobber real runtime state.
@@ -469,12 +469,12 @@ fi
 # _AUTOSTART_STATES); any other value is ignored so a typo can't write a
 # bogus state the reconciler would treat as "no prior state" anyway.
 if [ ! -f "$TIYAZO_HOME/gateway_state.json" ] && \
-        [ "${HERMES_GATEWAY_BOOTSTRAP_STATE:-}" = "running" ]; then
+        [ "${TIYAZO_GATEWAY_BOOTSTRAP_STATE:-}" = "running" ]; then
     if refuse_symlinked_path "seed" "$TIYAZO_HOME/gateway_state.json"; then
         :
     else
         printf '{"gateway_state":"running"}\n' > "$TIYAZO_HOME/gateway_state.json"
-        chown hermes:hermes "$TIYAZO_HOME/gateway_state.json" 2>/dev/null || true
+        chown tiyazo:tiyazo "$TIYAZO_HOME/gateway_state.json" 2>/dev/null || true
         chmod 644 "$TIYAZO_HOME/gateway_state.json"
     fi
 fi
@@ -486,22 +486,22 @@ fi
 # the python binary's own bin-stub already sets up (sys.path is rooted
 # at the venv's site-packages by virtue of running .venv/bin/python).
 if [ -d "$INSTALL_DIR/skills" ]; then
-    as_hermes "$INSTALL_DIR/.venv/bin/python" "$INSTALL_DIR/tools/skills_sync.py" \
+    as_tiyazo "$INSTALL_DIR/.venv/bin/python" "$INSTALL_DIR/tools/skills_sync.py" \
         || echo "[stage2] Warning: skills_sync.py failed; continuing"
 fi
 
 # --- Discover agent-browser's Chromium binary ---
 # The image's Dockerfile runs `npx playwright install chromium`, which
-# populates ``$PLAYWRIGHT_BROWSERS_PATH`` (=/opt/hermes/.playwright) with
+# populates ``$PLAYWRIGHT_BROWSERS_PATH`` (=/opt/tiyazo/.playwright) with
 # a ``chromium_headless_shell-<build>/chrome-headless-shell-linux64/``
-# directory. agent-browser (the runtime CLI Hermes spawns for the
+# directory. agent-browser (the runtime CLI Tiyazo spawns for the
 # browser tool) doesn't recognise this layout in its own cache scan and
 # fails with "Auto-launch failed: Chrome not found" — even though the
 # binary is right there (#15697).
 #
 # Fix: locate the binary at boot and export ``AGENT_BROWSER_EXECUTABLE_PATH``
 # via /run/s6/container_environment so the `with-contenv` shebang on
-# main-wrapper.sh propagates it into the supervised ``hermes`` process
+# main-wrapper.sh propagates it into the supervised ``tiyazo`` process
 # and thence to agent-browser subprocesses.
 #
 # - Skipped when the user has already set ``AGENT_BROWSER_EXECUTABLE_PATH``
@@ -527,7 +527,7 @@ if [ -z "${AGENT_BROWSER_EXECUTABLE_PATH:-}" ] && \
     if [ -n "$browser_bin" ]; then
         echo "[stage2] Found agent-browser Chromium binary: $browser_bin"
         # Write to s6's container_environment so with-contenv picks it
-        # up for all supervised services (main-hermes, dashboard, etc.).
+        # up for all supervised services (main-tiyazo, dashboard, etc.).
         # Idempotent: each boot overwrites with the current path.
         # Some container runtimes / s6-overlay versions do not create the
         # envdir before cont-init hooks run, so create it defensively.
