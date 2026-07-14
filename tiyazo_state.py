@@ -6320,3 +6320,4 @@ class AsyncSessionDB:
             return await asyncio.to_thread(attr, *args, **kwargs)
 
         return _offloaded
+

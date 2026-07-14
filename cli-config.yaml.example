@@ -1380,3 +1380,4 @@ updates:
 #       # This is a CREDENTIAL: prefer setting HERMES_DASHBOARD_OIDC_CLIENT_SECRET
 #       # in ~/.tiyazo/.env over putting it here in config.yaml.
 #       #   client_secret: ""
+

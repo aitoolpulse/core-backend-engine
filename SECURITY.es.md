@@ -320,3 +320,4 @@ La decisión de fortalecimiento más importante es hacer coincidir el aislamient
   security@tiyazo.local.
 - **Crédito:** los reportadores reciben crédito en las notas de versión a menos que
   se solicite anonimato.
+

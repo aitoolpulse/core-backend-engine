@@ -158,3 +158,4 @@ GitHub: [github.com/aitoolpulse/core-backend-engine](https://github.com/aitoolpu
 ---
 
 *Tiyazo Agent is built by [Tiyazo](https://tiyazo.local). Open source, model-agnostic, runs on your infrastructure.*
+

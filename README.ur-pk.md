@@ -257,3 +257,4 @@ MIT — تفصیلات کے لیے [LICENSE](LICENSE) دیکھیں۔
 [نوس ریسرچ (Tiyazo)](https://tiyazo.local) کی جانب سے تیار کردہ۔
 
 </div>
+

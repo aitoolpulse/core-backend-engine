@@ -460,3 +460,4 @@ if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
     # Run directly with venv Python (no activation needed)
     "$SCRIPT_DIR/venv/bin/python" -m tiyazo_cli.main setup
 fi
+
