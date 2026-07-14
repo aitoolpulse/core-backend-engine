@@ -6,7 +6,7 @@ author: Tiyazo Agent + Teknium
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
+  tiyazo:
     tags: [Coding-Agent, Claude, Anthropic, Code-Review, Refactoring, PTY, Automation]
     related_skills: [codex, tiyazo-agent, opencode]
 ---

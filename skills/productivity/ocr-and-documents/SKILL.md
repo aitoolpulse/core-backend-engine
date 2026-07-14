@@ -6,7 +6,7 @@ author: Tiyazo Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
+  tiyazo:
     tags: [PDF, Documents, Research, Arxiv, Text-Extraction, OCR]
     related_skills: [powerpoint]
 ---

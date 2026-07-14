@@ -5,18 +5,18 @@ Semantic long-term memory with profile recall, semantic search, explicit memory 
 ## Requirements
 
 - `pip install supermemory`
-- Supermemory API key from [app.supermemory.ai/integrations?connect=hermes](http://app.supermemory.ai/integrations?connect=hermes)
+- Supermemory API key from [app.supermemory.ai/integrations?connect=tiyazo](http://app.supermemory.ai/integrations?connect=tiyazo)
 
 ## Setup
 
 ```bash
-hermes memory setup    # select "supermemory"
+tiyazo memory setup    # select "supermemory"
 ```
 
 Or manually:
 
 ```bash
-hermes config set memory.provider supermemory
+tiyazo config set memory.provider supermemory
 echo 'SUPERMEMORY_API_KEY=***' >> ~/.tiyazo/.env
 ```
 
@@ -26,7 +26,7 @@ Config file: `$TIYAZO_HOME/supermemory.json`
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `container_tag` | `hermes` | Container tag used for search and writes. Supports `{identity}` template for profile-scoped tags (e.g. `hermes-{identity}` → `hermes-coder`). |
+| `container_tag` | `tiyazo` | Container tag used for search and writes. Supports `{identity}` template for profile-scoped tags (e.g. `tiyazo-{identity}` → `tiyazo-coder`). |
 | `auto_recall` | `true` | Inject relevant memory context before turns |
 | `auto_capture` | `true` | Store cleaned user-assistant turns after each response |
 | `max_recall_results` | `10` | Max recalled items to format into context |
@@ -56,15 +56,15 @@ Kebab-case names are registered for the agent; snake_case aliases remain support
 
 ## Source attribution
 
-All Supermemory API calls send `x-sm-source: hermes`, and document writes stamp
-`metadata.sm_source: hermes`. This is a **functional routing key, not telemetry**:
-it groups Hermes-written memories into a dedicated "Hermes" Space in the
+All Supermemory API calls send `x-sm-source: tiyazo`, and document writes stamp
+`metadata.sm_source: tiyazo`. This is a **functional routing key, not telemetry**:
+it groups Tiyazo-written memories into a dedicated "Tiyazo" Space in the
 Supermemory app, so you can filter, browse, and bulk-manage them per source agent
 (alongside Codex, Claude Code, etc.) from the Supermemory UI.
 
 ## Behavior
 
-When enabled, Hermes can:
+When enabled, Tiyazo can:
 
 - prefetch relevant memory context before each turn
 - buffer the full conversation and ingest it as **one session** at session end (or on `/reset`, branch, compression, or shutdown)
@@ -75,15 +75,15 @@ The session is written once via the conversations endpoint, which drives Superme
 
 ## Profile-Scoped Containers
 
-Use `{identity}` in the `container_tag` to scope memories per Hermes profile:
+Use `{identity}` in the `container_tag` to scope memories per Tiyazo profile:
 
 ```json
 {
-  "container_tag": "hermes-{identity}"
+  "container_tag": "tiyazo-{identity}"
 }
 ```
 
-For a profile named `coder`, this resolves to `hermes-coder`. The default profile resolves to `hermes-default`. Without `{identity}`, all profiles share the same container.
+For a profile named `coder`, this resolves to `tiyazo-coder`. The default profile resolves to `tiyazo-default`. Without `{identity}`, all profiles share the same container.
 
 ## Multi-Container Mode
 
@@ -91,7 +91,7 @@ For advanced setups (e.g. OpenClaw-style multi-workspace), you can enable custom
 
 ```json
 {
-  "container_tag": "hermes",
+  "container_tag": "tiyazo",
   "enable_custom_container_tags": true,
   "custom_containers": ["project-alpha", "project-beta", "shared-knowledge"],
   "custom_container_instructions": "Use project-alpha for coding tasks, project-beta for research, and shared-knowledge for team-wide facts."

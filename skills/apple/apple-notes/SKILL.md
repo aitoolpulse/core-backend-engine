@@ -6,7 +6,7 @@ author: Tiyazo Agent
 license: MIT
 platforms: [macos]
 metadata:
-  hermes:
+  tiyazo:
     tags: [Notes, Apple, macOS, note-taking]
     related_skills: [obsidian]
 prerequisites:

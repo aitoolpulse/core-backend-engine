@@ -6,7 +6,7 @@ author: Tiyazo Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
+  tiyazo:
     tags: [skills, authoring, tiyazo-agent, conventions, skill-md]
     related_skills: [plan, requesting-code-review]
 ---
@@ -47,7 +47,7 @@ version: 1.1.0
 author: Tiyazo Agent
 license: MIT
 metadata:
-  hermes:
+  tiyazo:
     tags: [short, descriptive, tags]
     related_skills: [other-skill, another-skill]
 ---

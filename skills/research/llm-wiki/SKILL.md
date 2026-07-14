@@ -6,7 +6,7 @@ author: Tiyazo Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
+  tiyazo:
     tags: [wiki, knowledge-base, research, notes, markdown, rag-alternative]
     category: research
     related_skills: [obsidian, arxiv]

@@ -6,7 +6,7 @@ author: Tiyazo Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
+  tiyazo:
     tags: [Research, Arxiv, Papers, Academic, Science, API]
     related_skills: [ocr-and-documents]
 ---

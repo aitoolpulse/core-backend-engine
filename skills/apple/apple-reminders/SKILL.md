@@ -6,7 +6,7 @@ author: Tiyazo Agent
 license: MIT
 platforms: [macos]
 metadata:
-  hermes:
+  tiyazo:
     tags: [Reminders, tasks, todo, macOS, Apple]
 prerequisites:
   commands: [remindctl]

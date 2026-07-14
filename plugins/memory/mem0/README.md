@@ -10,24 +10,24 @@ Server-side LLM fact extraction with semantic search and hybrid multi-signal ret
 ## Setup
 
 ```bash
-hermes memory setup    # select "mem0"
+tiyazo memory setup    # select "mem0"
 ```
 
 Or manually:
 ```bash
-hermes config set memory.provider mem0
+tiyazo config set memory.provider mem0
 echo "MEM0_API_KEY=your-key" >> ~/.tiyazo/.env
 ```
 
 ## Config
 
-Behavioral settings live in `$TIYAZO_HOME/mem0.json` (set them via `hermes memory setup`). Only the secret `MEM0_API_KEY` belongs in `~/.tiyazo/.env`.
+Behavioral settings live in `$TIYAZO_HOME/mem0.json` (set them via `tiyazo memory setup`). Only the secret `MEM0_API_KEY` belongs in `~/.tiyazo/.env`.
 
 | Key | Default | Description |
 |-----|---------|-------------|
 | `mode` | `platform` | `platform` (Mem0 Cloud) or `oss` (self-hosted) |
-| `user_id` | `hermes-user` | User identifier on Mem0 |
-| `agent_id` | `hermes` | Agent identifier |
+| `user_id` | `tiyazo-user` | User identifier on Mem0 |
+| `agent_id` | `tiyazo` | Agent identifier |
 | `rerank` | `true` | Rerank search results for relevance (platform mode only) |
 
 ## OSS (Self-Hosted) Mode
@@ -37,7 +37,7 @@ Run Mem0 locally with your own LLM, embedder, and vector store.
 ### Interactive Setup
 
 ```bash
-hermes memory setup
+tiyazo memory setup
 # Select "mem0" → "Open Source (self-hosted)"
 # Follow prompts for LLM, embedder, and vector store
 ```
@@ -45,7 +45,7 @@ hermes memory setup
 ### Agent-Driven Setup (Flags)
 
 ```bash
-hermes memory setup mem0 --mode oss \
+tiyazo memory setup mem0 --mode oss \
   --oss-llm openai --oss-llm-key sk-... \
   --oss-vector qdrant
 ```
@@ -75,7 +75,7 @@ hermes memory setup mem0 --mode oss \
 ### Platform to OSS
 
 ```bash
-hermes memory setup mem0 --mode oss --oss-llm-key sk-...
+tiyazo memory setup mem0 --mode oss --oss-llm-key sk-...
 ```
 
 Or edit `$TIYAZO_HOME/mem0.json` directly:
@@ -93,13 +93,13 @@ Or edit `$TIYAZO_HOME/mem0.json` directly:
 ### OSS to Platform
 
 ```bash
-hermes memory setup mem0 --mode platform --api-key sk-...
+tiyazo memory setup mem0 --mode platform --api-key sk-...
 ```
 
 ### Dry Run (preview without writing)
 
 ```bash
-hermes memory setup mem0 --mode oss --oss-llm-key sk-... --dry-run
+tiyazo memory setup mem0 --mode oss --oss-llm-key sk-... --dry-run
 ```
 
 ## Tools

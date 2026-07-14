@@ -6,7 +6,7 @@ author: Tiyazo Agent
 license: MIT
 platforms: [macos]
 metadata:
-  hermes:
+  tiyazo:
     tags: [FindMy, AirTag, location, tracking, macOS, Apple]
 ---
 

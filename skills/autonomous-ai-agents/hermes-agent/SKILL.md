@@ -6,15 +6,15 @@ author: Tiyazo Agent + Teknium
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
-    tags: [hermes, setup, configuration, multi-agent, spawning, cli, gateway, development]
-    homepage: https://github.com/NousResearch/tiyazo-agent
+  tiyazo:
+    tags: [tiyazo, setup, configuration, multi-agent, spawning, cli, gateway, development]
+    homepage: https://github.com/Tiyazo/tiyazo-agent
     related_skills: [claude-code, codex, opencode]
 ---
 
 # Tiyazo Agent
 
-Tiyazo Agent is an open-source AI agent framework by Nous Research that runs in your terminal, a native desktop app, messaging platforms, and IDEs. It's in the same category as Claude Code (Anthropic), Codex (OpenAI), and OpenClaw — autonomous coding and task-execution agents that use tool calling to interact with your system. Tiyazo works with any LLM provider (OpenRouter, Anthropic, OpenAI, Google, DeepSeek, xAI, local models, and 20+ others) and runs on Linux, macOS, Windows, and WSL.
+Tiyazo Agent is an open-source AI agent framework by Tiyazo that runs in your terminal, a native desktop app, messaging platforms, and IDEs. It's in the same category as Claude Code (Anthropic), Codex (OpenAI), and OpenClaw — autonomous coding and task-execution agents that use tool calling to interact with your system. Tiyazo works with any LLM provider (OpenRouter, Anthropic, OpenAI, Google, DeepSeek, xAI, local models, and 20+ others) and runs on Linux, macOS, Windows, and WSL.
 
 What makes Tiyazo different:
 
@@ -38,9 +38,9 @@ This skill is a concise operating guide, not the complete source of truth for ev
 
 Good verification targets:
 
-- CLI commands: `hermes --help`, `hermes <command> --help`, and `hermes_cli/main.py`
+- CLI commands: `tiyazo --help`, `tiyazo <command> --help`, and `tiyazo_cli/main.py`
 - User documentation: https://tiyazo-agent.nousresearch.com/docs/
-- Source tree: https://github.com/NousResearch/tiyazo-agent
+- Source tree: https://github.com/Tiyazo/tiyazo-agent
 
 ## Quick Start
 
@@ -52,20 +52,20 @@ curl -fsSL https://tiyazo-agent.nousresearch.com/install.sh | bash
 pip install tiyazo-agent       # or: uv pip install tiyazo-agent
 
 # Interactive chat (default surface; set display.interface: tui to launch the Ink TUI instead)
-hermes
+tiyazo
 
 # Single query
-hermes chat -q "What is the capital of France?"
+tiyazo chat -q "What is the capital of France?"
 
 # Setup wizard  /  pick model+provider  /  health check
-hermes setup
-hermes model
-hermes doctor
+tiyazo setup
+tiyazo model
+tiyazo doctor
 
 # Other surfaces
-hermes desktop                 # launch the native desktop app (alias: hermes gui)
-hermes dashboard               # web admin panel + embedded chat
-hermes proxy                   # OpenAI-compatible local proxy backed by your OAuth provider
+tiyazo desktop                 # launch the native desktop app (alias: tiyazo gui)
+tiyazo dashboard               # web admin panel + embedded chat
+tiyazo proxy                   # OpenAI-compatible local proxy backed by your OAuth provider
 ```
 
 ---
@@ -75,7 +75,7 @@ hermes proxy                   # OpenAI-compatible local proxy backed by your OA
 ### Global Flags
 
 ```
-hermes [flags] [command]
+tiyazo [flags] [command]
 
   --version, -V             Show version
   --resume, -r SESSION      Resume session by ID or title
@@ -92,7 +92,7 @@ No subcommand defaults to `chat`.
 ### Chat
 
 ```
-hermes chat [flags]
+tiyazo chat [flags]
   -q, --query TEXT          Single query, non-interactive
   -m, --model MODEL         Model (e.g. anthropic/claude-sonnet-4)
   -t, --toolsets LIST       Comma-separated toolsets
@@ -106,103 +106,103 @@ hermes chat [flags]
 ### Configuration
 
 ```
-hermes setup [section]      Interactive wizard (model|terminal|gateway|tools|agent)
-hermes model                Interactive model/provider picker
-hermes config               View current config
-hermes config edit          Open config.yaml in $EDITOR
-hermes config set KEY VAL   Set a config value
-hermes config path          Print config.yaml path
-hermes config env-path      Print .env path
-hermes config check         Check for missing/outdated config
-hermes config migrate       Update config with new options
-hermes doctor [--fix]       Check dependencies and config
-hermes status [--all]       Show component status
+tiyazo setup [section]      Interactive wizard (model|terminal|gateway|tools|agent)
+tiyazo model                Interactive model/provider picker
+tiyazo config               View current config
+tiyazo config edit          Open config.yaml in $EDITOR
+tiyazo config set KEY VAL   Set a config value
+tiyazo config path          Print config.yaml path
+tiyazo config env-path      Print .env path
+tiyazo config check         Check for missing/outdated config
+tiyazo config migrate       Update config with new options
+tiyazo doctor [--fix]       Check dependencies and config
+tiyazo status [--all]       Show component status
 ```
 
-Credentials (OAuth + API keys, with pooling) are managed under `hermes auth` — see the Credentials & Pools section below.
+Credentials (OAuth + API keys, with pooling) are managed under `tiyazo auth` — see the Credentials & Pools section below.
 
 ### Tools & Skills
 
 ```
-hermes tools                Interactive tool enable/disable (curses UI)
-hermes tools list           Show all tools and status
-hermes tools enable NAME    Enable a toolset
-hermes tools disable NAME   Disable a toolset
+tiyazo tools                Interactive tool enable/disable (curses UI)
+tiyazo tools list           Show all tools and status
+tiyazo tools enable NAME    Enable a toolset
+tiyazo tools disable NAME   Disable a toolset
 
-hermes skills list          List installed skills
-hermes skills search QUERY  Search the skills hub
-hermes skills install ID    Install a skill (ID can be a hub identifier OR a direct https://…/SKILL.md URL; pass --name to override when frontmatter has no name)
-hermes skills inspect ID    Preview without installing
-hermes skills config        Enable/disable skills per platform
-hermes skills check         Check for updates
-hermes skills update        Update outdated skills
-hermes skills uninstall N   Remove a hub skill
-hermes skills publish PATH  Publish to registry
-hermes skills browse        Browse all available skills
-hermes skills tap add REPO  Add a GitHub repo as skill source
+tiyazo skills list          List installed skills
+tiyazo skills search QUERY  Search the skills hub
+tiyazo skills install ID    Install a skill (ID can be a hub identifier OR a direct https://…/SKILL.md URL; pass --name to override when frontmatter has no name)
+tiyazo skills inspect ID    Preview without installing
+tiyazo skills config        Enable/disable skills per platform
+tiyazo skills check         Check for updates
+tiyazo skills update        Update outdated skills
+tiyazo skills uninstall N   Remove a hub skill
+tiyazo skills publish PATH  Publish to registry
+tiyazo skills browse        Browse all available skills
+tiyazo skills tap add REPO  Add a GitHub repo as skill source
 ```
 
 ### MCP Servers
 
 ```
-hermes mcp serve            Run Tiyazo as an MCP server
-hermes mcp add NAME         Add an MCP server (--url or --command)
-hermes mcp remove NAME      Remove an MCP server
-hermes mcp list             List configured servers
-hermes mcp test NAME        Test connection
-hermes mcp configure NAME   Toggle tool selection
+tiyazo mcp serve            Run Tiyazo as an MCP server
+tiyazo mcp add NAME         Add an MCP server (--url or --command)
+tiyazo mcp remove NAME      Remove an MCP server
+tiyazo mcp list             List configured servers
+tiyazo mcp test NAME        Test connection
+tiyazo mcp configure NAME   Toggle tool selection
 ```
 
 How the built-in MCP client connects servers (stdio/HTTP), auto-discovers
 their tools, and exposes them as first-class tools, plus catalog install
-(`hermes mcp install <name>`): `skill_view(name="tiyazo-agent", file_path="references/native-mcp.md")`.
+(`tiyazo mcp install <name>`): `skill_view(name="tiyazo-agent", file_path="references/native-mcp.md")`.
 
 ### Gateway (Messaging Platforms)
 
 ```
-hermes gateway run          Start gateway foreground
-hermes gateway install      Install as background service
-hermes gateway start/stop   Control the service
-hermes gateway restart      Restart the service
-hermes gateway status       Check status
-hermes gateway setup        Configure platforms
+tiyazo gateway run          Start gateway foreground
+tiyazo gateway install      Install as background service
+tiyazo gateway start/stop   Control the service
+tiyazo gateway restart      Restart the service
+tiyazo gateway status       Check status
+tiyazo gateway setup        Configure platforms
 ```
 
-Supported platforms (20+): Telegram, Discord, Slack, WhatsApp (Baileys bridge + official Business Cloud API), iMessage (Photon — `hermes photon setup`, the BlueBubbles successor with no Mac relay), Signal, Email, SMS, Matrix, Mattermost, Microsoft Teams, LINE, SimpleX, ntfy, Google Chat, Home Assistant, DingTalk, Feishu, WeCom, Weixin (WeChat), Raft (agent network), API Server, Webhooks. Open WebUI connects via the API Server adapter. Most adapters ship under `plugins/platforms/`, so new ones drop in without touching core.
+Supported platforms (20+): Telegram, Discord, Slack, WhatsApp (Baileys bridge + official Business Cloud API), iMessage (Photon — `tiyazo photon setup`, the BlueBubbles successor with no Mac relay), Signal, Email, SMS, Matrix, Mattermost, Microsoft Teams, LINE, SimpleX, ntfy, Google Chat, Home Assistant, DingTalk, Feishu, WeCom, Weixin (WeChat), Raft (agent network), API Server, Webhooks. Open WebUI connects via the API Server adapter. Most adapters ship under `plugins/platforms/`, so new ones drop in without touching core.
 
 Platform docs: https://tiyazo-agent.nousresearch.com/docs/user-guide/messaging/
 
 ### Sessions
 
 ```
-hermes sessions list        List recent sessions
-hermes sessions browse      Interactive picker
-hermes sessions export OUT  Export to JSONL
-hermes sessions rename ID T Rename a session
-hermes sessions delete ID   Delete a session
-hermes sessions prune       Clean up old sessions (--older-than N days)
-hermes sessions stats       Session store statistics
+tiyazo sessions list        List recent sessions
+tiyazo sessions browse      Interactive picker
+tiyazo sessions export OUT  Export to JSONL
+tiyazo sessions rename ID T Rename a session
+tiyazo sessions delete ID   Delete a session
+tiyazo sessions prune       Clean up old sessions (--older-than N days)
+tiyazo sessions stats       Session store statistics
 ```
 
 ### Cron Jobs
 
 ```
-hermes cron list            List jobs (--all for disabled)
-hermes cron create SCHED    Create: '30m', 'every 2h', '0 9 * * *'
-hermes cron edit ID         Edit schedule, prompt, delivery
-hermes cron pause/resume ID Control job state
-hermes cron run ID          Trigger on next tick
-hermes cron remove ID       Delete a job
-hermes cron status          Scheduler status
+tiyazo cron list            List jobs (--all for disabled)
+tiyazo cron create SCHED    Create: '30m', 'every 2h', '0 9 * * *'
+tiyazo cron edit ID         Edit schedule, prompt, delivery
+tiyazo cron pause/resume ID Control job state
+tiyazo cron run ID          Trigger on next tick
+tiyazo cron remove ID       Delete a job
+tiyazo cron status          Scheduler status
 ```
 
 ### Webhooks
 
 ```
-hermes webhook subscribe N  Create route at /webhooks/<name>
-hermes webhook list         List subscriptions
-hermes webhook remove NAME  Remove a subscription
-hermes webhook test NAME    Send a test POST
+tiyazo webhook subscribe N  Create route at /webhooks/<name>
+tiyazo webhook list         List subscriptions
+tiyazo webhook remove NAME  Remove a subscription
+tiyazo webhook test NAME    Send a test POST
 ```
 
 Full setup, route config, payload templating, and event-driven agent-run
@@ -211,26 +211,26 @@ patterns: `skill_view(name="tiyazo-agent", file_path="references/webhooks.md")`.
 ### Profiles
 
 ```
-hermes profile list         List all profiles
-hermes profile create NAME  Create (--clone, --clone-all, --clone-from)
-hermes profile use NAME     Set sticky default
-hermes profile delete NAME  Delete a profile
-hermes profile show NAME    Show details
-hermes profile alias NAME   Manage wrapper scripts
-hermes profile rename A B   Rename a profile
-hermes profile export NAME  Export to tar.gz
-hermes profile import FILE  Import from archive
+tiyazo profile list         List all profiles
+tiyazo profile create NAME  Create (--clone, --clone-all, --clone-from)
+tiyazo profile use NAME     Set sticky default
+tiyazo profile delete NAME  Delete a profile
+tiyazo profile show NAME    Show details
+tiyazo profile alias NAME   Manage wrapper scripts
+tiyazo profile rename A B   Rename a profile
+tiyazo profile export NAME  Export to tar.gz
+tiyazo profile import FILE  Import from archive
 ```
 
 ### Credentials & Pools
 
 ```
-hermes auth                 Interactive credential manager
-hermes auth add [PROVIDER]  Add OAuth or API-key credential
+tiyazo auth                 Interactive credential manager
+tiyazo auth add [PROVIDER]  Add OAuth or API-key credential
                             (e.g. nous, openai-codex, qwen-oauth, anthropic)
-hermes auth list [PROVIDER] List pooled credentials
-hermes auth remove P INDEX  Remove by provider + index
-hermes auth reset PROVIDER  Clear exhaustion status
+tiyazo auth list [PROVIDER] List pooled credentials
+tiyazo auth remove P INDEX  Remove by provider + index
+tiyazo auth reset PROVIDER  Clear exhaustion status
 ```
 
 Multiple credentials per provider form a pool that rotates automatically and skips exhausted keys.
@@ -238,25 +238,25 @@ Multiple credentials per provider form a pool that rotates automatically and ski
 ### Other
 
 ```
-hermes insights [--days N]  Usage analytics
-hermes update               Update to latest version
-hermes desktop / gui        Launch the native desktop app
-hermes dashboard            Web admin panel + embedded chat
-hermes proxy                OpenAI-compatible local proxy backed by an OAuth provider
-hermes portal               Quick setup / sign in via Nous Portal
-hermes kanban <verb>        Multi-agent work-queue board (init/create/list/show/assign/…)
-hermes pairing list/approve/revoke  DM authorization
-hermes plugins list/install/remove  Plugin management
-hermes secrets bitwarden …  External secret store (Bitwarden Secrets Manager)
-hermes memory setup/status/off  Memory provider config
-hermes send                 Send a one-off message through a gateway platform
-hermes completion bash|zsh  Shell completions
-hermes acp                  ACP server (IDE integration)
-hermes claw migrate         Migrate from OpenClaw
-hermes uninstall            Uninstall Tiyazo
+tiyazo insights [--days N]  Usage analytics
+tiyazo update               Update to latest version
+tiyazo desktop / gui        Launch the native desktop app
+tiyazo dashboard            Web admin panel + embedded chat
+tiyazo proxy                OpenAI-compatible local proxy backed by an OAuth provider
+tiyazo portal               Quick setup / sign in via Nous Portal
+tiyazo kanban <verb>        Multi-agent work-queue board (init/create/list/show/assign/…)
+tiyazo pairing list/approve/revoke  DM authorization
+tiyazo plugins list/install/remove  Plugin management
+tiyazo secrets bitwarden …  External secret store (Bitwarden Secrets Manager)
+tiyazo memory setup/status/off  Memory provider config
+tiyazo send                 Send a one-off message through a gateway platform
+tiyazo completion bash|zsh  Shell completions
+tiyazo acp                  ACP server (IDE integration)
+tiyazo claw migrate         Migrate from OpenClaw
+tiyazo uninstall            Uninstall Tiyazo
 ```
 
-For the full, authoritative command list run `hermes --help` (and `hermes <command> --help`). Plugin- and provider-supplied subcommands (e.g. `hermes photon setup` for iMessage) only appear once their plugin is installed/active.
+For the full, authoritative command list run `tiyazo --help` (and `tiyazo <command> --help`). Plugin- and provider-supplied subcommands (e.g. `tiyazo photon setup` for iMessage) only appear once their plugin is installed/active.
 
 ---
 
@@ -265,7 +265,7 @@ For the full, authoritative command list run `hermes --help` (and `hermes <comma
 Type these during an interactive chat session. New commands land fairly
 often; if something below looks stale, run `/help` in-session for the
 authoritative list or see the [live slash commands reference](https://tiyazo-agent.nousresearch.com/docs/reference/slash-commands).
-The registry of record is `hermes_cli/commands.py` — every consumer
+The registry of record is `tiyazo_cli/commands.py` — every consumer
 (autocomplete, Telegram menu, Slack mapping, `/help`) derives from it.
 
 ### Session Control
@@ -381,7 +381,7 @@ Profiles use `~/.tiyazo/profiles/<name>/` with the same layout.
 
 ### Config Sections
 
-Edit with `hermes config edit` or `hermes config set section.key value`.
+Edit with `tiyazo config edit` or `tiyazo config set section.key value`.
 
 | Section | Key options |
 |---------|-------------|
@@ -402,14 +402,14 @@ Full config reference: https://tiyazo-agent.nousresearch.com/docs/user-guide/con
 
 ### Providers
 
-20+ providers supported. Set via `hermes model` or `hermes setup`.
+20+ providers supported. Set via `tiyazo model` or `tiyazo setup`.
 
 | Provider | Auth | Key env var |
 |----------|------|-------------|
 | OpenRouter | API key | `OPENROUTER_API_KEY` |
 | Anthropic | API key | `ANTHROPIC_API_KEY` |
-| Nous Portal | OAuth | `hermes auth` |
-| OpenAI Codex | OAuth | `hermes auth` |
+| Nous Portal | OAuth | `tiyazo auth` |
+| OpenAI Codex | OAuth | `tiyazo auth` |
 | GitHub Copilot | Token | `COPILOT_GITHUB_TOKEN` |
 | Google Gemini | API key | `GOOGLE_API_KEY` or `GEMINI_API_KEY` |
 | DeepSeek | API key | `DEEPSEEK_API_KEY` |
@@ -424,7 +424,7 @@ Full config reference: https://tiyazo-agent.nousresearch.com/docs/user-guide/con
 | Kilo Code | API key | `KILOCODE_API_KEY` |
 | OpenCode Zen | API key | `OPENCODE_ZEN_API_KEY` |
 | OpenCode Go | API key | `OPENCODE_GO_API_KEY` |
-| Qwen OAuth | OAuth | `hermes auth add qwen-oauth` |
+| Qwen OAuth | OAuth | `tiyazo auth add qwen-oauth` |
 | Custom endpoint | Config | `model.base_url` + `model.api_key` in config.yaml |
 | GitHub Copilot ACP | External | `COPILOT_CLI_PATH` or Copilot CLI |
 
@@ -432,7 +432,7 @@ Full provider docs: https://tiyazo-agent.nousresearch.com/docs/integrations/prov
 
 ### Toolsets
 
-Enable/disable via `hermes tools` (interactive) or `hermes tools enable/disable NAME`.
+Enable/disable via `tiyazo tools` (interactive) or `tiyazo tools enable/disable NAME`.
 
 | Toolset | What it provides |
 |---------|-----------------|
@@ -490,7 +490,7 @@ Tiyazo injects project-level instructions into the system prompt by reading cont
 
 - **Use `.tiyazo.md`** when you want Tiyazo-specific behavior that lives above the cwd (root + subtree), or when you want rules to inherit from a parent directory. The parent walk stops at the git root, so a home-level `.tiyazo.md` won't leak into every project (a git repo's root is the boundary).
 - **Use `AGENTS.md`** when the same project will also be worked on by other agents (Codex, Claude Code, OpenCode). Those tools all have their own conventions for `AGENTS.md`, and the "cwd only" contract keeps the file portable.
-- **Don't put project rules in `~/.tiyazo/AGENTS.md`** (or any other home-level location). When Tiyazo runs with that directory as cwd, the file loads — but only for that one directory. For cross-project context, use `SOUL.md` (in `$TIYAZO_HOME`, identity-only) or install a skill via `hermes skills install`.
+- **Don't put project rules in `~/.tiyazo/AGENTS.md`** (or any other home-level location). When Tiyazo runs with that directory as cwd, the file loads — but only for that one directory. For cross-project context, use `SOUL.md` (in `$TIYAZO_HOME`, identity-only) or install a skill via `tiyazo skills install`.
 
 ### Size and truncation
 
@@ -502,7 +502,7 @@ All context files pass through the threat-pattern scanner before reaching the sy
 
 ### Disable for one session
 
-`hermes --ignore-rules` skips auto-injection of all project context files (`.tiyazo.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules`) **and** `SOUL.md` identity, plus user config, plugins, and MCP servers. Use it to isolate whether a problem is your setup or Tiyazo itself.
+`tiyazo --ignore-rules` skips auto-injection of all project context files (`.tiyazo.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules`) **and** `SOUL.md` identity, plus user config, plugins, and MCP servers. Use it to isolate whether a problem is your setup or Tiyazo itself.
 
 ### Example: a small `.tiyazo.md`
 
@@ -524,21 +524,21 @@ That file at `/home/me/projects/myrepo/.tiyazo.md` is auto-loaded when Tiyazo ru
 
 ## Security & Privacy Toggles
 
-Common "why is Tiyazo doing X to my output / tool calls / commands?" toggles — and the exact commands to change them. Most of these need a fresh session (`/reset` in chat, or start a new `hermes` invocation) because they're read once at startup.
+Common "why is Tiyazo doing X to my output / tool calls / commands?" toggles — and the exact commands to change them. Most of these need a fresh session (`/reset` in chat, or start a new `tiyazo` invocation) because they're read once at startup.
 
 ### Secret redaction in tool output
 
 Secret redaction is **on by default** — tool output (terminal stdout, `read_file`, web content, subagent summaries, etc.) is scanned for strings that look like API keys, tokens, and secrets before it enters the conversation context and logs. Leave it enabled for normal use:
 
 ```bash
-hermes config set security.redact_secrets true       # keep enabled globally
+tiyazo config set security.redact_secrets true       # keep enabled globally
 ```
 
 **Restart required.** `security.redact_secrets` is snapshotted at import time — toggling it mid-session (e.g. via `export HERMES_REDACT_SECRETS=false` from a tool call) will NOT take effect for the running process. Tell the user to change it in config from a terminal, then start a new session. This is deliberate — it prevents an LLM from flipping the toggle on itself mid-task.
 
 Disable only when you deliberately need raw credential-like strings for debugging or redactor development:
 ```bash
-hermes config set security.redact_secrets false
+tiyazo config set security.redact_secrets false
 ```
 
 ### PII redaction in gateway messages
@@ -546,8 +546,8 @@ hermes config set security.redact_secrets false
 Separate from secret redaction. When enabled, the gateway hashes user IDs and strips phone numbers from the session context before it reaches the model:
 
 ```bash
-hermes config set privacy.redact_pii true    # enable
-hermes config set privacy.redact_pii false   # disable (default)
+tiyazo config set privacy.redact_pii true    # enable
+tiyazo config set privacy.redact_pii false   # disable (default)
 ```
 
 ### Command approval prompts
@@ -559,12 +559,12 @@ By default (`approvals.mode: manual`), Tiyazo prompts the user before running sh
 - `off` — skip all approval prompts (equivalent to `--yolo`)
 
 ```bash
-hermes config set approvals.mode smart       # recommended middle ground
-hermes config set approvals.mode off         # bypass everything (not recommended)
+tiyazo config set approvals.mode smart       # recommended middle ground
+tiyazo config set approvals.mode off         # bypass everything (not recommended)
 ```
 
 Per-invocation bypass without changing config:
-- `hermes --yolo …`
+- `tiyazo --yolo …`
 - `export HERMES_YOLO_MODE=1`
 
 Note: YOLO / `approvals.mode: off` does NOT turn off secret redaction. They are independent.
@@ -575,7 +575,7 @@ Some shell-hook integrations require explicit allowlisting before they fire. Man
 
 ### Disabling the web/browser/image-gen tools
 
-To keep the model away from network or media tools entirely, open `hermes tools` and toggle per-platform. Takes effect on next session (`/reset`). See the Tools & Skills section above.
+To keep the model away from network or media tools entirely, open `tiyazo tools` and toggle per-platform. Takes effect on next session (`/reset`). See the Tools & Skills section above.
 
 ---
 
@@ -621,7 +621,7 @@ Run additional Tiyazo processes as fully independent subprocesses — separate s
 
 ### When to Use This vs delegate_task
 
-| | `delegate_task` | Spawning `hermes` process |
+| | `delegate_task` | Spawning `tiyazo` process |
 |-|-----------------|--------------------------|
 | Isolation | Separate conversation, shared process | Fully independent process |
 | Duration | Minutes (bounded by parent loop) | Hours/days |
@@ -632,10 +632,10 @@ Run additional Tiyazo processes as fully independent subprocesses — separate s
 ### One-Shot Mode
 
 ```
-terminal(command="hermes chat -q 'Research GRPO papers and write summary to ~/research/grpo.md'", timeout=300)
+terminal(command="tiyazo chat -q 'Research GRPO papers and write summary to ~/research/grpo.md'", timeout=300)
 
 # Background for long tasks:
-terminal(command="hermes chat -q 'Set up CI/CD for ~/myapp'", background=true)
+terminal(command="tiyazo chat -q 'Set up CI/CD for ~/myapp'", background=true)
 ```
 
 ### Interactive PTY Mode (via tmux)
@@ -644,7 +644,7 @@ Tiyazo uses prompt_toolkit, which requires a real terminal. Use tmux for interac
 
 ```
 # Start
-terminal(command="tmux new-session -d -s agent1 -x 120 -y 40 'hermes'", timeout=10)
+terminal(command="tmux new-session -d -s agent1 -x 120 -y 40 'tiyazo'", timeout=10)
 
 # Wait for startup, then send a message
 terminal(command="sleep 8 && tmux send-keys -t agent1 'Build a FastAPI auth service' Enter", timeout=15)
@@ -663,11 +663,11 @@ terminal(command="tmux send-keys -t agent1 '/exit' Enter && sleep 2 && tmux kill
 
 ```
 # Agent A: backend
-terminal(command="tmux new-session -d -s backend -x 120 -y 40 'hermes -w'", timeout=10)
+terminal(command="tmux new-session -d -s backend -x 120 -y 40 'tiyazo -w'", timeout=10)
 terminal(command="sleep 8 && tmux send-keys -t backend 'Build REST API for user management' Enter", timeout=15)
 
 # Agent B: frontend
-terminal(command="tmux new-session -d -s frontend -x 120 -y 40 'hermes -w'", timeout=10)
+terminal(command="tmux new-session -d -s frontend -x 120 -y 40 'tiyazo -w'", timeout=10)
 terminal(command="sleep 8 && tmux send-keys -t frontend 'Build React dashboard for user management' Enter", timeout=15)
 
 # Check progress, relay context between them
@@ -679,10 +679,10 @@ terminal(command="tmux send-keys -t frontend 'Here is the API schema from the ba
 
 ```
 # Resume most recent session
-terminal(command="tmux new-session -d -s resumed 'hermes --continue'", timeout=10)
+terminal(command="tmux new-session -d -s resumed 'tiyazo --continue'", timeout=10)
 
 # Resume specific session
-terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_143052_a1b2c3'", timeout=10)
+terminal(command="tmux new-session -d -s resumed 'tiyazo --resume 20260225_143052_a1b2c3'", timeout=10)
 ```
 
 ### Tips
@@ -690,7 +690,7 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 - **Prefer `delegate_task` for quick subtasks** — less overhead than spawning a full process
 - **Use `-w` (worktree mode)** when spawning agents that edit code — prevents git conflicts
 - **Set timeouts** for one-shot mode — complex tasks can take 5-10 minutes
-- **Use `hermes chat -q` for fire-and-forget** — no PTY needed
+- **Use `tiyazo chat -q` for fire-and-forget** — no PTY needed
 - **Use tmux for interactive sessions** — raw PTY mode has `\r` vs `\n` issues with prompt_toolkit
 - **For scheduled tasks**, use the `cronjob` tool instead of spawning — handles delivery and retry
 
@@ -724,7 +724,7 @@ Config: `delegation.*` in `config.yaml`.
 ### Cron (scheduled jobs)
 
 Durable scheduler — `cron/jobs.py` + `cron/scheduler.py`. Drive it via
-the `cronjob` tool, the `hermes cron` CLI (`list`, `add`, `edit`,
+the `cronjob` tool, the `tiyazo cron` CLI (`list`, `add`, `edit`,
 `pause`, `resume`, `run`, `remove`), or the `/cron` slash command.
 
 - **Schedules:** duration (`"30m"`, `"2h"`), "every" phrase
@@ -748,7 +748,7 @@ Background maintenance for agent-created skills. Tracks usage, marks
 idle skills stale, archives stale ones, keeps a pre-run tar.gz backup
 so nothing is lost.
 
-- **CLI:** `hermes curator <verb>` — `status`, `run`, `pause`, `resume`,
+- **CLI:** `tiyazo curator <verb>` — `status`, `run`, `pause`, `resume`,
   `pin`, `unpin`, `archive`, `restore`, `prune`, `backup`, `rollback`.
 - **Slash:** `/curator <subcommand>` mirrors the CLI.
 - **Scope:** only touches skills with `created_by: "agent"` provenance.
@@ -758,7 +758,7 @@ so nothing is lost.
 - **Cost:** the deterministic inactivity/prune sweep runs for free. The
   aux-model "consolidate overlapping skills into umbrellas" pass is
   **off by default** — opt in with `curator.consolidate: true` or
-  `hermes curator run --consolidate`. Routine background curation costs
+  `tiyazo curator run --consolidate`. Routine background curation costs
   zero tokens.
 - **Telemetry:** sidecar at `~/.tiyazo/skills/.usage.json` holds
   per-skill `use_count`, `view_count`, `patch_count`,
@@ -771,7 +771,7 @@ User docs: https://tiyazo-agent.nousresearch.com/docs/user-guide/features/curato
 ### Kanban (multi-agent work queue)
 
 Durable SQLite board for multi-profile / multi-worker collaboration.
-Users drive it via `hermes kanban <verb>`; dispatcher-spawned workers
+Users drive it via `tiyazo kanban <verb>`; dispatcher-spawned workers
 see a focused `kanban_*` toolset gated by `HERMES_KANBAN_TASK`, and
 orchestrator profiles can opt into the broader `kanban` toolset. Normal
 sessions still have zero `kanban_*` schema footprint unless configured.
@@ -803,17 +803,17 @@ User docs: https://tiyazo-agent.nousresearch.com/docs/user-guide/features/kanban
 
 Beyond the CLI and gateway, a few things worth knowing about:
 
-- **Desktop app** (`hermes desktop` / `hermes gui`) — native Electron app
+- **Desktop app** (`tiyazo desktop` / `tiyazo gui`) — native Electron app
   for macOS/Linux/Windows: streaming chat, session list, drag-and-drop +
   clipboard-paste files, Cmd+K palette, status-bar model picker,
   rebindable shortcuts, native notifications, live subagent watch-windows,
   VS Code Marketplace themes, and per-profile remote-gateway login (OAuth
   or username/password) so a thin local GUI can drive a heavy remote agent.
-- **Web dashboard** (`hermes dashboard`) — full admin panel: configure
+- **Web dashboard** (`tiyazo dashboard`) — full admin panel: configure
   every messaging channel, the MCP catalog, webhooks/hooks, memory, and a
   complete profile builder (model + skills + MCPs) from the browser, plus
-  an embedded `hermes --tui` chat. Secured behind an OAuth/token gate.
-- **OpenAI-compatible proxy** (`hermes proxy`) — exposes a
+  an embedded `tiyazo --tui` chat. Secured behind an OAuth/token gate.
+- **OpenAI-compatible proxy** (`tiyazo proxy`) — exposes a
   `http://localhost:port` OpenAI API backed by whichever OAuth provider
   you're signed into (Claude Pro, ChatGPT Pro, SuperGrok). Point Codex
   CLI, Aider, Cline, Continue, or any script at it — no API key.
@@ -852,7 +852,7 @@ To inspect how your terminal reports a keystroke, run
 
 **HTTP 400 "No models provided" on first run** — `config.yaml` was saved with
 a UTF-8 BOM (Notepad does this). Re-save as UTF-8 without BOM;
-`hermes config edit` writes correctly.
+`tiyazo config edit` writes correctly.
 
 ### `execute_code` / Sandbox
 
@@ -899,15 +899,15 @@ and logs — avoids shell-escaping backslashes in bash.
 3. In gateway: `/restart`. In CLI: exit and relaunch.
 
 ### Tool not available
-1. `hermes tools` — check if toolset is enabled for your platform
+1. `tiyazo tools` — check if toolset is enabled for your platform
 2. Some tools need env vars (check `.env`)
 3. `/reset` after enabling tools
 
 ### Model/provider issues
-1. `hermes doctor` — check config and dependencies
-2. `hermes auth` — re-authenticate OAuth providers (or `hermes auth add <provider>`)
+1. `tiyazo doctor` — check config and dependencies
+2. `tiyazo auth` — re-authenticate OAuth providers (or `tiyazo auth add <provider>`)
 3. Check `.env` has the right API key
-4. **Copilot 403**: `gh auth login` tokens do NOT work for Copilot API. You must use the Copilot-specific OAuth device code flow via `hermes model` → GitHub Copilot.
+4. **Copilot 403**: `gh auth login` tokens do NOT work for Copilot API. You must use the Copilot-specific OAuth device code flow via `tiyazo model` → GitHub Copilot.
 
 ### Changes not taking effect
 - **Tools/skills:** `/reset` starts a new session with updated toolset
@@ -915,9 +915,9 @@ and logs — avoids shell-escaping backslashes in bash.
 - **Code changes:** Restart the CLI or gateway process
 
 ### Skills not showing
-1. `hermes skills list` — verify installed
-2. `hermes skills config` — check platform enablement
-3. Load explicitly: `/skill name` or `hermes -s name`
+1. `tiyazo skills list` — verify installed
+2. `tiyazo skills config` — check platform enablement
+3. Load explicitly: `/skill name` or `tiyazo -s name`
 
 ### Gateway issues
 Check logs first:
@@ -928,7 +928,7 @@ grep -i "failed to send\|error" ~/.tiyazo/logs/gateway.log | tail -20
 Common gateway problems:
 - **Gateway dies on SSH logout**: Enable linger: `sudo loginctl enable-linger $USER`
 - **Gateway dies on WSL2 close**: WSL2 requires `systemd=true` in `/etc/wsl.conf` for systemd services to work. Without it, gateway falls back to `nohup` (dies when session closes).
-- **Gateway crash loop**: Reset the failed state: `systemctl --user reset-failed hermes-gateway`
+- **Gateway crash loop**: Reset the failed state: `systemctl --user reset-failed tiyazo-gateway`
 
 ### Platform-specific issues
 - **Discord bot silent**: Must enable **Message Content Intent** in Bot → Privileged Gateway Intents.
@@ -938,8 +938,8 @@ Common gateway problems:
 ### Auxiliary models not working
 If `auxiliary` tasks (vision, compression, session_search) fail silently, the `auto` provider can't find a backend. Either set `OPENROUTER_API_KEY` or `GOOGLE_API_KEY`, or explicitly configure each auxiliary task's provider:
 ```bash
-hermes config set auxiliary.vision.provider <your_provider>
-hermes config set auxiliary.vision.model <model_name>
+tiyazo config set auxiliary.vision.provider <your_provider>
+tiyazo config set auxiliary.vision.model <model_name>
 ```
 
 ---
@@ -948,20 +948,20 @@ hermes config set auxiliary.vision.model <model_name>
 
 | Looking for... | Location |
 |----------------|----------|
-| Config options | `hermes config edit` or [Configuration docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/configuration) |
-| Available tools | `hermes tools list` or [Tools reference](https://tiyazo-agent.nousresearch.com/docs/reference/tools-reference) |
+| Config options | `tiyazo config edit` or [Configuration docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/configuration) |
+| Available tools | `tiyazo tools list` or [Tools reference](https://tiyazo-agent.nousresearch.com/docs/reference/tools-reference) |
 | Slash commands | `/help` in session or [Slash commands reference](https://tiyazo-agent.nousresearch.com/docs/reference/slash-commands) |
-| Skills catalog | `hermes skills browse` or [Skills catalog](https://tiyazo-agent.nousresearch.com/docs/reference/skills-catalog) |
-| Provider setup | `hermes model` or [Providers guide](https://tiyazo-agent.nousresearch.com/docs/integrations/providers) |
-| Platform setup | `hermes gateway setup` or [Messaging docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/messaging/) |
-| MCP servers | `hermes mcp list` or [MCP guide](https://tiyazo-agent.nousresearch.com/docs/user-guide/features/mcp) |
-| Profiles | `hermes profile list` or [Profiles docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/profiles) |
-| Cron jobs | `hermes cron list` or [Cron docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/features/cron) |
-| Memory | `hermes memory status` or [Memory docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/features/memory) |
-| Env variables | `hermes config env-path` or [Env vars reference](https://tiyazo-agent.nousresearch.com/docs/reference/environment-variables) |
-| CLI commands | `hermes --help` or [CLI reference](https://tiyazo-agent.nousresearch.com/docs/reference/cli-commands) |
+| Skills catalog | `tiyazo skills browse` or [Skills catalog](https://tiyazo-agent.nousresearch.com/docs/reference/skills-catalog) |
+| Provider setup | `tiyazo model` or [Providers guide](https://tiyazo-agent.nousresearch.com/docs/integrations/providers) |
+| Platform setup | `tiyazo gateway setup` or [Messaging docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/messaging/) |
+| MCP servers | `tiyazo mcp list` or [MCP guide](https://tiyazo-agent.nousresearch.com/docs/user-guide/features/mcp) |
+| Profiles | `tiyazo profile list` or [Profiles docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/profiles) |
+| Cron jobs | `tiyazo cron list` or [Cron docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/features/cron) |
+| Memory | `tiyazo memory status` or [Memory docs](https://tiyazo-agent.nousresearch.com/docs/user-guide/features/memory) |
+| Env variables | `tiyazo config env-path` or [Env vars reference](https://tiyazo-agent.nousresearch.com/docs/reference/environment-variables) |
+| CLI commands | `tiyazo --help` or [CLI reference](https://tiyazo-agent.nousresearch.com/docs/reference/cli-commands) |
 | Gateway logs | `~/.tiyazo/logs/gateway.log` |
-| Session files | `hermes sessions browse` (reads state.db) |
+| Session files | `tiyazo sessions browse` (reads state.db) |
 | Source code | `~/.tiyazo/tiyazo-agent/` |
 
 ---
@@ -978,9 +978,9 @@ tiyazo-agent/
 ├── model_tools.py        # Tool discovery and dispatch
 ├── toolsets.py           # Toolset definitions
 ├── cli.py                # Interactive CLI (TiyazoCLI)
-├── hermes_state.py       # SQLite session store
+├── tiyazo_state.py       # SQLite session store
 ├── agent/                # Prompt builder, context compression, memory, model routing, credential pooling, skill dispatch
-├── hermes_cli/           # CLI subcommands, config, setup, commands
+├── tiyazo_cli/           # CLI subcommands, config, setup, commands
 │   ├── commands.py       # Slash command registry (CommandDef)
 │   ├── config.py         # DEFAULT_CONFIG, env var definitions
 │   └── main.py           # CLI entry point and argparse
@@ -1026,13 +1026,13 @@ registry.register(
 **2. Wire it into a toolset in `toolsets.py`** — add the name to
 `_HERMES_CORE_TOOLS` (every platform) or to a specific toolset.
 
-All handlers must return JSON strings. Use `get_hermes_home()` for paths,
+All handlers must return JSON strings. Use `get_tiyazo_home()` for paths,
 never hardcode `~/.tiyazo`. For custom/local-only tools, write a plugin in
 `~/.tiyazo/plugins/` instead of editing core — see the developer docs.
 
 ### Adding a Slash Command
 
-1. Add `CommandDef` to `COMMAND_REGISTRY` in `hermes_cli/commands.py`
+1. Add `CommandDef` to `COMMAND_REGISTRY` in `tiyazo_cli/commands.py`
 2. Add handler in `cli.py` → `process_command()`
 3. (Optional) Add gateway handler in `gateway/run.py`
 
@@ -1069,7 +1069,7 @@ scripts/run_tests.sh -v --tb=long             # pass-through pytest flags
 
 **Cross-platform test guards:** tests using POSIX-only syscalls need a skip marker. Common ones already in the codebase:
 - Symlink creation → `@pytest.mark.skipif(sys.platform == "win32", reason="Symlinks require elevated privileges on Windows")` (see `tests/cron/test_cron_script.py`)
-- POSIX file modes (0o600, etc.) → `@pytest.mark.skipif(sys.platform.startswith("win"), reason="POSIX mode bits not enforced on Windows")` (see `tests/hermes_cli/test_auth_toctou_file_modes.py`)
+- POSIX file modes (0o600, etc.) → `@pytest.mark.skipif(sys.platform.startswith("win"), reason="POSIX mode bits not enforced on Windows")` (see `tests/tiyazo_cli/test_auth_toctou_file_modes.py`)
 - `signal.SIGALRM` → Unix-only (see `tests/conftest.py::_enforce_test_timeout`)
 - Live Winsock / Windows-specific regression tests → `@pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific regression")`
 
@@ -1106,6 +1106,6 @@ Types: `fix:`, `feat:`, `refactor:`, `docs:`, `chore:`
 
 - **Never break prompt caching** — don't change context, tools, or system prompt mid-conversation
 - **Message role alternation** — never two assistant or two user messages in a row
-- Use `get_hermes_home()` from `hermes_constants` for all paths (profile-safe)
+- Use `get_tiyazo_home()` from `tiyazo_constants` for all paths (profile-safe)
 - Config values go in `config.yaml`, secrets go in `.env`
 - New tools need a `check_fn` so they only appear when requirements are met

@@ -6,7 +6,7 @@ author: Tiyazo Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  hermes:
+  tiyazo:
     tags: [Coding-Agent, OpenCode, Autonomous, Refactoring, Code-Review]
     related_skills: [claude-code, codex, tiyazo-agent]
 ---

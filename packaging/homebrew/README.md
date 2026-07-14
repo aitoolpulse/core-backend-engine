@@ -1,4 +1,4 @@
-Homebrew packaging notes for Hermes Agent.
+Homebrew packaging notes for Tiyazo Agent.
 
 Use `packaging/homebrew/tiyazo-agent.rb` as a tap or `homebrew-core` starting point.
 
