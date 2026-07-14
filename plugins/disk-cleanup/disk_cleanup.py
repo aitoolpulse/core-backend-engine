@@ -15,7 +15,7 @@ Rules:
   - chrome-profile→ prompt after 14 days (deep only)
   - >500 MB files → prompt always (deep only)
 
-Scope: strictly TIYAZO_HOME and /tmp/hermes-*
+Scope: strictly TIYAZO_HOME and /tmp/tiyazo-*
 Never touches: ~/.tiyazo/logs/ or any system directory.
 """
 
@@ -29,11 +29,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
-    from hermes_constants import get_hermes_home
+    from tiyazo_constants import get_tiyazo_home
 except Exception:  # pragma: no cover — plugin may load before constants resolves
     import os
 
-    def get_hermes_home() -> Path:  # type: ignore[no-redef]
+    def get_tiyazo_home() -> Path:  # type: ignore[no-redef]
         val = (os.environ.get("TIYAZO_HOME") or "").strip()
         return Path(val).resolve() if val else (Path.home() / ".tiyazo").resolve()
 
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 def get_state_dir() -> Path:
     """State dir — separate from ``$TIYAZO_HOME/logs/``."""
-    return get_hermes_home() / "disk-cleanup"
+    return get_tiyazo_home() / "disk-cleanup"
 
 
 def get_tracked_file() -> Path:
@@ -64,19 +64,19 @@ def get_log_file() -> Path:
 # ---------------------------------------------------------------------------
 
 def is_safe_path(path: Path) -> bool:
-    """Accept only paths under TIYAZO_HOME or ``/tmp/hermes-*``.
+    """Accept only paths under TIYAZO_HOME or ``/tmp/tiyazo-*``.
 
     Rejects Windows mounts (``/mnt/c`` etc.) and any system directory.
     """
-    hermes_home = get_hermes_home()
+    tiyazo_home = get_tiyazo_home()
     try:
-        path.resolve().relative_to(hermes_home)
+        path.resolve().relative_to(tiyazo_home)
         return True
     except (ValueError, OSError):
         pass
-    # Allow /tmp/hermes-* explicitly
+    # Allow /tmp/tiyazo-* explicitly
     parts = path.parts
-    if len(parts) >= 3 and parts[1] == "tmp" and parts[2].startswith("hermes-"):
+    if len(parts) >= 3 and parts[1] == "tmp" and parts[2].startswith("tiyazo-"):
         return True
     return False
 
@@ -177,9 +177,9 @@ def _is_protected_cron_path(p: Path) -> bool:
     # Lazily build the set once per process so TIYAZO_HOME is resolved
     # exactly once.
     if not _PROTECTED_CRON_PATHS:
-        hermes_home = get_hermes_home()
+        tiyazo_home = get_tiyazo_home()
         for parent in ("cron", "cronjobs"):
-            base = hermes_home / parent
+            base = tiyazo_home / parent
             _PROTECTED_CRON_PATHS.add(str(base))
             _PROTECTED_CRON_PATHS.add(str(base / "output"))
             _PROTECTED_CRON_PATHS.add(str(base / "jobs.json"))
@@ -368,11 +368,11 @@ def quick() -> Dict[str, Any]:
     # durable state trees.  Some installs place the Hermes checkout, venv,
     # and desktop build under TIYAZO_HOME; a full rglob over that tree can
     # stall the gateway event loop for minutes.
-    hermes_home = get_hermes_home()
+    tiyazo_home = get_tiyazo_home()
     empty_removed = 0
     sweep_stack: List[Tuple[Path, bool]] = []
     try:
-        for top in hermes_home.iterdir():
+        for top in tiyazo_home.iterdir():
             if (
                 top.is_dir()
                 and not top.is_symlink()
@@ -555,9 +555,9 @@ def guess_category(path: Path) -> Optional[str]:
         return None
 
     # Skip the state dir itself, logs, memory files, sessions, config.
-    hermes_home = get_hermes_home()
+    tiyazo_home = get_tiyazo_home()
     try:
-        rel = path.resolve().relative_to(hermes_home)
+        rel = path.resolve().relative_to(tiyazo_home)
         top = rel.parts[0] if rel.parts else ""
         if top in {
             "disk-cleanup", "logs", "memories", "sessions", "config.yaml",
@@ -577,7 +577,7 @@ def guess_category(path: Path) -> Optional[str]:
         if top == "cache":
             return "temp"
     except ValueError:
-        # Path isn't under TIYAZO_HOME (e.g. /tmp/hermes-*) — fall through.
+        # Path isn't under TIYAZO_HOME (e.g. /tmp/tiyazo-*) — fall through.
         pass
 
     name = path.name

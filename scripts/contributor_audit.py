@@ -58,7 +58,7 @@ IGNORED_EMAILS = {
     "noreply@nousresearch.com",
     "cursoragent@cursor.com",
     "hermes@nousresearch.com",
-    "hermes-audit@example.com",
+    "tiyazo-audit@example.com",
     "hermes@habibilabs.dev",
     "omx@oh-my-codex.dev",
     "codex@openai.com",

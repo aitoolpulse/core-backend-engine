@@ -62,7 +62,7 @@ services:
 
   dashboard:
     image: tiyazo-agent
-    container_name: hermes-dashboard
+    container_name: tiyazo-dashboard
     restart: unless-stopped
     network_mode: host
     depends_on:

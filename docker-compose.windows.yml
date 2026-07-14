@@ -23,7 +23,7 @@ services:
 
   dashboard:
     image: nousresearch/tiyazo-agent:latest
-    container_name: hermes-dashboard
+    container_name: tiyazo-dashboard
     restart: unless-stopped
     depends_on:
       - gateway

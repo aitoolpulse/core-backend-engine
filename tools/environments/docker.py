@@ -19,7 +19,7 @@ from typing import Optional
 from tools.environments.base import BaseEnvironment, _popen_bash
 from tools.environments.local import (
     _HERMES_PROVIDER_ENV_BLOCKLIST,
-    _is_hermes_internal_secret,
+    _is_tiyazo_internal_secret,
 )
 
 logger = logging.getLogger(__name__)
@@ -93,10 +93,10 @@ def _normalize_env_dict(env: dict | None) -> dict[str, str]:
     return normalized
 
 
-def _load_hermes_env_vars() -> dict[str, str]:
+def _load_tiyazo_env_vars() -> dict[str, str]:
     """Load ~/.tiyazo/.env values without failing Docker command execution."""
     try:
-        from hermes_cli.config import load_env
+        from tiyazo_cli.config import load_env
 
         return load_env() or {}
     except Exception:
@@ -131,7 +131,7 @@ def _get_active_profile_name() -> str:
     same process don't retroactively relabel running containers.
     """
     try:
-        from hermes_cli.profiles import get_active_profile_name
+        from tiyazo_cli.profiles import get_active_profile_name
 
         return get_active_profile_name() or "default"
     except Exception:
@@ -144,7 +144,7 @@ def reap_orphan_containers(
     profile_filter: str | None = None,
     docker_exe: str | None = None,
 ) -> int:
-    """Remove stale hermes-tagged containers left behind by prior processes.
+    """Remove stale tiyazo-tagged containers left behind by prior processes.
 
     Targets containers that match all of:
 
@@ -152,7 +152,7 @@ def reap_orphan_containers(
     * ``status=exited`` (running containers are NEVER reaped — they may
       belong to a sibling Hermes process whose reuse path will pick them
       up; killing them would crash the sibling mid-command)
-    * (optional) ``label=hermes-profile=<profile_filter>`` (sweep only the
+    * (optional) ``label=tiyazo-profile=<profile_filter>`` (sweep only the
       caller's profile by default; a hermes process in profile A must not
       tear down profile B's containers)
     * ``State.FinishedAt`` older than *max_age_seconds* ago (so a sibling
@@ -174,7 +174,7 @@ def reap_orphan_containers(
     docker = docker_exe or find_docker() or "docker"
     filters = ["--filter", "label=tiyazo-agent=1", "--filter", "status=exited"]
     if profile_filter:
-        filters.extend(["--filter", f"label=hermes-profile={_sanitize_label_value(profile_filter)}"])
+        filters.extend(["--filter", f"label=tiyazo-profile={_sanitize_label_value(profile_filter)}"])
 
     try:
         listing = subprocess.run(
@@ -855,10 +855,10 @@ class DockerEnvironment(BaseEnvironment):
         logger.info(f"Docker run_args: {all_run_args}")
 
         # Start the container directly via `docker run -d`.
-        container_name = f"hermes-{uuid.uuid4().hex[:8]}"
-        # Labels make hermes-created containers identifiable to:
+        container_name = f"tiyazo-{uuid.uuid4().hex[:8]}"
+        # Labels make tiyazo-created containers identifiable to:
         #   * the orphan reaper (`tiyazo-agent=1` for the global sweep filter)
-        #   * future cross-process reuse (`hermes-task-id`, `hermes-profile`)
+        #   * future cross-process reuse (`tiyazo-task-id`, `tiyazo-profile`)
         #   * operators running `docker ps --filter label=tiyazo-agent=1`
         # Values are limited to the safe character set defined by
         # _sanitize_label_value(); the active Hermes profile is captured at
@@ -867,8 +867,8 @@ class DockerEnvironment(BaseEnvironment):
         task_label = _sanitize_label_value(task_id)
         label_args = [
             "--label", "tiyazo-agent=1",
-            "--label", f"hermes-task-id={task_label}",
-            "--label", f"hermes-profile={profile_name}",
+            "--label", f"tiyazo-task-id={task_label}",
+            "--label", f"tiyazo-profile={profile_name}",
         ]
         # Save args for container recreation on "No such container" recovery.
         self._image = image
@@ -878,8 +878,8 @@ class DockerEnvironment(BaseEnvironment):
 
         self._labels = {
             "tiyazo-agent": "1",
-            "hermes-task-id": task_label,
-            "hermes-profile": profile_name,
+            "tiyazo-task-id": task_label,
+            "tiyazo-profile": profile_name,
         }
 
         # Cross-process container reuse (issue #20561 — docs claim "ONE long-lived
@@ -1036,16 +1036,16 @@ class DockerEnvironment(BaseEnvironment):
         # win over the generic Hermes secret blocklist. Only implicit passthrough
         # keys are filtered. Also strip Hermes-internal dynamic secrets
         # (AUXILIARY_*_API_KEY / _BASE_URL, GATEWAY_RELAY_* auth) that the
-        # name-based blocklist doesn't cover — see _is_hermes_internal_secret.
+        # name-based blocklist doesn't cover — see _is_tiyazo_internal_secret.
         _implicit_forward = {
-            k for k in passthrough_keys if not _is_hermes_internal_secret(k)
+            k for k in passthrough_keys if not _is_tiyazo_internal_secret(k)
         }
         forward_keys = explicit_forward_keys | (_implicit_forward - _HERMES_PROVIDER_ENV_BLOCKLIST)
-        hermes_env = _load_hermes_env_vars() if forward_keys else {}
+        tiyazo_env = _load_tiyazo_env_vars() if forward_keys else {}
         for key in sorted(forward_keys):
             value = os.getenv(key)
             if not value:
-                value = hermes_env.get(key)
+                value = tiyazo_env.get(key)
             if value:
                 exec_env[key] = value
 
@@ -1106,8 +1106,8 @@ class DockerEnvironment(BaseEnvironment):
         self._container_id = None
 
         # 1. Try label-based reuse (another process may have recreated it).
-        task_label = self._labels.get("hermes-task-id", "")
-        profile_label = self._labels.get("hermes-profile", "")
+        task_label = self._labels.get("tiyazo-task-id", "")
+        profile_label = self._labels.get("tiyazo-profile", "")
         existing = self._find_reusable_container(task_label, profile_label)
         if existing is not None:
             cid, state = existing
@@ -1133,7 +1133,7 @@ class DockerEnvironment(BaseEnvironment):
                 return False
             try:
                 import uuid as _uuid
-                new_name = f"hermes-{_uuid.uuid4().hex[:8]}"
+                new_name = f"tiyazo-{_uuid.uuid4().hex[:8]}"
                 init_args = [] if self._image_uses_s6_init else ["--init"]
                 label_args = []
                 for k, v in self._labels.items():
@@ -1277,7 +1277,7 @@ class DockerEnvironment(BaseEnvironment):
         whether the state warrants ``docker start`` before reuse.
 
         Restricted to the docker-stored label set this class creates; never
-        matches containers that happened to be named ``hermes-*`` but were
+        matches containers that happened to be named ``tiyazo-*`` but were
         started by some other tool.
         """
         try:
@@ -1285,8 +1285,8 @@ class DockerEnvironment(BaseEnvironment):
                 [
                     self._docker_exe, "ps", "-a",
                     "--filter", "label=tiyazo-agent=1",
-                    "--filter", f"label=hermes-task-id={task_label}",
-                    "--filter", f"label=hermes-profile={profile_label}",
+                    "--filter", f"label=tiyazo-task-id={task_label}",
+                    "--filter", f"label=tiyazo-profile={profile_label}",
                     "--format", "{{.ID}}\t{{.State}}",
                 ],
                 capture_output=True,
@@ -1431,7 +1431,7 @@ class DockerEnvironment(BaseEnvironment):
         # ``_atexit_cleanup`` in terminal_tool.py which waits up to ~60s for
         # outstanding cleanups, so most exits complete the work cleanly.
         import threading
-        t = threading.Thread(target=_do_cleanup, daemon=True, name=f"hermes-cleanup-{log_id}")
+        t = threading.Thread(target=_do_cleanup, daemon=True, name=f"tiyazo-cleanup-{log_id}")
         t.start()
         self._cleanup_thread = t
         self._container_id = None

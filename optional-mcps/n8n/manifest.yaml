@@ -6,11 +6,11 @@ manifest_version: 1
 
 name: n8n
 description: Manage and inspect n8n workflows from Hermes (stdio bridge, no public port).
-source: https://github.com/CyberSamuraiX/hermes-n8n-mcp
+source: https://github.com/CyberSamuraiX/tiyazo-n8n-mcp
 
 # How to launch the server once installed. The keys here map 1:1 to the
 # `mcp_servers.<name>` block written into ~/.tiyazo/config.yaml by the
-# existing `_save_mcp_server()` helper in hermes_cli/mcp_config.py.
+# existing `_save_mcp_server()` helper in tiyazo_cli/mcp_config.py.
 transport:
   type: stdio
   # For git-installed servers, ${INSTALL_DIR} is substituted at install time
@@ -26,7 +26,7 @@ transport:
 # + dependency install.
 install:
   type: git
-  url: https://github.com/CyberSamuraiX/hermes-n8n-mcp.git
+  url: https://github.com/CyberSamuraiX/tiyazo-n8n-mcp.git
   # Pin to a commit/tag. Required — manifests do not float HEAD.
   ref: main
   # Bootstrap commands run inside the cloned directory after clone.

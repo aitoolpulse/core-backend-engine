@@ -31,7 +31,7 @@ import time
 from pathlib import Path
 from typing import Dict, Optional
 
-from hermes_cli.config import get_hermes_home
+from tiyazo_cli.config import get_tiyazo_home
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class DeadTargetRegistry:
         if path is not None:
             self._path = path
         else:
-            self._path = get_hermes_home() / "gateway" / "dead_targets.json"
+            self._path = get_tiyazo_home() / "gateway" / "dead_targets.json"
         self._load()
 
     # -- persistence -------------------------------------------------------

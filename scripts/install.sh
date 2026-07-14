@@ -142,7 +142,7 @@ while [[ $# -gt 0 ]]; do
             INSTALL_DIR_EXPLICIT=true
             shift 2
             ;;
-        --hermes-home)
+        --tiyazo-home)
             TIYAZO_HOME="$2"
             shift 2
             ;;
@@ -176,7 +176,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --dir PATH     Installation directory"
             echo "                   default (non-root):  ~/.tiyazo/tiyazo-agent"
             echo "                   default (root, Linux): /usr/local/lib/tiyazo-agent"
-            echo "  --hermes-home PATH  Data directory (default: ~/.tiyazo, or \$TIYAZO_HOME)"
+            echo "  --tiyazo-home PATH  Data directory (default: ~/.tiyazo, or \$TIYAZO_HOME)"
             echo "  -h, --help     Show this help"
             echo ""
             echo "Notes:"
@@ -484,7 +484,7 @@ configure_managed_node_npm_prefix() {
     printf 'prefix=%s\n' "$(dirname "$link_dir")" > "$TIYAZO_HOME/node/etc/npmrc"
 }
 
-get_hermes_command_path() {
+get_tiyazo_command_path() {
     local link_dir
     link_dir="$(get_command_link_dir)"
     if [ -x "$link_dir/hermes" ]; then
@@ -553,7 +553,7 @@ install_uv() {
 
     # Hermes owns its own uv at $TIYAZO_HOME/bin/uv.  Always install there —
     # no PATH probing, no conda guards, no multi-location resolution chains.
-    # The runtime update path (hermes_cli/managed_uv.py) looks in the same
+    # The runtime update path (tiyazo_cli/managed_uv.py) looks in the same
     # place, so install.sh and `hermes update` stay in sync.
     local _managed_uv="$TIYAZO_HOME/bin/uv"
 
@@ -571,8 +571,8 @@ install_uv() {
     # `curl | sh` masks curl failures (sh exits 0 on empty stdin)
     # and conflates network errors with installer errors.
     local _uv_install_log _uv_installer
-    _uv_install_log="$(mktemp 2>/dev/null || echo "/tmp/hermes-uv-install.$$.log")"
-    _uv_installer="$(mktemp 2>/dev/null || echo "/tmp/hermes-uv-installer.$$.sh")"
+    _uv_install_log="$(mktemp 2>/dev/null || echo "/tmp/tiyazo-uv-install.$$.log")"
+    _uv_installer="$(mktemp 2>/dev/null || echo "/tmp/tiyazo-uv-installer.$$.sh")"
     if ! curl -LsSf https://astral.sh/uv/install.sh -o "$_uv_installer" 2>"$_uv_install_log"; then
         log_error "Failed to download uv installer from https://astral.sh/uv/install.sh"
         log_info "curl output:"
@@ -1209,7 +1209,7 @@ clone_repo() {
                     git reset -q
                 fi
                 local stash_name
-                stash_name="hermes-install-autostash-$(date -u +%Y%m%d-%H%M%S)"
+                stash_name="tiyazo-install-autostash-$(date -u +%Y%m%d-%H%M%S)"
                 log_info "Local changes detected, stashing before update..."
                 git stash push --include-untracked -m "$stash_name"
                 autostash_ref="stash@{0}"
@@ -1793,7 +1793,7 @@ copy_config_templates() {
     fi
 
     # Create SOUL.md if it doesn't exist (global persona file).
-    # This MUST match DEFAULT_SOUL_MD in hermes_cli/default_soul.py — the
+    # This MUST match DEFAULT_SOUL_MD in tiyazo_cli/default_soul.py — the
     # runtime (_ensure_default_soul_md) treats the old comment-only scaffold as
     # "never customized" and upgrades it to this text on next run, so any drift
     # here is self-healing, but keep them in sync to avoid a churn on first run.
@@ -2269,9 +2269,9 @@ run_setup_wizard() {
     # Run hermes setup using the venv Python directly (no activation needed).
     # Redirect stdin from /dev/tty so interactive prompts work when piped from curl.
     if [ "$USE_VENV" = true ]; then
-        "$INSTALL_DIR/venv/bin/python" -m hermes_cli.main setup < /dev/tty
+        "$INSTALL_DIR/venv/bin/python" -m tiyazo_cli.main setup < /dev/tty
     else
-        python -m hermes_cli.main setup < /dev/tty
+        python -m tiyazo_cli.main setup < /dev/tty
     fi
 }
 
@@ -2309,7 +2309,7 @@ maybe_start_gateway() {
             log_info "Running 'hermes whatsapp' to pair via QR code..."
             echo ""
             if prompt_yes_no "Pair WhatsApp now?" "yes"; then
-                HERMES_CMD="$(get_hermes_command_path)"
+                HERMES_CMD="$(get_tiyazo_command_path)"
                 $HERMES_CMD whatsapp || true
             fi
         else
@@ -2338,7 +2338,7 @@ maybe_start_gateway() {
     fi
 
     if [ "$should_install_gateway" = true ]; then
-        HERMES_CMD="$(get_hermes_command_path)"
+        HERMES_CMD="$(get_tiyazo_command_path)"
 
         if [ "$DISTRO" != "termux" ] && command -v systemctl &> /dev/null; then
             log_info "Installing systemd service..."
@@ -2580,7 +2580,7 @@ postinstall_mode() {
         "$HERMES_CMD" setup
     else
         log_warn "hermes command not found on PATH"
-        log_info "Try: python -m hermes_cli.main setup"
+        log_info "Try: python -m tiyazo_cli.main setup"
     fi
 }
 

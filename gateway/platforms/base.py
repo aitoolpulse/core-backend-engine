@@ -492,7 +492,7 @@ sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))
 
 from gateway.config import Platform, PlatformConfig
 from gateway.session import SessionSource, build_session_key
-from hermes_constants import get_default_hermes_root, get_hermes_dir, get_hermes_home
+from tiyazo_constants import get_default_tiyazo_root, get_tiyazo_dir, get_tiyazo_home
 
 
 GATEWAY_SECRET_CAPTURE_UNSUPPORTED_MESSAGE = (
@@ -565,13 +565,13 @@ async def _ssrf_redirect_guard(response):
 
 # Import-time default. Tests monkeypatch this; the get_*_cache_dir() getters
 # re-resolve per call so the active profile override is honored.
-IMAGE_CACHE_DIR = get_hermes_dir("cache/images", "image_cache")
+IMAGE_CACHE_DIR = get_tiyazo_dir("cache/images", "image_cache")
 
 
 def _resolve_cache_dir(constant_name: str, new_subpath: str, old_name: str) -> Path:
-    """Resolve fresh via get_hermes_dir (active profile), unless a test has
+    """Resolve fresh via get_tiyazo_dir (active profile), unless a test has
     monkeypatched the constant away from its import-time default."""
-    fresh = get_hermes_dir(new_subpath, old_name)
+    fresh = get_tiyazo_dir(new_subpath, old_name)
     current = globals().get(constant_name)
     default = _CACHE_DIR_IMPORT_DEFAULTS.get(constant_name)
     if current is not None and default is not None and current != default:
@@ -605,7 +605,7 @@ def get_inbound_media_max_bytes() -> int:
     unreadable — falls back to the default.
     """
     try:
-        from hermes_cli.config import load_config as _load_config
+        from tiyazo_cli.config import load_config as _load_config
         cfg = _load_config()
     except Exception:
         return DEFAULT_INBOUND_MEDIA_MAX_BYTES
@@ -813,7 +813,7 @@ def cleanup_image_cache(max_age_hours: int = 24) -> int:
 # here so the STT tool (OpenAI Whisper) can transcribe them from local files.
 # ---------------------------------------------------------------------------
 
-AUDIO_CACHE_DIR = get_hermes_dir("cache/audio", "audio_cache")
+AUDIO_CACHE_DIR = get_tiyazo_dir("cache/audio", "audio_cache")
 
 
 def get_audio_cache_dir() -> Path:
@@ -912,7 +912,7 @@ async def cache_audio_from_url(url: str, ext: str = ".ogg", retries: int = 2) ->
 # here so the agent can reference them by local file path.
 # ---------------------------------------------------------------------------
 
-VIDEO_CACHE_DIR = get_hermes_dir("cache/videos", "video_cache")
+VIDEO_CACHE_DIR = get_tiyazo_dir("cache/videos", "video_cache")
 
 SUPPORTED_VIDEO_TYPES = {
     ".mp4": "video/mp4",
@@ -947,8 +947,8 @@ def cache_video_from_bytes(data: bytes, ext: str = ".mp4") -> str:
 # here so the agent can reference them by local file path.
 # ---------------------------------------------------------------------------
 
-DOCUMENT_CACHE_DIR = get_hermes_dir("cache/documents", "document_cache")
-SCREENSHOT_CACHE_DIR = get_hermes_dir("cache/screenshots", "browser_screenshots")
+DOCUMENT_CACHE_DIR = get_tiyazo_dir("cache/documents", "document_cache")
+SCREENSHOT_CACHE_DIR = get_tiyazo_dir("cache/screenshots", "browser_screenshots")
 
 # Import-time defaults; _resolve_cache_dir compares against these to tell a
 # test monkeypatch from an unmodified constant.
@@ -960,8 +960,8 @@ _CACHE_DIR_IMPORT_DEFAULTS = {
     "SCREENSHOT_CACHE_DIR": SCREENSHOT_CACHE_DIR,
 }
 
-_TIYAZO_HOME = get_hermes_home()
-_HERMES_ROOT = get_default_hermes_root()
+_TIYAZO_HOME = get_tiyazo_home()
+_HERMES_ROOT = get_default_tiyazo_root()
 MEDIA_DELIVERY_ALLOW_DIRS_ENV = "HERMES_MEDIA_ALLOW_DIRS"
 MEDIA_DELIVERY_TRUST_RECENT_ENV = "HERMES_MEDIA_TRUST_RECENT_FILES"
 MEDIA_DELIVERY_TRUST_RECENT_SECONDS_ENV = "HERMES_MEDIA_TRUST_RECENT_SECONDS"
@@ -1172,11 +1172,11 @@ def _media_delivery_denied_paths() -> List[Path]:
         "pairing",
         "mcp-tokens",
     )
-    for hermes_root in (_TIYAZO_HOME, _HERMES_ROOT):
+    for tiyazo_root in (_TIYAZO_HOME, _HERMES_ROOT):
         for rel in _ROOT_CREDENTIAL_FILES:
-            denied.append(hermes_root / rel)
+            denied.append(tiyazo_root / rel)
         for rel in _ROOT_CREDENTIAL_DIRS:
-            denied.append(hermes_root / rel)
+            denied.append(tiyazo_root / rel)
     return denied
 
 
@@ -3000,7 +3000,7 @@ class BasePlatformAdapter(ABC):
         auto-deletion.  Non-fatal if config is unreadable.
         """
         try:
-            from hermes_cli.config import load_config as _load_config
+            from tiyazo_cli.config import load_config as _load_config
         except Exception:
             return 0
         try:
@@ -4628,7 +4628,7 @@ class BasePlatformAdapter(ABC):
             # session lifecycle and its cleanup races with the running task
             # (see PR #4926).
             cmd = event.get_command()
-            from hermes_cli.commands import should_bypass_active_session
+            from tiyazo_cli.commands import should_bypass_active_session
 
             if should_bypass_active_session(cmd):
                 # /stop, /new, /reset must cancel the in-flight adapter task
@@ -5238,7 +5238,7 @@ class BasePlatformAdapter(ABC):
             # session (e.g. deferred background-review notifications).
             #
             # Snapshot the callback generation HERE (after the agent has run),
-            # not at the top of this task.  _hermes_run_generation is set on
+            # not at the top of this task.  _tiyazo_run_generation is set on
             # the interrupt event by GatewayRunner._bind_adapter_run_generation
             # during _handle_message_with_agent — which happens DURING the
             # self._message_handler(event) await above.  Snapshotting earlier
@@ -5247,7 +5247,7 @@ class BasePlatformAdapter(ABC):
             # fresher run's callbacks.
             _callback_generation = getattr(
                 interrupt_event,
-                "_hermes_run_generation",
+                "_tiyazo_run_generation",
                 None,
             )
             if hasattr(self, "pop_post_delivery_callback"):

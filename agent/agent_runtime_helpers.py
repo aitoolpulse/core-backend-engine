@@ -31,7 +31,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from hermes_cli.timeouts import get_provider_request_timeout
+from tiyazo_cli.timeouts import get_provider_request_timeout
 from agent.prompt_builder import format_steer_marker
 from agent.tool_dispatch_helpers import _trajectory_normalize_msg, make_tool_result_message
 from agent.trajectory import convert_scratchpad_to_think
@@ -1516,9 +1516,9 @@ def anthropic_prompt_cache_policy(
     # the policy from the preset's real aggregator slot instead.
     if eff_provider.strip().lower() == "moa":
         try:
-            from hermes_cli.config import load_config as _load_moa_cfg
-            from hermes_cli.moa_config import resolve_moa_preset
-            from hermes_cli.runtime_provider import resolve_runtime_provider
+            from tiyazo_cli.config import load_config as _load_moa_cfg
+            from tiyazo_cli.moa_config import resolve_moa_preset
+            from tiyazo_cli.runtime_provider import resolve_runtime_provider
 
             _preset = resolve_moa_preset(
                 _load_moa_cfg().get("moa") or {}, eff_model or None
@@ -1725,7 +1725,7 @@ def switch_model(agent, new_model, new_provider, api_key='', base_url='', api_mo
     change persists across turns (unlike fallback which is
     turn-scoped).
     """
-    from hermes_cli.providers import determine_api_mode
+    from tiyazo_cli.providers import determine_api_mode
 
     # ── Determine api_mode if not provided ──
     if not api_mode:
@@ -1864,7 +1864,7 @@ def switch_model(agent, new_model, new_provider, api_key='', base_url='', api_mo
             # the matching block in agent_init.py for the full rationale.
             if new_provider == "minimax-oauth" and isinstance(effective_key, str) and effective_key:
                 try:
-                    from hermes_cli.auth import build_minimax_oauth_token_provider
+                    from tiyazo_cli.auth import build_minimax_oauth_token_provider
                     effective_key = build_minimax_oauth_token_provider()
                 except Exception as _mm_exc:  # noqa: BLE001
                     import logging as _logging
@@ -1892,7 +1892,7 @@ def switch_model(agent, new_model, new_provider, api_key='', base_url='', api_mo
                 "base_url": effective_base,
             }
             try:
-                from hermes_cli.config import (
+                from tiyazo_cli.config import (
                     apply_custom_provider_tls_to_client_kwargs,
                     get_compatible_custom_providers,
                     load_config_readonly,
@@ -1954,7 +1954,7 @@ def switch_model(agent, new_model, new_provider, api_key='', base_url='', api_mo
         # custom provider mid-session (closes #15779).
         _sm_custom_providers = None
         try:
-            from hermes_cli.config import load_config, get_compatible_custom_providers
+            from tiyazo_cli.config import load_config, get_compatible_custom_providers
             _sm_cfg = load_config()
             _sm_custom_providers = get_compatible_custom_providers(_sm_cfg)
         except Exception:
@@ -2077,7 +2077,7 @@ def invoke_tool(agent, function_name: str, function_args: dict, effective_task_i
 
     _tool_middleware_trace = list(tool_request_middleware_trace or [])
     try:
-        from hermes_cli.middleware import apply_tool_request_middleware
+        from tiyazo_cli.middleware import apply_tool_request_middleware
 
         if not skip_tool_request_middleware:
             _tool_request_mw = apply_tool_request_middleware(
@@ -2098,7 +2098,7 @@ def invoke_tool(agent, function_name: str, function_args: dict, effective_task_i
     block_message: Optional[str] = None
     if not pre_tool_block_checked:
         try:
-            from hermes_cli.plugins import get_pre_tool_call_block_message
+            from tiyazo_cli.plugins import get_pre_tool_call_block_message
             block_message = get_pre_tool_call_block_message(
                 function_name,
                 function_args,
@@ -2170,7 +2170,7 @@ def invoke_tool(agent, function_name: str, function_args: dict, effective_task_i
         def _execute(next_args: dict) -> Any:
             session_db = agent._get_session_db_for_recall()
             if not session_db:
-                from hermes_state import format_session_db_unavailable
+                from tiyazo_state import format_session_db_unavailable
                 return _finish_agent_tool(json.dumps({"success": False, "error": format_session_db_unavailable()}), next_args)
             from tools.session_search_tool import session_search as _session_search
             return _finish_agent_tool(
@@ -2257,7 +2257,7 @@ def invoke_tool(agent, function_name: str, function_args: dict, effective_task_i
                 tool_request_middleware_trace=list(_tool_middleware_trace),
             )
 
-    from hermes_cli.middleware import run_tool_execution_middleware
+    from tiyazo_cli.middleware import run_tool_execution_middleware
 
     return run_tool_execution_middleware(
         function_name,

@@ -50,7 +50,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
-from hermes_constants import secure_parent_dir
+from tiyazo_constants import secure_parent_dir
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +121,7 @@ _SKIP_TOKENS = frozenset({"skip", "cancel", "s", "n", "no", "q", "quit"})
 # _wait_for_callback maps this to OAuthNonInteractiveError ("user_skipped")
 # so the MCP setup path treats it as a non-fatal "continue without this
 # server" rather than a hard failure.
-_USER_SKIPPED_SENTINEL = "__hermes_user_skipped__"
+_USER_SKIPPED_SENTINEL = "__tiyazo_user_skipped__"
 
 
 # ---------------------------------------------------------------------------
@@ -136,8 +136,8 @@ def _get_token_dir() -> Path:
     Layout: ``TIYAZO_HOME/mcp-tokens/``
     """
     try:
-        from hermes_constants import get_hermes_home
-        base = Path(get_hermes_home())
+        from tiyazo_constants import get_tiyazo_home
+        base = Path(get_tiyazo_home())
     except ImportError:
         base = Path(os.environ.get("TIYAZO_HOME", str(Path.home() / ".tiyazo")))
     return base / "mcp-tokens"

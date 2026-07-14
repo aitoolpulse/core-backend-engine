@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 
 from tools.environments.base import BaseEnvironment, _pipe_stdin
-from hermes_cli._subprocess_compat import windows_hide_flags
+from tiyazo_cli._subprocess_compat import windows_hide_flags
 
 _IS_WINDOWS = platform.system() == "Windows"
 
@@ -121,7 +121,7 @@ def _build_provider_env_blocklist() -> frozenset:
     blocked: set[str] = set()
 
     try:
-        from hermes_cli.auth import PROVIDER_REGISTRY
+        from tiyazo_cli.auth import PROVIDER_REGISTRY
         for pconfig in PROVIDER_REGISTRY.values():
             blocked.update(pconfig.api_key_env_vars)
             if pconfig.auth_type == "aws_sdk":
@@ -132,7 +132,7 @@ def _build_provider_env_blocklist() -> frozenset:
         pass
 
     try:
-        from hermes_cli.config import OPTIONAL_ENV_VARS
+        from tiyazo_cli.config import OPTIONAL_ENV_VARS
         for name, metadata in OPTIONAL_ENV_VARS.items():
             category = metadata.get("category")
             if category in {"tool", "messaging"}:
@@ -239,7 +239,7 @@ _HERMES_PROVIDER_ENV_BLOCKLIST = _build_provider_env_blocklist()
 _ACTIVE_VENV_MARKER_VARS = ("VIRTUAL_ENV", "CONDA_PREFIX")
 
 
-def _is_hermes_internal_secret(key: str) -> bool:
+def _is_tiyazo_internal_secret(key: str) -> bool:
     """Return True for Hermes-internal secrets injected under *dynamic* names.
 
     ``_HERMES_PROVIDER_ENV_BLOCKLIST`` is name-based and derived from the
@@ -267,7 +267,7 @@ def _is_hermes_internal_secret(key: str) -> bool:
     This is the single source of truth for "Hermes-internal dynamic secret"
     across every spawn path — the terminal ``_make_run_env`` /
     ``_sanitize_subprocess_env`` filters, the Docker passthrough filter, and the
-    non-terminal :func:`hermes_subprocess_env` helper all call it, so the
+    non-terminal :func:`tiyazo_subprocess_env` helper all call it, so the
     dynamic patterns are stripped **unconditionally** regardless of
     ``env_passthrough`` skill registration or ``inherit_credentials``. Nothing
     a model-driving CLI legitimately needs matches these patterns.
@@ -284,12 +284,12 @@ def _is_hermes_internal_secret(key: str) -> bool:
     return False
 
 
-def _inject_context_hermes_home(env: dict) -> None:
+def _inject_context_tiyazo_home(env: dict) -> None:
     """Bridge the context-local Hermes home override into subprocess env."""
     try:
-        from hermes_constants import get_hermes_home_override
+        from tiyazo_constants import get_tiyazo_home_override
 
-        value = get_hermes_home_override()
+        value = get_tiyazo_home_override()
         if value:
             env["TIYAZO_HOME"] = value
     except Exception:
@@ -355,7 +355,7 @@ def _sanitize_subprocess_env(base_env: dict | None, extra_env: dict | None = Non
     for key, value in (base_env or {}).items():
         if key.startswith(_HERMES_PROVIDER_ENV_FORCE_PREFIX):
             continue
-        if _is_hermes_internal_secret(key):
+        if _is_tiyazo_internal_secret(key):
             continue
         if key not in _HERMES_PROVIDER_ENV_BLOCKLIST or _is_passthrough(key):
             sanitized[key] = value
@@ -363,17 +363,17 @@ def _sanitize_subprocess_env(base_env: dict | None, extra_env: dict | None = Non
     for key, value in (extra_env or {}).items():
         if key.startswith(_HERMES_PROVIDER_ENV_FORCE_PREFIX):
             real_key = key[len(_HERMES_PROVIDER_ENV_FORCE_PREFIX):]
-            if _is_hermes_internal_secret(real_key):
+            if _is_tiyazo_internal_secret(real_key):
                 continue
             sanitized[real_key] = value
-        elif _is_hermes_internal_secret(key):
+        elif _is_tiyazo_internal_secret(key):
             continue
         elif key not in _HERMES_PROVIDER_ENV_BLOCKLIST or _is_passthrough(key):
             sanitized[key] = value
 
-    _inject_context_hermes_home(sanitized)
+    _inject_context_tiyazo_home(sanitized)
 
-    from hermes_constants import apply_subprocess_home_env
+    from tiyazo_constants import apply_subprocess_home_env
     apply_subprocess_home_env(sanitized)
 
     # Same cross-session leak guard as _make_run_env, for the background/PTY
@@ -395,7 +395,7 @@ def _sanitize_subprocess_env(base_env: dict | None, extra_env: dict | None = Non
 # secrets to keep out of a compromised dependency's reach (gateway bot tokens,
 # GitHub auth, remote-compute tokens, dashboard session secret).  The set is a
 # narrow subset of _HERMES_PROVIDER_ENV_BLOCKLIST; provider keys are handled by
-# the conditional Tier-2 strip in hermes_subprocess_env().
+# the conditional Tier-2 strip in tiyazo_subprocess_env().
 _ALWAYS_STRIP_KEYS: frozenset[str] = frozenset({
     # GitHub auth
     "GH_TOKEN",
@@ -415,7 +415,7 @@ _ALWAYS_STRIP_KEYS: frozenset[str] = frozenset({
     # provisions and persists to the 0600 .env. Stripped unconditionally on
     # EVERY spawn surface (terminal + model-driving CLIs) so it can't drift
     # between paths: _SECRET / _DELIVERY_KEY are also matched by
-    # _is_hermes_internal_secret, but _ID has no secret suffix, so it must be
+    # _is_tiyazo_internal_secret, but _ID has no secret suffix, so it must be
     # enumerated here to stay stripped on the inherit_credentials=True path
     # (codex / copilot), which skips the Tier-2 blocklist.
     "GATEWAY_RELAY_ID",
@@ -431,7 +431,7 @@ _ALWAYS_STRIP_KEYS: frozenset[str] = frozenset({
 })
 
 
-def hermes_subprocess_env(*, inherit_credentials: bool = False) -> dict[str, str]:
+def tiyazo_subprocess_env(*, inherit_credentials: bool = False) -> dict[str, str]:
     """Build a sanitized environment dict for a spawned subprocess.
 
     Centralized helper for the **non-terminal** spawn surface (browser,
@@ -472,11 +472,11 @@ def hermes_subprocess_env(*, inherit_credentials: bool = False) -> dict[str, str
     # (``AUXILIARY_<TASK>_API_KEY`` / ``_BASE_URL`` side-LLM credentials,
     # ``GATEWAY_RELAY_*`` relay-auth material) must never reach a child,
     # regardless of ``inherit_credentials`` — a model-driving CLI has no
-    # legitimate use for them. See :func:`_is_hermes_internal_secret`.
+    # legitimate use for them. See :func:`_is_tiyazo_internal_secret`.
     for key in list(env):
         if key.startswith(_HERMES_PROVIDER_ENV_FORCE_PREFIX):
             env.pop(key, None)
-        elif _is_hermes_internal_secret(key):
+        elif _is_tiyazo_internal_secret(key):
             env.pop(key, None)
 
     if not inherit_credentials:
@@ -487,8 +487,8 @@ def hermes_subprocess_env(*, inherit_credentials: bool = False) -> dict[str, str
     # Windows UTF-8 safety for spawned processes (#31420).
     env.setdefault("PYTHONUTF8", "1")
 
-    _inject_context_hermes_home(env)
-    from hermes_constants import apply_subprocess_home_env
+    _inject_context_tiyazo_home(env)
+    from tiyazo_constants import apply_subprocess_home_env
     apply_subprocess_home_env(env)
 
     # Active-venv markers must not clobber another project's environment.
@@ -535,11 +535,11 @@ def _find_bash() -> str:
     #   PortableGit: %LOCALAPPDATA%\hermes\git\bin\bash.exe   (primary)
     #   MinGit:      %LOCALAPPDATA%\hermes\git\usr\bin\bash.exe (legacy/32-bit fallback)
     _local_appdata = os.environ.get("LOCALAPPDATA", "")
-    _hermes_portable_git = os.path.join(_local_appdata, "hermes", "git") if _local_appdata else ""
-    if _hermes_portable_git:
+    _tiyazo_portable_git = os.path.join(_local_appdata, "hermes", "git") if _local_appdata else ""
+    if _tiyazo_portable_git:
         for candidate in (
-            os.path.join(_hermes_portable_git, "bin", "bash.exe"),        # PortableGit (primary)
-            os.path.join(_hermes_portable_git, "usr", "bin", "bash.exe"), # MinGit fallback
+            os.path.join(_tiyazo_portable_git, "bin", "bash.exe"),        # PortableGit (primary)
+            os.path.join(_tiyazo_portable_git, "usr", "bin", "bash.exe"), # MinGit fallback
         ):
             if os.path.isfile(candidate):
                 return candidate
@@ -628,7 +628,7 @@ _SENTINEL = object()
 _HERMES_BIN_DIR: "str | None | object" = _SENTINEL
 
 
-def _resolve_hermes_bin_dir() -> str | None:
+def _resolve_tiyazo_bin_dir() -> str | None:
     """Return the directory holding the ``hermes`` console-script, or None.
 
     The terminal tool runs in a freshly-spawned subshell whose PATH is the
@@ -685,14 +685,14 @@ def _resolve_hermes_bin_dir() -> str | None:
     return candidate
 
 
-def _prepend_hermes_bin_dir(existing_path: str) -> str:
+def _prepend_tiyazo_bin_dir(existing_path: str) -> str:
     """Prepend the hermes install dir to ``existing_path`` if it's missing.
 
     Cross-platform (uses ``os.pathsep``). First-occurrence wins, so a PATH
     that already contains the dir is returned unchanged. Returns the input
     unchanged when the install dir can't be resolved.
     """
-    bin_dir = _resolve_hermes_bin_dir()
+    bin_dir = _resolve_tiyazo_bin_dir()
     if not bin_dir:
         return existing_path
     sep = os.pathsep
@@ -803,10 +803,10 @@ def _make_run_env(env: dict) -> dict:
     for k, v in merged.items():
         if k.startswith(_HERMES_PROVIDER_ENV_FORCE_PREFIX):
             real_key = k[len(_HERMES_PROVIDER_ENV_FORCE_PREFIX):]
-            if _is_hermes_internal_secret(real_key):
+            if _is_tiyazo_internal_secret(real_key):
                 continue
             run_env[real_key] = v
-        elif _is_hermes_internal_secret(k):
+        elif _is_tiyazo_internal_secret(k):
             continue
         elif k not in _HERMES_PROVIDER_ENV_BLOCKLIST or _is_passthrough(k):
             run_env[k] = v
@@ -816,11 +816,11 @@ def _make_run_env(env: dict) -> dict:
         # Ensure the hermes install dir is reachable so plugins can shell out
         # to bare ``hermes`` via the terminal tool even when the gateway was
         # launched without it on PATH (systemd, service managers, cron, etc.).
-        run_env[path_key] = _prepend_hermes_bin_dir(new_path)
+        run_env[path_key] = _prepend_tiyazo_bin_dir(new_path)
 
-    _inject_context_hermes_home(run_env)
+    _inject_context_tiyazo_home(run_env)
 
-    from hermes_constants import apply_subprocess_home_env
+    from tiyazo_constants import apply_subprocess_home_env
     apply_subprocess_home_env(run_env)
 
     # Bridge ContextVar-based session vars into the subprocess env (with the
@@ -843,7 +843,7 @@ def _read_terminal_shell_init_config() -> tuple[list[str], bool]:
     execution never breaks because the config file is unreadable.
     """
     try:
-        from hermes_cli.config import load_config
+        from tiyazo_cli.config import load_config
 
         cfg = load_config() or {}
         terminal_cfg = cfg.get("terminal") or {}
@@ -959,10 +959,10 @@ class LocalEnvironment(BaseEnvironment):
             # accepts forward slashes in filesystem paths, and we control
             # the path so we can guarantee no spaces.
             try:
-                from hermes_constants import get_hermes_home
-                cache_dir = get_hermes_home() / "cache" / "terminal"
+                from tiyazo_constants import get_tiyazo_home
+                cache_dir = get_tiyazo_home() / "cache" / "terminal"
             except Exception:
-                cache_dir = Path(tempfile.gettempdir()) / "hermes_terminal"
+                cache_dir = Path(tempfile.gettempdir()) / "tiyazo_terminal"
             cache_dir.mkdir(parents=True, exist_ok=True)
             # Force forward slashes so the same string serves both contexts.
             return str(cache_dir).replace("\\", "/")
@@ -1047,7 +1047,7 @@ class LocalEnvironment(BaseEnvironment):
         )
         if not _IS_WINDOWS:
             try:
-                proc._hermes_pgid = os.getpgid(proc.pid)
+                proc._tiyazo_pgid = os.getpgid(proc.pid)
             except ProcessLookupError:
                 pass
 
@@ -1104,7 +1104,7 @@ class LocalEnvironment(BaseEnvironment):
                 try:
                     pgid = os.getpgid(proc.pid)
                 except ProcessLookupError:
-                    pgid = getattr(proc, "_hermes_pgid", None)
+                    pgid = getattr(proc, "_tiyazo_pgid", None)
                     if pgid is None:
                         raise
 

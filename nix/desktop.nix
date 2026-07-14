@@ -20,7 +20,7 @@ let
   npm = hermesNpmLib.mkNpmPassthru {
     folder = "apps/desktop";
     attr = "desktop";
-    pname = "hermes-desktop";
+    pname = "tiyazo-desktop";
   };
 
   packageJson = builtins.fromJSON (builtins.readFile (npm.src + "/apps/desktop/package.json"));
@@ -30,7 +30,7 @@ let
   renderer = pkgs.buildNpmPackage (
     npm
     // {
-      pname = "hermes-desktop-renderer";
+      pname = "tiyazo-desktop-renderer";
       inherit version;
       doCheck = true;
 
@@ -113,7 +113,7 @@ in
 
 # Electron wrapper: nixpkgs' electron binary pointed at the renderer dir.
 stdenv.mkDerivation {
-  pname = "hermes-desktop";
+  pname = "tiyazo-desktop";
   inherit version;
 
   dontUnpack = true;
@@ -124,21 +124,21 @@ stdenv.mkDerivation {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/share/hermes-desktop $out/bin
-    cp -r ${renderer}/* $out/share/hermes-desktop/
+    mkdir -p $out/share/tiyazo-desktop $out/bin
+    cp -r ${renderer}/* $out/share/tiyazo-desktop/
 
     # Standard nixpkgs pattern for electron-builder apps: patch process.resourcesPath
     # to point to the app's directory. In Nix, unpackaged electron defaults this
     # to the electron distribution's resources path, breaking extraResources lookups.
-    substituteInPlace $out/share/hermes-desktop/electron/main.cjs \
-      --replace-fail "process.resourcesPath" "'$out/share/hermes-desktop'"
+    substituteInPlace $out/share/tiyazo-desktop/electron/main.cjs \
+      --replace-fail "process.resourcesPath" "'$out/share/tiyazo-desktop'"
 
     # git-review-ops.cjs has the same process.resourcesPath fallback for its
     # staged simple-git dep (native-deps/vendor/node_modules/), so it needs the same
     # rewrite — otherwise the require() fallback resolves against the electron
     # dist's resources path and fails to load simple-git (issue #52735).
-    substituteInPlace $out/share/hermes-desktop/electron/git-review-ops.cjs \
-      --replace-fail "process.resourcesPath" "'$out/share/hermes-desktop'"
+    substituteInPlace $out/share/tiyazo-desktop/electron/git-review-ops.cjs \
+      --replace-fail "process.resourcesPath" "'$out/share/tiyazo-desktop'"
 
     # Wrap the nixpkgs electron binary to launch our app.  Set
     # HERMES_DESKTOP_HERMES to the absolute path of the nix-built `hermes`
@@ -146,8 +146,8 @@ stdenv.mkDerivation {
     # PATH") uses our fully wrapped binary — venv with all deps,
     # bundled skills/plugins, runtime PATH (ripgrep/git/ffmpeg/etc).
     # No reimplementation of the agent resolver in the wrapper.
-    makeWrapper ${lib.getExe electron} $out/bin/hermes-desktop \
-      --add-flags "$out/share/hermes-desktop" \
+    makeWrapper ${lib.getExe electron} $out/bin/tiyazo-desktop \
+      --add-flags "$out/share/tiyazo-desktop" \
       --set HERMES_DESKTOP_HERMES "${lib.getExe hermesAgent}" \
       --set ELECTRON_IS_DEV 0
 
@@ -163,6 +163,6 @@ stdenv.mkDerivation {
     homepage = "https://github.com/aitoolpulse/core-backend-engine";
     license = licenses.mit;
     platforms = platforms.unix;
-    mainProgram = "hermes-desktop";
+    mainProgram = "tiyazo-desktop";
   };
 }

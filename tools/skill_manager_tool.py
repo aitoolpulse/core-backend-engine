@@ -42,9 +42,9 @@ import contextvars as _ctxvars
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from hermes_constants import get_hermes_home, display_hermes_home
+from tiyazo_constants import get_tiyazo_home, display_tiyazo_home
 from utils import atomic_replace, is_truthy_value
-from hermes_cli.config import cfg_get
+from tiyazo_cli.config import cfg_get
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ def _guard_agent_created_enabled() -> bool:
     on via `hermes config set skills.guard_agent_created true`.
     """
     try:
-        from hermes_cli.config import load_config
+        from tiyazo_cli.config import load_config
         cfg = load_config()
         return is_truthy_value(
             cfg_get(cfg, "skills", "guard_agent_created"),
@@ -148,7 +148,7 @@ import yaml
 
 
 # All skills live in ~/.tiyazo/skills/ (single source of truth)
-TIYAZO_HOME = get_hermes_home()
+TIYAZO_HOME = get_tiyazo_home()
 SKILLS_DIR = TIYAZO_HOME / "skills"
 
 MAX_NAME_LENGTH = 64
@@ -597,13 +597,13 @@ def _find_skill_in_other_profiles(name: str) -> List[Tuple[str, Path]]:
     """
     matches: List[Tuple[str, Path]] = []
     try:
-        from hermes_constants import get_default_hermes_root
+        from tiyazo_constants import get_default_tiyazo_root
         from agent.skill_utils import is_excluded_skill_path
     except Exception:
         return matches
 
     try:
-        root = get_default_hermes_root()
+        root = get_default_tiyazo_root()
     except Exception:
         return matches
 
@@ -1410,7 +1410,7 @@ SKILL_MANAGE_SCHEMA = {
     "description": (
         "Manage skills (create, update, delete). Skills are your procedural "
         "memory — reusable approaches for recurring task types. "
-        f"New skills go to {display_hermes_home()}/skills/; existing skills can be modified wherever they live.\n\n"
+        f"New skills go to {display_tiyazo_home()}/skills/; existing skills can be modified wherever they live.\n\n"
         "Actions: create (full SKILL.md + optional category), "
         "patch (old_string/new_string — preferred for fixes), "
         "edit (full SKILL.md rewrite — major overhauls only), "

@@ -16,7 +16,7 @@ instances and coordinates:
   is warranted.
 
 Replaces what used to be scattered across eight call sites in `mcp_oauth.py`,
-`mcp_tool.py`, and `hermes_cli/mcp_config.py`. This module is the ONLY place
+`mcp_tool.py`, and `tiyazo_cli/mcp_config.py`. This module is the ONLY place
 that instantiates the MCP SDK's `OAuthClientProvider` — all other code paths
 go through `get_manager()`.
 
@@ -102,7 +102,7 @@ class _ProviderEntry:
 # ---------------------------------------------------------------------------
 
 
-def _make_hermes_provider_class() -> Optional[type]:
+def _make_tiyazo_provider_class() -> Optional[type]:
     """Lazy-import the SDK base class and return our subclass.
 
     Wrapped in a function so this module imports cleanly even when the
@@ -136,13 +136,13 @@ def _make_hermes_provider_class() -> Optional[type]:
             **kwargs: Any,
         ):
             super().__init__(*args, **kwargs)
-            self._hermes_server_name = server_name
+            self._tiyazo_server_name = server_name
             # When the client_id comes from config.yaml (pre-registered), an
             # invalid_client rejection means the *config* is wrong — deleting
             # client.json would just be re-seeded from config and re-running
             # registration can't help. Only auto-heal dynamically-registered
             # clients. See _maybe_flag_poisoned_client.
-            self._hermes_preregistered = preregistered
+            self._tiyazo_preregistered = preregistered
 
         async def _initialize(self) -> None:
             """Load stored tokens + client info AND seed token_expiry_time.
@@ -198,7 +198,7 @@ def _make_hermes_provider_class() -> Optional[type]:
                     logger.debug(
                         "MCP OAuth '%s': restored metadata from disk "
                         "(token_endpoint=%s)",
-                        self._hermes_server_name,
+                        self._tiyazo_server_name,
                         meta.token_endpoint,
                     )
 
@@ -219,7 +219,7 @@ def _make_hermes_provider_class() -> Optional[type]:
                     logger.debug(
                         "MCP OAuth '%s': pre-flight metadata discovery "
                         "failed (non-fatal): %s",
-                        self._hermes_server_name, exc,
+                        self._tiyazo_server_name, exc,
                     )
 
         async def _prefetch_oauth_metadata(self) -> None:
@@ -252,7 +252,7 @@ def _make_hermes_provider_class() -> Optional[type]:
                     except httpx.HTTPError as exc:
                         logger.debug(
                             "MCP OAuth '%s': PRM discovery to %s failed: %s",
-                            self._hermes_server_name, url, exc,
+                            self._tiyazo_server_name, url, exc,
                         )
                         continue
                     prm = await handle_protected_resource_response(resp)
@@ -275,7 +275,7 @@ def _make_hermes_provider_class() -> Optional[type]:
                     except httpx.HTTPError as exc:
                         logger.debug(
                             "MCP OAuth '%s': ASM discovery to %s failed: %s",
-                            self._hermes_server_name, url, exc,
+                            self._tiyazo_server_name, url, exc,
                         )
                         continue
                     ok, asm = await handle_auth_metadata_response(resp)
@@ -292,7 +292,7 @@ def _make_hermes_provider_class() -> Optional[type]:
                         logger.debug(
                             "MCP OAuth '%s': pre-flight ASM discovered "
                             "token_endpoint=%s",
-                            self._hermes_server_name, asm.token_endpoint,
+                            self._tiyazo_server_name, asm.token_endpoint,
                         )
                         break
 
@@ -348,7 +348,7 @@ def _make_hermes_provider_class() -> Optional[type]:
             back to ``hermes mcp reauth``.
             """
             try:
-                if self._hermes_preregistered:
+                if self._tiyazo_preregistered:
                     return
                 status = getattr(response, "status_code", None)
                 if status not in (400, 401):
@@ -382,7 +382,7 @@ def _make_hermes_provider_class() -> Optional[type]:
             except Exception as exc:  # pragma: no cover — defensive, must not throw
                 logger.debug(
                     "MCP OAuth '%s': invalid_client detection failed (non-fatal): %s",
-                    self._hermes_server_name, exc,
+                    self._tiyazo_server_name, exc,
                 )
 
         async def async_auth_flow(self, request):  # type: ignore[override]
@@ -391,12 +391,12 @@ def _make_hermes_provider_class() -> Optional[type]:
             # whatever state the SDK already has.
             try:
                 await get_manager().invalidate_if_disk_changed(
-                    self._hermes_server_name
+                    self._tiyazo_server_name
                 )
             except Exception as exc:  # pragma: no cover — defensive
                 logger.debug(
                     "MCP OAuth '%s': pre-flow disk-watch failed (non-fatal): %s",
-                    self._hermes_server_name, exc,
+                    self._tiyazo_server_name, exc,
                 )
 
             # Manually bridge the bidirectional generator protocol. httpx's
@@ -432,7 +432,7 @@ def _make_hermes_provider_class() -> Optional[type]:
 
 
 # Cached at import time. Tested and used by :class:`MCPOAuthManager`.
-_HERMES_PROVIDER_CLS: Optional[type] = _make_hermes_provider_class()
+_HERMES_PROVIDER_CLS: Optional[type] = _make_tiyazo_provider_class()
 
 
 # ---------------------------------------------------------------------------

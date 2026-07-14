@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 # long-running subprocesses immediately instead of blocking until timeout.
 # ---------------------------------------------------------------------------
 from tools.interrupt import is_interrupted, _interrupt_event  # noqa: F401 — re-exported
-# display_hermes_home imported lazily at call site (stale-module safety during hermes update)
+# display_tiyazo_home imported lazily at call site (stale-module safety during hermes update)
 
 
 
@@ -128,7 +128,7 @@ def _check_disk_usage_warning():
         # Get total size of hermes directories
         total_bytes = 0
         import glob
-        for path in glob.glob(str(scratch_dir / "hermes-*")):
+        for path in glob.glob(str(scratch_dir / "tiyazo-*")):
             for f in Path(path).rglob('*'):
                 if f.is_file():
                     try:
@@ -335,7 +335,7 @@ def _handle_sudo_failure(output: str, env_type: str) -> str:
     
     for failure in sudo_failures:
         if failure in output:
-            from hermes_constants import display_hermes_home as _dhh
+            from tiyazo_constants import display_tiyazo_home as _dhh
             return output + f"\n\n💡 Tip: To enable sudo over messaging, add SUDO_PASSWORD to {_dhh()}/.env on the agent machine."
     
     return output
@@ -1368,7 +1368,7 @@ def _get_env_config() -> Dict[str, Any]:
         "docker_persist_across_processes": os.getenv(
             "TERMINAL_DOCKER_PERSIST_ACROSS_PROCESSES", "true"
         ).lower() in {"true", "1", "yes"},
-        # Startup orphan reaper for hermes-tagged containers left behind by
+        # Startup orphan reaper for tiyazo-tagged containers left behind by
         # crashed / SIGKILL'd previous processes that bypassed atexit.
         # Conservative: only sweeps Exited containers older than 2× the
         # idle-reap window AND scoped to the current profile. Issue #20561.
@@ -1679,7 +1679,7 @@ def cleanup_all_environments():
     # Also clean any orphaned directories
     scratch_dir = _get_scratch_dir()
     import glob
-    for path in glob.glob(str(scratch_dir / "hermes-*")):
+    for path in glob.glob(str(scratch_dir / "tiyazo-*")):
         try:
             shutil.rmtree(path, ignore_errors=True)
             logger.info("Removed orphaned: %s", path)
@@ -2248,14 +2248,14 @@ def terminal_tool(
                     logger.info("%s environment ready for task %s", env_type, effective_task_id[:8])
 
         # Hard-block: gateway lifecycle commands (systemctl/launchctl/hermes
-        # restart|stop targeting hermes-gateway) must never run inside the
+        # restart|stop targeting tiyazo-gateway) must never run inside the
         # gateway process itself. The restart would SIGTERM the gateway, which
         # kills this very subprocess before it can complete — the service may
         # never restart. This mirrors the `hermes gateway restart` guard in
-        # hermes_cli/gateway.py and the cron-path guard in hermes_cli/cron.py,
+        # tiyazo_cli/gateway.py and the cron-path guard in tiyazo_cli/cron.py,
         # but applies unconditionally (force=True cannot help here).
         if os.environ.get("_HERMES_GATEWAY") == "1":
-            from hermes_cli.cron import _contains_gateway_lifecycle_command
+            from tiyazo_cli.cron import _contains_gateway_lifecycle_command
             if _contains_gateway_lifecycle_command(command):
                 return json.dumps({
                     "output": "",
@@ -2668,7 +2668,7 @@ def terminal_tool(
             # replace it by returning a string from transform_terminal_output.
             # The hook is fail-open, and the first valid string return wins.
             try:
-                from hermes_cli.plugins import invoke_hook
+                from tiyazo_cli.plugins import invoke_hook
                 hook_results = invoke_hook(
                     "transform_terminal_output",
                     command=command,
@@ -2917,7 +2917,7 @@ if __name__ == "__main__":
     print(f"  TERMINAL_MODAL_IMAGE: {os.getenv('TERMINAL_MODAL_IMAGE', default_img)}")
     print(f"  TERMINAL_DAYTONA_IMAGE: {os.getenv('TERMINAL_DAYTONA_IMAGE', default_img)}")
     print(f"  TERMINAL_CWD: {os.getenv('TERMINAL_CWD', _safe_getcwd())}")
-    from hermes_constants import display_hermes_home as _dhh
+    from tiyazo_constants import display_tiyazo_home as _dhh
     print(f"  TERMINAL_SANDBOX_DIR: {os.getenv('TERMINAL_SANDBOX_DIR', f'{_dhh()}/sandboxes')}")
     print(f"  TERMINAL_TIMEOUT: {os.getenv('TERMINAL_TIMEOUT', '60')}")
     print(f"  TERMINAL_LIFETIME_SECONDS: {os.getenv('TERMINAL_LIFETIME_SECONDS', '300')}")

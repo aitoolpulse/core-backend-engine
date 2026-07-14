@@ -35,14 +35,14 @@ from typing import Any, List, Optional
 
 # Add parent directory to path for imports BEFORE repo-level imports.
 # Without this, standalone invocations (e.g. after `hermes update` reloads
-# the module) fail with ModuleNotFoundError for hermes_time et al.
+# the module) fail with ModuleNotFoundError for tiyazo_time et al.
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from hermes_constants import get_hermes_home
-from hermes_cli._subprocess_compat import windows_hide_flags
-from hermes_cli.config import load_config, _expand_env_vars
-from hermes_cli.fallback_config import get_fallback_chain
-from hermes_time import now as _hermes_now
+from tiyazo_constants import get_tiyazo_home
+from tiyazo_cli._subprocess_compat import windows_hide_flags
+from tiyazo_cli.config import load_config, _expand_env_vars
+from tiyazo_cli.fallback_config import get_fallback_chain
+from tiyazo_time import now as _tiyazo_now
 
 logger = logging.getLogger(__name__)
 
@@ -154,10 +154,10 @@ def _merge_mcp_into_per_job_toolsets(per_job: list[str], cfg: dict) -> list[str]
     result = [t for t in per_job if t != "no_mcp"]
     if "no_mcp" in per_job:
         return result
-    # lazy import: avoid heavy hermes_cli import at cron module load (matches
+    # lazy import: avoid heavy tiyazo_cli import at cron module load (matches
     # _resolve_cron_enabled_toolsets' fallback) and share one MCP-membership
     # computation with the gateway/CLI platform resolver.
-    from hermes_cli.tools_config import enabled_mcp_server_names
+    from tiyazo_cli.tools_config import enabled_mcp_server_names
     enabled_mcp = enabled_mcp_server_names(cfg)
     if set(result) & enabled_mcp:
         return result
@@ -190,7 +190,7 @@ def _resolve_cron_enabled_toolsets(job: dict, cfg: dict) -> list[str] | None:
     if per_job:
         return _merge_mcp_into_per_job_toolsets(list(per_job), cfg or {})
     try:
-        from hermes_cli.tools_config import _get_platform_tools  # lazy: avoid heavy import at cron module load
+        from tiyazo_cli.tools_config import _get_platform_tools  # lazy: avoid heavy import at cron module load
         return sorted(_get_platform_tools(cfg or {}, "cron"))
     except Exception as exc:
         logger.warning(
@@ -440,10 +440,10 @@ def _interpreter_shutting_down(exc: Optional[BaseException] = None) -> bool:
 
 
 # Backward-compatible module override used by tests and emergency monkeypatches.
-_hermes_home: Path | None = None
+_tiyazo_home: Path | None = None
 
 
-def _get_hermes_home() -> Path:
+def _get_tiyazo_home() -> Path:
     """Resolve Hermes home dynamically while preserving test monkeypatch hooks.
 
     Cron is per-profile by design (#4707): the in-process ticker runs inside a
@@ -452,13 +452,13 @@ def _get_hermes_home() -> Path:
     (its .env, config.yaml, scripts, skills). Do not freeze this at import or
     anchor it at the shared default root — either re-breaks profile isolation.
     """
-    return _hermes_home or get_hermes_home()
+    return _tiyazo_home or get_tiyazo_home()
 
 
 def _get_lock_paths() -> tuple[Path, Path]:
     """Resolve cron lock paths at call time so profile/env changes are honored."""
-    hermes_home = _get_hermes_home()
-    lock_dir = hermes_home / "cron"
+    tiyazo_home = _get_tiyazo_home()
+    lock_dir = tiyazo_home / "cron"
     return lock_dir, lock_dir / ".tick.lock"
 
 
@@ -861,7 +861,7 @@ def _plugin_cron_env_var(platform_name: str) -> str:
     support without editing this module.
     """
     try:
-        from hermes_cli.plugins import discover_plugins
+        from tiyazo_cli.plugins import discover_plugins
         discover_plugins()  # idempotent
         from gateway.platform_registry import platform_registry
         entry = platform_registry.get(platform_name.lower())
@@ -945,7 +945,7 @@ def _iter_home_target_platforms():
     for name in _HOME_TARGET_ENV_VARS:
         yield name
     try:
-        from hermes_cli.plugins import discover_plugins
+        from tiyazo_cli.plugins import discover_plugins
         discover_plugins()  # idempotent
         from gateway.platform_registry import platform_registry
         for entry in platform_registry.plugin_entries():
@@ -1945,7 +1945,7 @@ def _run_job_script(script_path: str) -> tuple[bool, str]:
         (success, output) — on failure *output* contains the error message so the
         LLM can report the problem to the user.
     """
-    scripts_dir = _get_hermes_home() / "scripts"
+    scripts_dir = _get_tiyazo_home() / "scripts"
     scripts_dir.mkdir(parents=True, exist_ok=True)
     scripts_dir_resolved = scripts_dir.resolve()
 
@@ -2451,7 +2451,7 @@ def run_job(
                 except OSError:
                     pass
 
-        now_iso = _hermes_now().strftime("%Y-%m-%d %H:%M:%S")
+        now_iso = _tiyazo_now().strftime("%Y-%m-%d %H:%M:%S")
 
         if not ok:
             # Script crashed / timed out / exited non-zero.  Deliver the
@@ -2520,7 +2520,7 @@ def run_job(
     # and discoverable via session_search (same pattern as gateway/run.py).
     _session_db = None
     try:
-        from hermes_state import SessionDB
+        from tiyazo_state import SessionDB
         _session_db = SessionDB()
     except Exception as e:
         logger.debug("Job '%s': SQLite session store not available: %s", job.get("id", "?"), e)
@@ -2542,7 +2542,7 @@ def run_job(
             silent_doc = (
                 f"# Cron Job: {job_name}\n\n"
                 f"**Job ID:** {job_id}\n"
-                f"**Run Time:** {_hermes_now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                f"**Run Time:** {_tiyazo_now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
                 "Script gate returned `wakeAgent=false` — agent skipped.\n"
             )
             return True, silent_doc, SILENT_MARKER, None
@@ -2561,7 +2561,7 @@ def run_job(
         blocked_doc = (
             f"# Cron Job: {job_name}\n\n"
             f"**Job ID:** {job_id}\n"
-            f"**Run Time:** {_hermes_now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"**Run Time:** {_tiyazo_now().strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"**Status:** BLOCKED\n\n"
             "The assembled prompt (user prompt + loaded skill content) tripped "
             "the cron injection scanner and the agent was NOT run.\n\n"
@@ -2576,7 +2576,7 @@ def run_job(
         logger.info("Job '%s': script produced no output, skipping AI call.", job_name)
         return True, "", SILENT_MARKER, None
     origin = _resolve_origin(job)
-    _cron_session_id = f"cron_{job_id}_{_hermes_now().strftime('%Y%m%d_%H%M%S')}"
+    _cron_session_id = f"cron_{job_id}_{_tiyazo_now().strftime('%Y%m%d_%H%M%S')}"
 
     logger.info("Running job '%s' (ID: %s)", job_name, job_id)
     logger.info("Prompt: %s", prompt[:100])
@@ -2676,7 +2676,7 @@ def run_job(
 
         # Re-read .env and config.yaml fresh every run so provider/key
         # changes take effect without a gateway restart. Route through
-        # load_hermes_dotenv (not a bare load_dotenv) and reset the secret-
+        # load_tiyazo_dotenv (not a bare load_dotenv) and reset the secret-
         # source cache first: startup already applied external secrets and
         # recorded this TIYAZO_HOME in _APPLIED_HOMES, so a naive reload would
         # re-apply only the .env placeholder and never re-resolve a Bitwarden/
@@ -2684,14 +2684,14 @@ def run_job(
         # (#33465). Clearing the cache forces the re-pull; the resolved secret
         # overrides the placeholder only when secrets.bitwarden.override_existing
         # is set (mirrors startup), and the Bitwarden value-cache keeps the
-        # forced re-pull off the network. load_hermes_dotenv also handles the
+        # forced re-pull off the network. load_tiyazo_dotenv also handles the
         # utf-8/latin-1 encoding fallback internally.
-        from hermes_cli.env_loader import (
-            load_hermes_dotenv,
+        from tiyazo_cli.env_loader import (
+            load_tiyazo_dotenv,
             reset_secret_source_cache,
         )
         reset_secret_source_cache()
-        load_hermes_dotenv(hermes_home=_get_hermes_home())
+        load_tiyazo_dotenv(tiyazo_home=_get_tiyazo_home())
 
         delivery_target = _resolve_delivery_target(job)
         if delivery_target:
@@ -2714,7 +2714,7 @@ def run_job(
         _cfg = {}
         try:
             import yaml
-            _cfg_path = str(_get_hermes_home() / "config.yaml")
+            _cfg_path = str(_get_tiyazo_home() / "config.yaml")
             if os.path.exists(_cfg_path):
                 with open(_cfg_path, encoding="utf-8") as _f:
                     _cfg = yaml.safe_load(_f) or {}
@@ -2723,7 +2723,7 @@ def run_job(
                 # builds its own dict, so overlay managed values via the shared
                 # helper (fail-open, no-op when no managed scope).
                 try:
-                    from hermes_cli import managed_scope
+                    from tiyazo_cli import managed_scope
                     _cfg = managed_scope.apply_managed_overlay(_cfg)
                 except Exception:
                     pass
@@ -2758,7 +2758,7 @@ def run_job(
 
         # Apply IPv4 preference if configured.
         try:
-            from hermes_constants import apply_ipv4_preference
+            from tiyazo_constants import apply_ipv4_preference
             _net_cfg = _cfg.get("network", {})
             if isinstance(_net_cfg, dict) and _net_cfg.get("force_ipv4"):
                 apply_ipv4_preference(force=True)
@@ -2767,7 +2767,7 @@ def run_job(
 
         # Reasoning config from config.yaml (raw value — a YAML boolean False
         # means thinking disabled, see parse_reasoning_effort)
-        from hermes_constants import parse_reasoning_effort
+        from tiyazo_constants import parse_reasoning_effort
         reasoning_config = parse_reasoning_effort(
             _cfg.get("agent", {}).get("reasoning_effort", "")
         )
@@ -2785,7 +2785,7 @@ def run_job(
         if prefill_file:
             pfpath = Path(prefill_file).expanduser()
             if not pfpath.is_absolute():
-                pfpath = _get_hermes_home() / pfpath
+                pfpath = _get_tiyazo_home() / pfpath
             if pfpath.exists():
                 try:
                     with open(pfpath, "r", encoding="utf-8") as _pf:
@@ -2802,11 +2802,11 @@ def run_job(
         # Provider routing
         pr = _cfg.get("provider_routing") or {}
 
-        from hermes_cli.runtime_provider import (
+        from tiyazo_cli.runtime_provider import (
             resolve_runtime_provider,
             format_runtime_provider_error,
         )
-        from hermes_cli.auth import AuthError
+        from tiyazo_cli.auth import AuthError
 
         # F8 runtime backstop: never resolve a stored provider/base_url pair that
         # would ship a named provider's stored credential to an off-host endpoint
@@ -3132,7 +3132,7 @@ def run_job(
         output = f"""# Cron Job: {job_name}
 
 **Job ID:** {job_id}
-**Run Time:** {_hermes_now().strftime('%Y-%m-%d %H:%M:%S')}
+**Run Time:** {_tiyazo_now().strftime('%Y-%m-%d %H:%M:%S')}
 **Schedule:** {job.get('schedule_display', 'N/A')}
 
 ## Prompt
@@ -3154,7 +3154,7 @@ def run_job(
         output = f"""# Cron Job: {job_name} (FAILED)
 
 **Job ID:** {job_id}
-**Run Time:** {_hermes_now().strftime('%Y-%m-%d %H:%M:%S')}
+**Run Time:** {_tiyazo_now().strftime('%Y-%m-%d %H:%M:%S')}
 **Schedule:** {job.get('schedule_display', 'N/A')}
 
 ## Prompt
@@ -3197,7 +3197,7 @@ def run_job(
             # suffix keeps it unique against the sessions.title index across runs.
             try:
                 _title_base = " ".join(job_name.split())[:60].strip() or f"cron {job_id}"
-                _cron_title = f"{_title_base} · {_hermes_now().strftime('%b %d %H:%M')}"
+                _cron_title = f"{_title_base} · {_tiyazo_now().strftime('%b %d %H:%M')}"
                 _session_db.set_session_title(_cron_session_id, _cron_title)
             except (Exception, KeyboardInterrupt) as e:
                 logger.debug("Job '%s': failed to set cron session title: %s", job_id, e)
@@ -3293,7 +3293,7 @@ def run_one_job(job: dict, *, adapters=None, loop=None, verbose: bool = False) -
         )
 
         _scope_token = set_secret_scope(
-            build_profile_secret_scope(_get_hermes_home())
+            build_profile_secret_scope(_get_tiyazo_home())
         )
         # Defer the cron agent's async-resource teardown until AFTER delivery.
         # run_job normally closes the agent (and reaps stale async clients) in
@@ -3432,11 +3432,11 @@ def tick(verbose: bool = True, adapters=None, loop=None, sync: bool = True) -> i
         due_jobs = get_due_jobs()
 
         if verbose and not due_jobs:
-            logger.info("%s - No jobs due", _hermes_now().strftime('%H:%M:%S'))
+            logger.info("%s - No jobs due", _tiyazo_now().strftime('%H:%M:%S'))
             return 0
 
         if verbose:
-            logger.info("%s - %s job(s) due", _hermes_now().strftime('%H:%M:%S'), len(due_jobs))
+            logger.info("%s - %s job(s) due", _tiyazo_now().strftime('%H:%M:%S'), len(due_jobs))
 
         # Advance next_run_at for all recurring jobs FIRST, under the file lock,
         # before any execution begins.  This preserves at-most-once semantics.

@@ -10,15 +10,15 @@ Usage::
     # or
     hermes acp
     # or
-    hermes-acp
+    tiyazo-acp
 """
 
-# IMPORTANT: hermes_bootstrap must be the very first import — UTF-8 stdio
-# on Windows.  No-op on POSIX.  See hermes_bootstrap.py for full rationale.
+# IMPORTANT: tiyazo_bootstrap must be the very first import — UTF-8 stdio
+# on Windows.  No-op on POSIX.  See tiyazo_bootstrap.py for full rationale.
 try:
-    import hermes_bootstrap  # noqa: F401
+    import tiyazo_bootstrap  # noqa: F401
 except ModuleNotFoundError:
-    # Graceful fallback when hermes_bootstrap isn't registered in the venv
+    # Graceful fallback when tiyazo_bootstrap isn't registered in the venv
     # yet — happens during partial ``hermes update`` where git-reset landed
     # new code but ``uv pip install -e .`` didn't finish.  Missing bootstrap
     # means UTF-8 stdio setup is skipped on Windows; POSIX is unaffected.
@@ -27,14 +27,14 @@ else:
     # Stop a ``utils/``/``proxy/``/``ui/`` package in the launch directory from
     # shadowing Hermes's own modules — ``hermes acp`` can be started from any
     # cwd, including a project that has same-named packages on its path.
-    hermes_bootstrap.harden_import_path()
+    tiyazo_bootstrap.harden_import_path()
 
 import argparse
 import asyncio
 import logging
 import sys
 from pathlib import Path
-from hermes_constants import get_hermes_home
+from tiyazo_constants import get_tiyazo_home
 
 
 # Methods clients send as periodic liveness probes. They are not part of the
@@ -100,22 +100,22 @@ def _setup_logging() -> None:
 
 def _load_env() -> None:
     """Load .env from TIYAZO_HOME (default ``~/.tiyazo``)."""
-    from hermes_cli.env_loader import load_hermes_dotenv
+    from tiyazo_cli.env_loader import load_tiyazo_dotenv
 
-    hermes_home = get_hermes_home()
-    loaded = load_hermes_dotenv(hermes_home=hermes_home)
+    tiyazo_home = get_tiyazo_home()
+    loaded = load_tiyazo_dotenv(tiyazo_home=tiyazo_home)
     if loaded:
         for env_file in loaded:
             logging.getLogger(__name__).info("Loaded env from %s", env_file)
     else:
         logging.getLogger(__name__).info(
-            "No .env found at %s, using system env", hermes_home / ".env"
+            "No .env found at %s, using system env", tiyazo_home / ".env"
         )
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        prog="hermes-acp",
+        prog="tiyazo-acp",
         description="Run Hermes Agent as an ACP stdio server.",
     )
     parser.add_argument("--version", action="store_true", help="Print Hermes version and exit")
@@ -147,9 +147,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _print_version() -> None:
-    from hermes_cli import __version__ as hermes_version
+    from tiyazo_cli import __version__ as tiyazo_version
 
-    print(hermes_version)
+    print(tiyazo_version)
 
 
 def _run_check() -> None:
@@ -160,12 +160,12 @@ def _run_check() -> None:
 
 
 def _run_setup() -> None:
-    from hermes_cli.main import main as hermes_main
+    from tiyazo_cli.main import main as tiyazo_main
 
     old_argv = sys.argv[:]
     try:
         sys.argv = [old_argv[0] if old_argv else "hermes", "model"]
-        hermes_main()
+        tiyazo_main()
     finally:
         sys.argv = old_argv
 
@@ -194,7 +194,7 @@ def _run_setup_browser(assume_yes: bool = False) -> int:
 
     Returns 0 on success, 1 on failure.
     """
-    from hermes_cli.dep_ensure import ensure_dependency
+    from tiyazo_cli.dep_ensure import ensure_dependency
 
     try:
         node_ok = ensure_dependency("node", interactive=not assume_yes)

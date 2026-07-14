@@ -852,9 +852,9 @@ def _is_local_openviking_url(value: str) -> bool:
     return scheme == "http" and (parsed.hostname or "").lower() in _LOCAL_OPENVIKING_HOSTS
 
 
-def _load_hermes_openviking_config() -> dict:
+def _load_tiyazo_openviking_config() -> dict:
     try:
-        from hermes_cli.config import load_config
+        from tiyazo_cli.config import load_config
 
         config = load_config()
         memory_config = config.get("memory", {}) if isinstance(config, dict) else {}
@@ -1148,8 +1148,8 @@ def _local_openviking_bind(endpoint: str) -> tuple[str, int]:
 
 def _openviking_server_log_path() -> Path:
     try:
-        from hermes_constants import get_hermes_home
-        home = get_hermes_home()
+        from tiyazo_constants import get_tiyazo_home
+        home = get_tiyazo_home()
     except Exception:
         home = Path(os.environ.get("TIYAZO_HOME", "")).expanduser() if os.environ.get("TIYAZO_HOME") else Path.home() / ".tiyazo"
     return home / _OPENVIKING_SERVER_LOG_RELATIVE_PATH
@@ -1576,7 +1576,7 @@ def _link_ovcli_profile(
         os.environ.pop(key, None)
 
 
-def _save_hermes_only_config(
+def _save_tiyazo_only_config(
     *,
     config: dict,
     provider_config: dict,
@@ -1761,7 +1761,7 @@ def _run_create_profile_setup(
         _print_openviking_ready("Created and linked OpenViking profile.", ovcli_path)
         return True
 
-    _save_hermes_only_config(
+    _save_tiyazo_only_config(
         config=config,
         provider_config=provider_config,
         env_path=env_path,
@@ -1833,7 +1833,7 @@ class OpenVikingMemoryProvider(MemoryProvider):
         """Check if OpenViking endpoint is configured. No network calls."""
         if os.environ.get("OPENVIKING_ENDPOINT"):
             return True
-        provider_config = _load_hermes_openviking_config()
+        provider_config = _load_tiyazo_openviking_config()
         if not provider_config.get("use_ovcli_config"):
             return False
         try:
@@ -1960,13 +1960,13 @@ class OpenVikingMemoryProvider(MemoryProvider):
                 display[key] = "(set)"
         return display
 
-    def post_setup(self, hermes_home: str, config: dict) -> None:
+    def post_setup(self, tiyazo_home: str, config: dict) -> None:
         """Custom setup that can reuse OpenViking's shared CLI config."""
-        from hermes_cli.config import save_config
-        from hermes_cli.memory_setup import _CANCELLED, _curses_select, _print_cancelled_setup, _prompt
+        from tiyazo_cli.config import save_config
+        from tiyazo_cli.memory_setup import _CANCELLED, _curses_select, _print_cancelled_setup, _prompt
 
-        hermes_home_path = Path(hermes_home)
-        env_path = hermes_home_path / ".env"
+        tiyazo_home_path = Path(tiyazo_home)
+        env_path = tiyazo_home_path / ".env"
         if not isinstance(config.get("memory"), dict):
             config["memory"] = {}
         provider_config = config["memory"].get("openviking", {})
@@ -2131,7 +2131,7 @@ class OpenVikingMemoryProvider(MemoryProvider):
         )
 
     def initialize(self, session_id: str, **kwargs) -> None:
-        settings = _resolve_connection_settings(_load_hermes_openviking_config())
+        settings = _resolve_connection_settings(_load_tiyazo_openviking_config())
         self._endpoint = settings["endpoint"]
         self._api_key = settings["api_key"]
         self._account = settings["account"]

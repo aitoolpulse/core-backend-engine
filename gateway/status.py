@@ -20,7 +20,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from hermes_constants import get_hermes_home
+from tiyazo_constants import get_tiyazo_home
 from typing import Any, Optional
 from utils import atomic_json_write
 
@@ -29,7 +29,7 @@ if sys.platform == "win32":
 else:
     import fcntl
 
-_GATEWAY_KIND = "hermes-gateway"
+_GATEWAY_KIND = "tiyazo-gateway"
 _RUNTIME_STATUS_FILE = "gateway_state.json"
 _LOCKS_DIRNAME = "gateway-locks"
 _IS_WINDOWS = sys.platform == "win32"
@@ -44,7 +44,7 @@ _WINDOWS_LOCK_OFFSET = 1024 * 1024
 
 def _get_pid_path() -> Path:
     """Return the path to the gateway PID file, respecting TIYAZO_HOME."""
-    home = get_hermes_home()
+    home = get_tiyazo_home()
     return home / "gateway.pid"
 
 
@@ -52,7 +52,7 @@ def _get_gateway_lock_path(pid_path: Optional[Path] = None) -> Path:
     """Return the path to the runtime gateway lock file."""
     if pid_path is not None:
         return pid_path.with_name(_GATEWAY_LOCK_FILENAME)
-    home = get_hermes_home()
+    home = get_tiyazo_home()
     return home / _GATEWAY_LOCK_FILENAME
 
 
@@ -84,7 +84,7 @@ def terminate_pid(pid: int, *, force: bool = False) -> None:
         # CREATE_NO_WINDOW: terminate_pid runs from the windowless pythonw.exe
         # gateway/desktop backend, so a bare taskkill spawn would flash a
         # conhost window on every force-kill.
-        from hermes_cli._subprocess_compat import windows_hide_flags
+        from tiyazo_cli._subprocess_compat import windows_hide_flags
 
         try:
             result = subprocess.run(
@@ -202,7 +202,7 @@ def _gateway_command_subcommand(command: str | None) -> str | None:
 
     Lifecycle decisions (is the gateway up? did restart relaunch it?) must not
     fire on loose substring matches.  The previous ``"... gateway" in cmdline``
-    test also matched ``hermes_cli.main gateway status`` and even unrelated
+    test also matched ``tiyazo_cli.main gateway status`` and even unrelated
     processes like ``python -m tui_gateway`` -- which made ``restart()`` race
     against a still-draining old process and ``status``/``start`` report false
     positives.  This requires the actual ``gateway`` subcommand followed by
@@ -211,7 +211,7 @@ def _gateway_command_subcommand(command: str | None) -> str | None:
     word "gateway".
 
     Tokenizes quote-aware (``shlex``) so quoted Windows paths with spaces
-    (``"C:\\Program Files\\...\\hermes-gateway.exe"``) survive, and strips
+    (``"C:\\Program Files\\...\\tiyazo-gateway.exe"``) survive, and strips
     ``--profile``/``-p`` selectors from anywhere in argv -- Hermes's
     ``_apply_profile_override`` removes them before argparse, so the profile
     flag (and a profile literally named ``gateway``) can legally appear on
@@ -234,13 +234,13 @@ def _gateway_command_subcommand(command: str | None) -> str | None:
         if token == "gateway/run.py" or token.endswith("/gateway/run.py"):
             return "run"
         basename = token.rsplit("/", 1)[-1]
-        if basename in ("hermes-gateway", "hermes-gateway.exe"):
+        if basename in ("tiyazo-gateway", "tiyazo-gateway.exe"):
             return "run"
 
     joined = " ".join(tokens)
     has_gateway_entry = (
-        "hermes_cli.main" in joined
-        or "hermes_cli/main.py" in joined
+        "tiyazo_cli.main" in joined
+        or "tiyazo_cli/main.py" in joined
         or any(t.rsplit("/", 1)[-1] in ("hermes", "hermes.exe") for t in tokens)
     )
     if not has_gateway_entry:
@@ -327,7 +327,7 @@ def _profile_name_for_home(profile_home: Path) -> Optional[str]:
 def _command_line_belongs_to_profile(command: str, profile_home: Path) -> bool:
     """Return True when a gateway command line belongs to ``profile_home``.
 
-    Mirrors ``hermes_cli.gateway._matches_current_profile`` so the dashboard's
+    Mirrors ``tiyazo_cli.gateway._matches_current_profile`` so the dashboard's
     cross-profile liveness fallback scopes a live PID to the *right* profile.
     In a per-profile container, one profile's stale ``gateway_state.json`` can
     record a PID that the OS has since recycled onto a DIFFERENT profile's live
@@ -346,7 +346,7 @@ def _command_line_belongs_to_profile(command: str, profile_home: Path) -> bool:
         return (
             f"--profile {profile_lc}" in command_lc
             or f"-p {profile_lc}" in command_lc
-            or f"hermes_home={home_lc}" in command_lc
+            or f"tiyazo_home={home_lc}" in command_lc
         )
 
     # Default/root profile: the gateway runs with no profile flag. Accept unless
@@ -356,7 +356,7 @@ def _command_line_belongs_to_profile(command: str, profile_home: Path) -> bool:
     # absence is not disqualifying — only a conflicting explicit value is.
     if "--profile " in command_lc or " -p " in command_lc:
         return False
-    if "hermes_home=" in command_lc and f"hermes_home={home_lc}" not in command_lc:
+    if "tiyazo_home=" in command_lc and f"tiyazo_home={home_lc}" not in command_lc:
         return False
     return True
 
@@ -1117,7 +1117,7 @@ def release_all_scoped_locks(
 # unexpected kills — but that also means a --replace takeover target
 # exits 1, which tricks systemd into reviving it 30 seconds later,
 # starting a flap loop against the replacer when both services are
-# enabled in the user's systemd (e.g. ``hermes.service`` + ``hermes-
+# enabled in the user's systemd (e.g. ``hermes.service`` + ``tiyazo-
 # gateway.service``).
 #
 # The takeover marker breaks the loop: the replacer writes a short-lived
@@ -1136,13 +1136,13 @@ _PLANNED_STOP_MARKER_TTL_S = 60
 
 def _get_takeover_marker_path() -> Path:
     """Return the path to the --replace takeover marker file."""
-    home = get_hermes_home()
+    home = get_tiyazo_home()
     return home / _TAKEOVER_MARKER_FILENAME
 
 
 def _get_planned_stop_marker_path() -> Path:
     """Return the path to the intentional gateway stop marker file."""
-    home = get_hermes_home()
+    home = get_tiyazo_home()
     return home / _PLANNED_STOP_MARKER_FILENAME
 
 
@@ -1196,8 +1196,8 @@ def _consume_pid_marker_for_self(
     # absent as "same home" so old markers and single-profile setups are
     # unaffected. Leave a mismatched marker in place so the correct
     # profile can still consume it.
-    replacer_home = record.get("replacer_hermes_home")
-    if replacer_home is not None and replacer_home != str(get_hermes_home()):
+    replacer_home = record.get("replacer_tiyazo_home")
+    if replacer_home is not None and replacer_home != str(get_tiyazo_home()):
         return False
 
     our_pid = os.getpid()
@@ -1246,7 +1246,7 @@ def write_takeover_marker(target_pid: int) -> bool:
             "target_pid": target_pid,
             "target_start_time": target_start_time,
             "replacer_pid": os.getpid(),
-            "replacer_hermes_home": str(get_hermes_home()),
+            "replacer_tiyazo_home": str(get_tiyazo_home()),
             "written_at": _utc_now_iso(),
         }
         _write_json_file(_get_takeover_marker_path(), record)

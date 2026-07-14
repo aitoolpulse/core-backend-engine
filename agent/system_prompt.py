@@ -443,8 +443,8 @@ def build_system_prompt_parts(agent: Any, system_message: Optional[str] = None) 
         except Exception:
             pass
 
-    from hermes_time import now as _hermes_now
-    now = _hermes_now()
+    from tiyazo_time import now as _tiyazo_now
+    now = _tiyazo_now()
     # Date-only (not minute-precision) so the system prompt is byte-stable
     # for the full day.  Minute-precision changes invalidate prefix-cache KV
     # on every rebuild path (compression boundary, fresh-agent gateway turns,

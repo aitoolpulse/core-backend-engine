@@ -829,7 +829,7 @@ app.post('/send-media', async (req, res) => {
           // as video/mp4.
           let tmpGifMp4 = null;
           try {
-            tmpGifMp4 = path.join(tmpdir(), `hermes_gif_${randomBytes(6).toString('hex')}.mp4`);
+            tmpGifMp4 = path.join(tmpdir(), `tiyazo_gif_${randomBytes(6).toString('hex')}.mp4`);
             execFileSync(
               'ffmpeg',
               ['-y', '-i', filePath, '-movflags', 'faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', tmpGifMp4],
@@ -863,7 +863,7 @@ app.post('/send-media', async (req, res) => {
         const needsConversion = !['ogg', 'opus'].includes(ext);
         let tmpPath = null;
         if (needsConversion) {
-          tmpPath = path.join(tmpdir(), `hermes_voice_${randomBytes(6).toString('hex')}.ogg`);
+          tmpPath = path.join(tmpdir(), `tiyazo_voice_${randomBytes(6).toString('hex')}.ogg`);
           try {
             execFileSync(
               'ffmpeg',

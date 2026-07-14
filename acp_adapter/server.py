@@ -75,14 +75,14 @@ from acp_adapter.provenance import session_provenance_meta
 from acp_adapter.session import SessionManager, SessionState, _expand_acp_enabled_toolsets
 from acp_adapter.tools import build_tool_complete, build_tool_start
 from tools.approval import (
-    reset_hermes_interactive_context,
-    set_hermes_interactive_context,
+    reset_tiyazo_interactive_context,
+    set_tiyazo_interactive_context,
 )
 
 logger = logging.getLogger(__name__)
 
 try:
-    from hermes_cli import __version__ as HERMES_VERSION
+    from tiyazo_cli import __version__ as HERMES_VERSION
 except Exception:
     HERMES_VERSION = "0.0.0"
 
@@ -586,7 +586,7 @@ class HermesACPAgent(acp.Agent):
         provider = getattr(state.agent, "provider", None) or detect_provider() or "openrouter"
 
         try:
-            from hermes_cli.models import curated_models_for_provider, normalize_provider, provider_label
+            from tiyazo_cli.models import curated_models_for_provider, normalize_provider, provider_label
 
             normalized_provider = normalize_provider(provider)
             provider_name = provider_label(normalized_provider)
@@ -649,7 +649,7 @@ class HermesACPAgent(acp.Agent):
         new_model = raw_model.strip()
 
         try:
-            from hermes_cli.models import detect_provider_for_model, parse_model_input
+            from tiyazo_cli.models import detect_provider_for_model, parse_model_input
 
             target_provider, new_model = parse_model_input(new_model, current_provider)
             if target_provider == current_provider:
@@ -717,16 +717,16 @@ class HermesACPAgent(acp.Agent):
     def _provenance_meta(
         self,
         acp_session_id: str,
-        current_hermes_session_id: str,
-        previous_hermes_session_id: Optional[str] = None,
+        current_tiyazo_session_id: str,
+        previous_tiyazo_session_id: Optional[str] = None,
     ) -> Optional[dict]:
         """Best-effort ``_meta.tiyazo.sessionProvenance`` for an ACP session."""
         try:
             return session_provenance_meta(
                 self.session_manager._get_db(),
                 acp_session_id,
-                current_hermes_session_id,
-                previous_hermes_session_id=previous_hermes_session_id,
+                current_tiyazo_session_id,
+                previous_tiyazo_session_id=previous_tiyazo_session_id,
             )
         except Exception:
             logger.debug(
@@ -738,13 +738,13 @@ class HermesACPAgent(acp.Agent):
         self,
         session_id: str,
         *,
-        current_hermes_session_id: Optional[str] = None,
-        previous_hermes_session_id: Optional[str] = None,
+        current_tiyazo_session_id: Optional[str] = None,
+        previous_tiyazo_session_id: Optional[str] = None,
     ) -> None:
         """Send ACP native session metadata after Hermes changes it.
 
         When the internal Hermes head rotated (e.g. compression-driven session
-        split during a turn), pass ``previous_hermes_session_id`` so the
+        split during a turn), pass ``previous_tiyazo_session_id`` so the
         attached ``_meta.tiyazo.sessionProvenance`` flags the rotation reason.
         """
         if not self._conn:
@@ -759,14 +759,14 @@ class HermesACPAgent(acp.Agent):
 
         title = row.get("title")
         # The `sessions` table does not have an `updated_at` column (see
-        # hermes_state.py schema — only started_at/ended_at). Use "now" as
+        # tiyazo_state.py schema — only started_at/ended_at). Use "now" as
         # the updated_at since we're emitting this notification precisely
         # because the title was just refreshed.
         updated_at = datetime.now(timezone.utc).isoformat()
         meta = self._provenance_meta(
             session_id,
-            current_hermes_session_id or session_id,
-            previous_hermes_session_id,
+            current_tiyazo_session_id or session_id,
+            previous_tiyazo_session_id,
         )
         update = SessionInfoUpdate(
             session_update="session_info_update",
@@ -831,7 +831,7 @@ class HermesACPAgent(acp.Agent):
             from agent.memory_manager import inject_memory_provider_tools
 
             enabled_toolsets = _expand_acp_enabled_toolsets(
-                getattr(state.agent, "enabled_toolsets", None) or ["hermes-acp"],
+                getattr(state.agent, "enabled_toolsets", None) or ["tiyazo-acp"],
                 mcp_server_names=[server.name for server in mcp_servers],
             )
             state.agent.enabled_toolsets = enabled_toolsets
@@ -1451,7 +1451,7 @@ class HermesACPAgent(acp.Agent):
         # Set it INSIDE _run_agent so the TLS write happens in the executor
         # thread — setting it here would write to the event-loop thread's TLS,
         # not the executor's. Interactive routing uses a contextvar in
-        # tools.approval (set_hermes_interactive_context) rather than
+        # tools.approval (set_tiyazo_interactive_context) rather than
         # os.environ["HERMES_INTERACTIVE"], so concurrent executor workers can't
         # race on a process-global flag — one session's restore can't drop
         # another onto the non-interactive auto-approve path mid-run
@@ -1501,7 +1501,7 @@ class HermesACPAgent(acp.Agent):
             # and the non-interactive auto-approve path must not fire. Uses a
             # contextvar (not os.environ) so concurrent executor workers don't
             # race on the flag (GHSA-96vc-wcxf-jjff).
-            interactive_token = set_hermes_interactive_context(True)
+            interactive_token = set_tiyazo_interactive_context(True)
             # Propagate the originating ACP session id to tools that want to
             # tag side-effects with it (e.g. ``kanban_create`` stamps it on
             # the new task so clients can render a per-session board). Save
@@ -1523,7 +1523,7 @@ class HermesACPAgent(acp.Agent):
             finally:
                 # Restore the interactive contextvar for this context.
                 if interactive_token is not None:
-                    reset_hermes_interactive_context(interactive_token)
+                    reset_tiyazo_interactive_context(interactive_token)
                 # Restore HERMES_SESSION_ID symmetrically.
                 if previous_session_id is None:
                     os.environ.pop("HERMES_SESSION_ID", None)
@@ -1553,7 +1553,7 @@ class HermesACPAgent(acp.Agent):
             # can detect a compression-driven session rotation afterwards. The
             # ACP `session_id` stays the stable client handle; agent.session_id
             # is the live internal head that compression may rotate.
-            pre_turn_hermes_id = getattr(state.agent, "session_id", None)
+            pre_turn_tiyazo_id = getattr(state.agent, "session_id", None)
             # Wrap the executor call in a fresh copy of the current context so
             # concurrent ACP sessions on the shared ThreadPoolExecutor don't
             # stomp on each other's ContextVar writes (HERMES_SESSION_KEY in
@@ -1576,18 +1576,18 @@ class HermesACPAgent(acp.Agent):
         # DB head moved during the turn, emit a session_info_update carrying
         # _meta.tiyazo.sessionProvenance so ACP clients can render the boundary
         # and keep old/new ids in lineage. The ACP session_id is unchanged.
-        post_turn_hermes_id = getattr(state.agent, "session_id", None)
+        post_turn_tiyazo_id = getattr(state.agent, "session_id", None)
         if (
             conn
-            and post_turn_hermes_id
-            and pre_turn_hermes_id
-            and post_turn_hermes_id != pre_turn_hermes_id
+            and post_turn_tiyazo_id
+            and pre_turn_tiyazo_id
+            and post_turn_tiyazo_id != pre_turn_tiyazo_id
         ):
             try:
                 await self._send_session_info_update(
                     session_id,
-                    current_hermes_session_id=post_turn_hermes_id,
-                    previous_hermes_session_id=pre_turn_hermes_id,
+                    current_tiyazo_session_id=post_turn_tiyazo_id,
+                    previous_tiyazo_session_id=pre_turn_tiyazo_id,
                 )
             except Exception:
                 logger.debug(
@@ -1791,7 +1791,7 @@ class HermesACPAgent(acp.Agent):
             from agent.memory_manager import inject_memory_provider_tools
 
             toolsets = _expand_acp_enabled_toolsets(
-                getattr(state.agent, "enabled_toolsets", None) or ["hermes-acp"]
+                getattr(state.agent, "enabled_toolsets", None) or ["tiyazo-acp"]
             )
             tools = get_tool_definitions(enabled_toolsets=toolsets, quiet_mode=True)
             tool_view = SimpleNamespace(

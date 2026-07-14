@@ -445,7 +445,7 @@ function Get-PowerShellHostExe {
 function Install-Uv {
     # Hermes owns its own uv at $HermesHome\bin\uv.exe.  Always install there —
     # no PATH probing, no conda guards, no multi-location resolution chains.
-    # The runtime update path (hermes_cli/managed_uv.py) looks in the same
+    # The runtime update path (tiyazo_cli/managed_uv.py) looks in the same
     # place, so install.ps1 and `hermes update` stay in sync.
     $managedUv = Join-Path $HermesHome "bin\uv.exe"
 
@@ -958,7 +958,7 @@ function Test-Node {
         if ($zipName) {
             $downloadUrl = "${indexUrl}${zipName}"
             $tmpZip = "$env:TEMP\$zipName"
-            $tmpDir = "$env:TEMP\hermes-node-extract"
+            $tmpDir = "$env:TEMP\tiyazo-node-extract"
 
             Invoke-WebRequest -Uri $downloadUrl -OutFile $tmpZip -UseBasicParsing
             if (Test-Path $tmpDir) { Remove-Item -Recurse -Force $tmpDir }
@@ -1139,7 +1139,7 @@ function Install-SystemPackages {
         # present -> happy path, no clutter).
         $pkgLogs = @{}
         foreach ($pkg in $wingetPkgs) {
-            $log = "$env:TEMP\hermes-winget-$($pkg -replace '[^A-Za-z0-9]','_')-$(Get-Random).log"
+            $log = "$env:TEMP\tiyazo-winget-$($pkg -replace '[^A-Za-z0-9]','_')-$(Get-Random).log"
             $pkgLogs[$pkg] = $log
             # --source winget pins us to the github-backed source.  Without this,
             # a broken msstore source (cert validation failures like 0x8a15005e
@@ -1339,7 +1339,7 @@ function Install-Repository {
                         Write-Info "Clearing unmerged index entries from a previous conflict..."
                         git -c windows.appendAtomically=false reset -q 2>$null
                     }
-                    $stashName = "hermes-install-autostash-" + (Get-Date -Format "yyyyMMdd-HHmmss")
+                    $stashName = "tiyazo-install-autostash-" + (Get-Date -Format "yyyyMMdd-HHmmss")
                     Write-Info "Local changes detected, stashing before update..."
                     git -c windows.appendAtomically=false stash push --include-untracked -m "$stashName"
                     if ($LASTEXITCODE -eq 0) { $autostashRef = "stash@{0}" }
@@ -1648,7 +1648,7 @@ function Install-Venv {
             & taskkill /F /T /IM hermes.exe /FI "PID ne $myPid" 2>$null | Out-Null
             # taskkill /IM hermes.exe is NOT enough: the gateway/agent that a
             # scheduled task or watchdog autostarts runs as
-            # `pythonw.exe -m hermes_cli.main gateway run` straight out of
+            # `pythonw.exe -m tiyazo_cli.main gateway run` straight out of
             # venv\Scripts\, so its image name is python/pythonw, not hermes.exe.
             # That process holds the venv's .pyd files open and re-triggers the
             # access-denied failure. Stop anything whose executable lives under
@@ -1656,7 +1656,7 @@ function Install-Venv {
             # and a global/system python outside the venv is never touched.
             #
             # The gateway autostart task registers with /RL LIMITED as the current
-            # user (see hermes_cli/gateway_windows.py), so the installer always
+            # user (see tiyazo_cli/gateway_windows.py), so the installer always
             # runs at equal-or-higher integrity and can read its executable path.
             # Get-CimInstance is used over Get-Process because it returns a null
             # ExecutablePath for a process it cannot inspect (a different session)
@@ -1950,7 +1950,7 @@ except Exception:
         # uv on Windows can register hermes.exe in dist-info/RECORD but fail to
         # materialise the .exe (file lock during self-update, distlib edge case).
         # Catch it here so a fresh install/update does not finish with a broken
-        # `hermes` command while tiyazo-agent.exe / hermes-acp.exe exist
+        # `hermes` command while tiyazo-agent.exe / tiyazo-acp.exe exist
         $scriptsDir = Join-Path $InstallDir "venv\Scripts"
         $pythonExe = Join-Path $scriptsDir "python.exe"
         if ((Test-Path $scriptsDir) -and (Test-Path $pythonExe)) {
@@ -1979,7 +1979,7 @@ print(','.join(scripts))
                     }
                     if ($stillMissing.Count -gt 0) {
                         Write-Warn "Entry points still missing after repair: $($stillMissing -join ', ')"
-                        Write-Info "Workaround: `"$pythonExe`" -m hermes_cli.main <command>"
+                        Write-Info "Workaround: `"$pythonExe`" -m tiyazo_cli.main <command>"
                     } else {
                         Write-Success "Console entry points restored"
                     }
@@ -2008,7 +2008,7 @@ print(','.join(scripts))
             if ($LASTEXITCODE -eq 0) { $webOk = $true }
         } catch { }
         try {
-            & $pythonExe -m py_compile "$InstallDir\hermes_cli\web_server.py" 2>&1 | Out-Null
+            & $pythonExe -m py_compile "$InstallDir\tiyazo_cli\web_server.py" 2>&1 | Out-Null
             if ($LASTEXITCODE -eq 0) { $webServerSyntaxOk = $true }
         } catch { }
         $ErrorActionPreference = $prevEAP
@@ -2023,7 +2023,7 @@ print(','.join(scripts))
             }
         }
         if (-not $webServerSyntaxOk) {
-            throw "dashboard backend source failed syntax check: hermes_cli/web_server.py"
+            throw "dashboard backend source failed syntax check: tiyazo_cli/web_server.py"
         }
     }
     
@@ -2202,7 +2202,7 @@ function Copy-ConfigTemplates {
     # PowerShell version.
     $soulPath = "$HermesHome\SOUL.md"
     if (-not (Test-Path $soulPath)) {
-        # MUST match DEFAULT_SOUL_MD in hermes_cli/default_soul.py. The runtime
+        # MUST match DEFAULT_SOUL_MD in tiyazo_cli/default_soul.py. The runtime
         # upgrades the old comment-only scaffold to this text on next run, so
         # drift is self-healing, but keep them in sync to avoid first-run churn.
         $soulContent = @"
@@ -2350,7 +2350,7 @@ function Install-NodeDeps {
     # Browser tools
     if (Test-Path "$InstallDir\package.json") {
         Write-Info "Installing Node.js dependencies (browser tools)..."
-        $browserLog = "$env:TEMP\hermes-npm-browser-$(Get-Random).log"
+        $browserLog = "$env:TEMP\tiyazo-npm-browser-$(Get-Random).log"
         $browserNpmOk = _Run-NpmInstall "Browser tools" $InstallDir $browserLog $npmExe
 
         # Install Playwright Chromium (mirrors scripts/install.sh behaviour for
@@ -2377,7 +2377,7 @@ function Install-NodeDeps {
                 Write-Warn "npx not found -- cannot install Playwright Chromium."
                 Write-Info "Run manually later: cd `"$InstallDir`"; npx playwright install chromium"
             } else {
-                $pwLog = "$env:TEMP\hermes-playwright-install-$(Get-Random).log"
+                $pwLog = "$env:TEMP\tiyazo-playwright-install-$(Get-Random).log"
                 Push-Location $InstallDir
                 # Capture EAP outside the try block so the catch's restore call
                 # always has a meaningful value (see Install-Uv for the full
@@ -2454,7 +2454,7 @@ function Install-NodeDeps {
     $tuiDir = "$InstallDir\ui-tui"
     if (Test-Path "$tuiDir\package.json") {
         Write-Info "Installing TUI dependencies..."
-        $tuiLog = "$env:TEMP\hermes-npm-tui-$(Get-Random).log"
+        $tuiLog = "$env:TEMP\tiyazo-npm-tui-$(Get-Random).log"
         [void](_Run-NpmInstall "TUI" $tuiDir $tuiLog $npmExe)
     }
 }
@@ -2590,7 +2590,7 @@ function Install-Desktop {
     # itself, ~150MB), then run `npm run pack` in apps/desktop which
     # produces the unpacked binary at apps/desktop/release/<os>-unpacked/.
     #
-    # The Tauri bootstrap installer's launch_hermes_desktop command
+    # The Tauri bootstrap installer's launch_tiyazo_desktop command
     # resolves apps/desktop/release/win-unpacked/Hermes.exe directly,
     # so an "unpacked" build (electron-builder --dir) is enough — we
     # don't need to produce an NSIS/MSI artifact here.
@@ -2710,7 +2710,7 @@ function Install-Desktop {
     # belt-and-suspenders: if the user's environment has them set
     # for some other tool, electron-builder would still try to sign.
     Write-Info "Building desktop app (this takes 1-3 minutes)..."
-    $buildLog = "$env:TEMP\hermes-desktop-build-$(Get-Random).log"
+    $buildLog = "$env:TEMP\tiyazo-desktop-build-$(Get-Random).log"
     Push-Location $desktopDir
     $prevEAP = $ErrorActionPreference
     $prevCSCAuto = $env:CSC_IDENTITY_AUTO_DISCOVERY
@@ -3010,9 +3010,9 @@ function Invoke-SetupWizard {
 
     # Run hermes setup using the venv Python directly (no activation needed)
     if (-not $NoVenv) {
-        & ".\venv\Scripts\python.exe" -m hermes_cli.main setup
+        & ".\venv\Scripts\python.exe" -m tiyazo_cli.main setup
     } else {
-        python -m hermes_cli.main setup
+        python -m tiyazo_cli.main setup
     }
 
     Pop-Location

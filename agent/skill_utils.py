@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from hermes_constants import get_config_path, get_skills_dir, is_termux
+from tiyazo_constants import get_config_path, get_skills_dir, is_termux
 
 logger = logging.getLogger(__name__)
 
@@ -247,7 +247,7 @@ def _detect_environment(env: str) -> bool:
                 result = False
     elif env == "docker":
         try:
-            from hermes_constants import is_container
+            from tiyazo_constants import is_container
 
             result = is_container()
         except Exception:
@@ -318,7 +318,7 @@ def _raw_config_cache_clear() -> None:
 def _load_raw_config() -> Dict[str, Any]:
     """Read config.yaml with a shared mtime+size keyed cache.
 
-    This module intentionally avoids importing ``hermes_cli.config`` on the
+    This module intentionally avoids importing ``tiyazo_cli.config`` on the
     skill prompt/build path. A tiny local cache gives the same repeated-read
     win without pulling the heavier CLI config stack into startup.
     """
@@ -462,9 +462,9 @@ def get_external_skills_dirs() -> List[Path]:
     if not isinstance(raw_dirs, list):
         return []
 
-    from hermes_constants import get_hermes_home
+    from tiyazo_constants import get_tiyazo_home
 
-    hermes_home = get_hermes_home()
+    tiyazo_home = get_tiyazo_home()
     local_skills = get_skills_dir().resolve()
     seen: Set[Path] = set()
     result = []
@@ -478,7 +478,7 @@ def get_external_skills_dirs() -> List[Path]:
         p = Path(expanded)
         # Resolve relative paths against TIYAZO_HOME, not cwd
         if not p.is_absolute():
-            p = (hermes_home / p).resolve()
+            p = (tiyazo_home / p).resolve()
         else:
             p = p.resolve()
         if p == local_skills:

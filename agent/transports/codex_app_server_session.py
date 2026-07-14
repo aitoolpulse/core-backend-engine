@@ -249,7 +249,7 @@ class CodexAppServerSession:
         self._client.initialize(
             client_name="hermes",
             client_title="Hermes Agent",
-            client_version=_get_hermes_version(),
+            client_version=_get_tiyazo_version(),
         )
         # Permission selection is intentionally NOT sent on thread/start.
         # Two reasons (live-tested against codex 0.130.0):
@@ -682,14 +682,14 @@ class CodexAppServerSession:
         elif method == "mcpServer/elicitation/request":
             # Codex's MCP layer asks the user for structured input on
             # behalf of an MCP server (e.g. tool-call confirmation,
-            # OAuth, form data). For our own hermes-tools callback we
+            # OAuth, form data). For our own tiyazo-tools callback we
             # auto-accept — the user already approved Hermes' tools
             # by enabling the runtime, and we never expose anything
             # codex's built-in shell can't already do. For other MCP
             # servers we decline so the user explicitly opts in via
             # codex's own auth flow.
             server_name = params.get("serverName") or ""
-            if server_name == "hermes-tools":
+            if server_name == "tiyazo-tools":
                 self._client.respond(
                     rid,
                     {"action": "accept", "content": None, "_meta": None},
@@ -879,7 +879,7 @@ def _has_turn_aborted_marker(text: str) -> bool:
     return False
 
 
-def _get_hermes_version() -> str:
+def _get_tiyazo_version() -> str:
     """Best-effort Hermes version string for codex's userAgent line."""
     try:
         from importlib.metadata import version

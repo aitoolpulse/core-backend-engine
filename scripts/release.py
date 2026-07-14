@@ -31,7 +31,7 @@ from datetime import datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-VERSION_FILE = REPO_ROOT / "hermes_cli" / "__init__.py"
+VERSION_FILE = REPO_ROOT / "tiyazo_cli" / "__init__.py"
 PYPROJECT_FILE = REPO_ROOT / "pyproject.toml"
 
 # ACP Registry manifest must stay version-locked with pyproject.toml.
@@ -287,13 +287,13 @@ AUTHOR_MAP = {
     "tgmerritt@gmail.com": "tgmerritt",  # PR #43553 salvage (parse vLLM's token-based output-cap error format so over-cap max_tokens 400s reduce the output cap instead of death-looping into compression)
     "13277570+justin-cyhuang@users.noreply.github.com": "justin-cyhuang",
     "agent@tranquil-flow.dev": "Tranquil-Flow",
-    "jason@hermes-jc": "jcjc81",
+    "jason@tiyazo-jc": "jcjc81",
     "290862769+friendshipisover@users.noreply.github.com": "friendshipisover",
     "51421+MattKotsenas@users.noreply.github.com": "MattKotsenas",
     "92324143+ypwcharles@users.noreply.github.com": "ypwcharles",
     "mailtowbd@gmail.com": "marco0158",
     "157793278+jacobmansonlkevincc@users.noreply.github.com": "lkevincc0",
-    "121278003+Cossackx@users.noreply.github.com": "Cossackx",  # PR #52528 salvage (Windows hermes-shim resolution + prefer --update on recovery; #52378)
+    "121278003+Cossackx@users.noreply.github.com": "Cossackx",  # PR #52528 salvage (Windows tiyazo-shim resolution + prefer --update on recovery; #52378)
     "97326386+Icather@users.noreply.github.com": "Icather",  # PR #45554 salvage (self-lock guard breaks Windows update-recovery infinite loop; #52378 / #45542)
     "--email": "andryypaez@gmail.com",
     "mucio@mucio.net": "francescomucio",
@@ -1652,7 +1652,7 @@ AUTHOR_MAP = {
     "pol.kuijken@gmail.com": "polkn",  # PR #6136 salvage (skill_view collision refusal)
     "robin@soal.org": "rewbs",
     # batch salvage (May 2026 LHF run)
-    "sauravsejal40@gmail.com": "Saurav0989",  # PR #27071 (docs: hermes-eval community link)
+    "sauravsejal40@gmail.com": "Saurav0989",  # PR #27071 (docs: tiyazo-eval community link)
     "220110965+Saurav0989@users.noreply.github.com": "Saurav0989",
     "aviarchi1994@gmail.com": "avifenesh",  # PR #25902 (docs: computer-use-linux MCP)
     "55848801+avifenesh@users.noreply.github.com": "avifenesh",

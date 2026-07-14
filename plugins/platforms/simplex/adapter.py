@@ -79,7 +79,7 @@ HEALTH_CHECK_INTERVAL = 30.0
 HEALTH_CHECK_STALE_THRESHOLD = 300.0
 
 # Correlation ID prefix for requests we send so we can ignore our own echoes.
-_CORR_PREFIX = "hermes-"
+_CORR_PREFIX = "tiyazo-"
 
 
 # ---------------------------------------------------------------------------
@@ -1223,7 +1223,7 @@ def interactive_setup() -> None:
 
     Prompts for the WebSocket URL and the optional allowlist / groups /
     auto-accept / home channel. Writes to ``~/.tiyazo/.env`` via
-    ``hermes_cli.config``.
+    ``tiyazo_cli.config``.
     """
     print()
     print("SimpleX Chat setup")
@@ -1234,10 +1234,10 @@ def interactive_setup() -> None:
     print()
 
     try:
-        from hermes_cli.config import get_env_value, save_env_value
+        from tiyazo_cli.config import get_env_value, save_env_value
     except ImportError:
         print(
-            "hermes_cli.config not available; set SIMPLEX_* vars manually in "
+            "tiyazo_cli.config not available; set SIMPLEX_* vars manually in "
             "~/.tiyazo/.env"
         )
         return
@@ -1247,7 +1247,7 @@ def interactive_setup() -> None:
         suffix = " [keep current]" if existing else ""
         try:
             if secret:
-                from hermes_cli.secret_prompt import masked_secret_prompt
+                from tiyazo_cli.secret_prompt import masked_secret_prompt
                 value = masked_secret_prompt(f"{prompt}{suffix}: ")
             else:
                 value = input(f"{prompt}{suffix}: ").strip()

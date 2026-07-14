@@ -12,12 +12,12 @@
       configMergeScript = pkgs.callPackage ./configMergeScript.nix { };
 
       # Auto-generated config key reference — always in sync with Python
-      configKeys = pkgs.runCommand "hermes-config-keys" {} ''
+      configKeys = pkgs.runCommand "tiyazo-config-keys" {} ''
         set -euo pipefail
         export HOME=$TMPDIR
         ${hermesVenv}/bin/python3 -c '
 import json, sys
-from hermes_cli.config import DEFAULT_CONFIG
+from tiyazo_cli.config import DEFAULT_CONFIG
 
 def leaf_paths(d, prefix=""):
     paths = []
@@ -49,7 +49,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           results = map (sys: { inherit sys; result = tryEvalPkg sys; }) targetSystems;
           failures = builtins.filter (r: !r.result.success) results;
           failMsg = lib.concatMapStringsSep "\n" (r: "  - ${r.sys}") failures;
-        in pkgs.runCommand "hermes-cross-eval" { } (
+        in pkgs.runCommand "tiyazo-cross-eval" { } (
           if failures != [] then
             throw "Package fails to evaluate on:\n${failMsg}"
           else ''
@@ -62,21 +62,21 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         # Verify the default package builds successfully (cross-platform).
         # On Linux the runtime checks below already depend on the package,
         # but this ensures darwin builders also build it during flake check.
-        build-package = pkgs.runCommand "hermes-build-package" { } ''
+        build-package = pkgs.runCommand "tiyazo-build-package" { } ''
           echo "PASS: package built at ${tiyazo-agent}"
           mkdir -p $out
           echo "ok" > $out/result
         '';
 
         # Verify the devShell builds successfully (cross-platform).
-        build-devshell = pkgs.runCommand "hermes-build-devshell" { } ''
+        build-devshell = pkgs.runCommand "tiyazo-build-devshell" { } ''
           echo "PASS: devShell built at ${self'.devShells.default}"
           mkdir -p $out
           echo "ok" > $out/result
         '';
       } // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         # Verify binaries exist and are executable
-        package-contents = pkgs.runCommand "hermes-package-contents" { } ''
+        package-contents = pkgs.runCommand "tiyazo-package-contents" { } ''
           set -e
           echo "=== Checking binaries ==="
           test -x ${tiyazo-agent}/bin/hermes || (echo "FAIL: hermes binary missing"; exit 1)
@@ -93,10 +93,10 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         '';
 
         # Verify every pyproject.toml [project.scripts] entry has a wrapped binary
-        entry-points-sync = pkgs.runCommand "hermes-entry-points-sync" { } ''
+        entry-points-sync = pkgs.runCommand "tiyazo-entry-points-sync" { } ''
           set -e
           echo "=== Checking entry points match pyproject.toml [project.scripts] ==="
-          for bin in hermes tiyazo-agent hermes-acp; do
+          for bin in hermes tiyazo-agent tiyazo-acp; do
             test -x ${tiyazo-agent}/bin/$bin || (echo "FAIL: $bin binary missing from Nix package"; exit 1)
             echo "PASS: $bin present"
           done
@@ -106,7 +106,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         '';
 
         # Verify CLI subcommands are accessible
-        cli-commands = pkgs.runCommand "hermes-cli-commands" { } ''
+        cli-commands = pkgs.runCommand "tiyazo-cli-commands" { } ''
           set -e
           export HOME=$(mktemp -d)
 
@@ -121,7 +121,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         '';
 
         # Verify bundled skills are present in the package
-        bundled-skills = pkgs.runCommand "hermes-bundled-skills" { } ''
+        bundled-skills = pkgs.runCommand "tiyazo-bundled-skills" { } ''
           set -e
           echo "=== Checking bundled skills ==="
           test -d ${tiyazo-agent}/share/tiyazo-agent/skills || (echo "FAIL: skills directory missing"; exit 1)
@@ -141,7 +141,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         '';
 
         # Verify bundled plugins (platforms, memory, context_engine) are present
-        bundled-plugins = pkgs.runCommand "hermes-bundled-plugins" { } ''
+        bundled-plugins = pkgs.runCommand "tiyazo-bundled-plugins" { } ''
           set -e
           echo "=== Checking bundled plugins ==="
           test -d ${tiyazo-agent}/share/tiyazo-agent/plugins || (echo "FAIL: plugins directory missing"; exit 1)
@@ -163,7 +163,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         # Verify bundled i18n locale catalogs are present and resolvable.
         # Regression for #23943 / #27632 / #35374 — sealed Nix venvs dropped
         # locales/, surfacing raw i18n keys like gateway.reset.header_default.
-        bundled-locales = pkgs.runCommand "hermes-bundled-locales" { } ''
+        bundled-locales = pkgs.runCommand "tiyazo-bundled-locales" { } ''
           set -e
           echo "=== Checking bundled locales ==="
           test -d ${tiyazo-agent}/share/tiyazo-agent/locales || (echo "FAIL: locales directory missing"; exit 1)
@@ -208,7 +208,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         '';
 
         # Verify bundled TUI is present and compiled
-        bundled-tui = pkgs.runCommand "hermes-bundled-tui" { } ''
+        bundled-tui = pkgs.runCommand "tiyazo-bundled-tui" { } ''
           set -e
           echo "=== Checking bundled TUI ==="
           test -d ${tiyazo-agent}/ui-tui || (echo "FAIL: ui-tui directory missing"; exit 1)
@@ -230,7 +230,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
 
         # Verify HERMES_NODE is set in wrapper and points to Node 20+
         # (string-width uses the /v regex flag which requires Node 20+)
-        hermes-node = pkgs.runCommand "hermes-node-version" { } ''
+        tiyazo-node = pkgs.runCommand "tiyazo-node-version" { } ''
           set -e
           echo "=== Checking HERMES_NODE in wrapper ==="
           grep -q "HERMES_NODE" ${tiyazo-agent}/bin/hermes || \
@@ -252,7 +252,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         '';
 
         # Verify HERMES_MANAGED guard works on all mutation commands
-        managed-guard = pkgs.runCommand "hermes-managed-guard" { } ''
+        managed-guard = pkgs.runCommand "tiyazo-managed-guard" { } ''
           set -e
           export HOME=$(mktemp -d)
 
@@ -279,7 +279,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           hermesWithExtra = tiyazo-agent.override {
             extraPythonPackages = [ testPkg ];
           };
-        in pkgs.runCommand "hermes-extra-python-packages" { } ''
+        in pkgs.runCommand "tiyazo-extra-python-packages" { } ''
           set -e
           echo "=== Checking extraPythonPackages PYTHONPATH injection ==="
 
@@ -307,7 +307,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           hermesWithGroups = tiyazo-agent.override {
             extraDependencyGroups = [ "honcho" ];
           };
-        in pkgs.runCommand "hermes-extra-dependency-groups" { } ''
+        in pkgs.runCommand "tiyazo-extra-dependency-groups" { } ''
           set -e
           echo "=== Checking extraDependencyGroups override evaluates ==="
 
@@ -326,7 +326,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         # Regression guard: messaging deps live outside [all], so the
         # #messaging variant must actually ship discord.py — otherwise
         # `nix profile install .#messaging` regresses to the broken default.
-        messaging-variant = pkgs.runCommand "hermes-messaging-variant" { } ''
+        messaging-variant = pkgs.runCommand "tiyazo-messaging-variant" { } ''
           set -e
           echo "=== Checking discord.py importable from messaging variant ==="
           ${self'.packages.messaging.tiyazoVenv}/bin/python3 -c \
@@ -396,7 +396,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
                 - USER_VAR
           '';
 
-        in pkgs.runCommand "hermes-config-roundtrip" {
+        in pkgs.runCommand "tiyazo-config-roundtrip" {
           nativeBuildInputs = [ pkgs.jq ];
         } ''
           set -e
@@ -407,12 +407,12 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
 
           # Helper: run merge then load with Python, output merged JSON
           merge_and_load() {
-            local hermes_home="$1"
-            export TIYAZO_HOME="$hermes_home"
-            ${configMergeScript} ${nixSettings} "$hermes_home/config.yaml"
+            local tiyazo_home="$1"
+            export TIYAZO_HOME="$tiyazo_home"
+            ${configMergeScript} ${nixSettings} "$tiyazo_home/config.yaml"
             ${hermesVenv}/bin/python3 -c '
 import json, sys
-from hermes_cli.config import load_config
+from tiyazo_cli.config import load_config
 json.dump(load_config(), sys.stdout, default=str)
 '
           }

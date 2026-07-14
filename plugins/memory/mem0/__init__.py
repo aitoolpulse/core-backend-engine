@@ -53,7 +53,7 @@ _CLIENT_ERROR_TYPES = ("MemoryNotFoundError", "ValidationError")
 # that legacy mem0.json files written by the setup wizard (which historically
 # wrote this exact placeholder) still allow gateway-native ids to flow
 # through instead of silently overriding them with the placeholder.
-_DEFAULT_USER_ID = "hermes-user"
+_DEFAULT_USER_ID = "tiyazo-user"
 
 
 def _is_client_error(exc: Exception) -> bool:
@@ -76,7 +76,7 @@ def _load_config() -> dict:
     individual keys.  This avoids a silent failure when the JSON file exists
     but is missing fields like ``api_key`` that the user set in ``.env``.
     """
-    from hermes_constants import get_hermes_home
+    from tiyazo_constants import get_tiyazo_home
 
     config = {
         "mode": os.environ.get("MEM0_MODE", "platform"),
@@ -91,7 +91,7 @@ def _load_config() -> dict:
     if env_user_id:
         config["user_id"] = env_user_id
 
-    config_path = get_hermes_home() / "mem0.json"
+    config_path = get_tiyazo_home() / "mem0.json"
     if config_path.exists():
         try:
             file_cfg = json.loads(config_path.read_text(encoding="utf-8"))
@@ -241,11 +241,11 @@ class Mem0MemoryProvider(MemoryProvider):
             return bool(cfg.get("oss", {}).get("vector_store"))
         return bool(cfg.get("api_key"))
 
-    def save_config(self, values, hermes_home):
+    def save_config(self, values, tiyazo_home):
         """Write config to $TIYAZO_HOME/mem0.json."""
         import json
         from pathlib import Path
-        config_path = Path(hermes_home) / "mem0.json"
+        config_path = Path(tiyazo_home) / "mem0.json"
         existing = {}
         if config_path.exists():
             try:
@@ -262,14 +262,14 @@ class Mem0MemoryProvider(MemoryProvider):
         api_key_required = mode != "oss"
         return [
             {"key": "api_key", "description": "Mem0 Platform API key", "secret": True, "required": api_key_required, "env_var": "MEM0_API_KEY", "url": "https://app.mem0.ai"},
-            {"key": "user_id", "description": "User identifier", "default": "hermes-user"},
+            {"key": "user_id", "description": "User identifier", "default": "tiyazo-user"},
             {"key": "agent_id", "description": "Agent identifier", "default": "hermes"},
             {"key": "rerank", "description": "Enable reranking for recall", "default": "true", "choices": ["true", "false"]},
         ]
 
-    def post_setup(self, hermes_home: str, config: dict) -> None:
+    def post_setup(self, tiyazo_home: str, config: dict) -> None:
         from ._setup import post_setup
-        post_setup(hermes_home, config)
+        post_setup(tiyazo_home, config)
 
     def _create_backend(self):
         # Lazy-install the mem0 SDK on demand before either backend imports

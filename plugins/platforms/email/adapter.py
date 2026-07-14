@@ -134,12 +134,12 @@ def _send_imap_id(imap: "imaplib.IMAP4") -> None:
     """
     try:
         try:
-            from hermes_cli import __version__ as _hermes_version
+            from tiyazo_cli import __version__ as _tiyazo_version
         except Exception:  # noqa: BLE001 — keep ID best-effort if import fails
-            _hermes_version = "0"
+            _tiyazo_version = "0"
         imap.xatom(
             "ID",
-            f'("name" "tiyazo-agent" "version" "{_hermes_version}" '
+            f'("name" "tiyazo-agent" "version" "{_tiyazo_version}" '
             '"vendor" "NousResearch" '
             '"support-email" "noreply@nousresearch.com")',
         )
@@ -943,7 +943,7 @@ class EmailAdapter(BasePlatformAdapter):
             msg["References"] = original_msg_id
 
         msg["Date"] = formatdate(localtime=True)
-        msg_id = f"<hermes-{uuid.uuid4().hex[:12]}@{self._message_id_domain()}>"
+        msg_id = f"<tiyazo-{uuid.uuid4().hex[:12]}@{self._message_id_domain()}>"
         msg["Message-ID"] = msg_id
 
         msg.attach(MIMEText(body, "plain", "utf-8"))
@@ -1056,7 +1056,7 @@ class EmailAdapter(BasePlatformAdapter):
             msg["References"] = original_msg_id
 
         msg["Date"] = formatdate(localtime=True)
-        msg_id = f"<hermes-{uuid.uuid4().hex[:12]}@{self._message_id_domain()}>"
+        msg_id = f"<tiyazo-{uuid.uuid4().hex[:12]}@{self._message_id_domain()}>"
         msg["Message-ID"] = msg_id
 
         if body:
@@ -1136,7 +1136,7 @@ class EmailAdapter(BasePlatformAdapter):
             msg["References"] = original_msg_id
 
         msg["Date"] = formatdate(localtime=True)
-        msg_id = f"<hermes-{uuid.uuid4().hex[:12]}@{self._message_id_domain()}>"
+        msg_id = f"<tiyazo-{uuid.uuid4().hex[:12]}@{self._message_id_domain()}>"
         msg["Message-ID"] = msg_id
 
         if body:
@@ -1182,7 +1182,7 @@ class EmailAdapter(BasePlatformAdapter):
 # bundled plugin. register() exposes the platform via the registry, replacing
 # the Platform.EMAIL elif in gateway/run.py, the _PLATFORM_CONNECTED_CHECKERS
 # entry in gateway/config.py, the _PLATFORMS["email"] static dict in
-# hermes_cli/gateway.py, and the _send_email dispatch in
+# tiyazo_cli/gateway.py, and the _send_email dispatch in
 # tools/send_message_tool.py. EMAIL_* env→PlatformConfig seeding stays in core.
 # ──────────────────────────────────────────────────────────────────────────
 
@@ -1243,7 +1243,7 @@ def _is_connected(config) -> bool:
     extra = getattr(config, "extra", {}) or {}
     if extra.get("address"):
         return True
-    import hermes_cli.gateway as gateway_mod
+    import tiyazo_cli.gateway as gateway_mod
     return bool((gateway_mod.get_env_value("EMAIL_ADDRESS") or "").strip())
 
 

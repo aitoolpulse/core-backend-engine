@@ -3,10 +3,10 @@
 
 Usage (via cron with --no-agent):
 
-    hermes cron create hermes-issues \\
+    hermes cron create tiyazo-issues \\
       --schedule "*/5 * * * *" --no-agent \\
       --script "$TIYAZO_HOME/skills/devops/watchers/scripts/watch_github.py" \\
-      --script-args "--name hermes-issues --repo aitoolpulse/core-backend-engine --scope issues"
+      --script-args "--name tiyazo-issues --repo aitoolpulse/core-backend-engine --scope issues"
 
 Set GITHUB_TOKEN (or GH_TOKEN) in the Hermes .env file
 (``${TIYAZO_HOME:-~/.tiyazo}/.env``) to avoid the 60 req/hr

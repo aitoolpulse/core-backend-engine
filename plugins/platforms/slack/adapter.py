@@ -980,9 +980,9 @@ class SlackAdapter(BasePlatformAdapter):
         bot_tokens = [t.strip() for t in raw_token.split(",") if t.strip()]
 
         # Also load tokens from OAuth token file
-        from hermes_constants import get_hermes_home
+        from tiyazo_constants import get_tiyazo_home
 
-        tokens_file = get_hermes_home() / "slack_tokens.json"
+        tokens_file = get_tiyazo_home() / "slack_tokens.json"
         if tokens_file.exists():
             try:
                 saved = json.loads(tokens_file.read_text(encoding="utf-8"))
@@ -1147,7 +1147,7 @@ class SlackAdapter(BasePlatformAdapter):
             # routes the command event through the socket regardless of the
             # manifest's request URL, but it will not deliver an event for
             # a slash command the manifest doesn't declare.
-            from hermes_cli.commands import slack_native_slashes
+            from tiyazo_cli.commands import slack_native_slashes
             import re as _re
 
             _slash_names = [name for name, _d, _h in slack_native_slashes()]
@@ -1159,7 +1159,7 @@ class SlackAdapter(BasePlatformAdapter):
                 _slash_pattern = _re.compile(r"^/hermes$")
 
             @self._app.command(_slash_pattern)
-            async def handle_hermes_command(ack, command):
+            async def handle_tiyazo_command(ack, command):
                 slash = (command.get("command") or "").lstrip("/")
                 await ack(
                     response_type="ephemeral",
@@ -1169,19 +1169,19 @@ class SlackAdapter(BasePlatformAdapter):
 
             # Register Block Kit action handlers for approval buttons
             for _action_id in (
-                "hermes_approve_once",
-                "hermes_approve_session",
-                "hermes_approve_always",
-                "hermes_deny",
+                "tiyazo_approve_once",
+                "tiyazo_approve_session",
+                "tiyazo_approve_always",
+                "tiyazo_deny",
             ):
                 self._app.action(_action_id)(self._handle_approval_action)
 
             # Register Block Kit action handlers for slash-confirm buttons
             # (generic three-option prompts; see tools/slash_confirm.py).
             for _action_id in (
-                "hermes_confirm_once",
-                "hermes_confirm_always",
-                "hermes_confirm_cancel",
+                "tiyazo_confirm_once",
+                "tiyazo_confirm_always",
+                "tiyazo_confirm_cancel",
             ):
                 self._app.action(_action_id)(self._handle_slash_confirm_action)
 
@@ -1196,7 +1196,7 @@ class SlackAdapter(BasePlatformAdapter):
             # down the gateway: any exception inside the plugin handler is
             # caught and logged, and slack_bolt still sees a clean ack.
             try:
-                from hermes_cli.plugins import get_plugin_manager
+                from tiyazo_cli.plugins import get_plugin_manager
                 _plugin_handlers = get_plugin_manager().get_slack_action_handlers()
             except Exception as e:  # pragma: no cover - defensive
                 logger.warning(
@@ -2630,7 +2630,7 @@ class SlackAdapter(BasePlatformAdapter):
         # so casual messages like "!nice work" pass through unchanged.
         if original_text.startswith("!"):
             try:
-                from hermes_cli.commands import is_gateway_known_command
+                from tiyazo_cli.commands import is_gateway_known_command
 
                 first_token = original_text[1:].split(maxsplit=1)[0]
                 # Strip "@suffix" the same way get_command() does, so
@@ -3283,26 +3283,26 @@ class SlackAdapter(BasePlatformAdapter):
                             "type": "button",
                             "text": {"type": "plain_text", "text": "Allow Once"},
                             "style": "primary",
-                            "action_id": "hermes_approve_once",
+                            "action_id": "tiyazo_approve_once",
                             "value": session_key,
                         },
                         {
                             "type": "button",
                             "text": {"type": "plain_text", "text": "Allow Session"},
-                            "action_id": "hermes_approve_session",
+                            "action_id": "tiyazo_approve_session",
                             "value": session_key,
                         },
                         {
                             "type": "button",
                             "text": {"type": "plain_text", "text": "Always Allow"},
-                            "action_id": "hermes_approve_always",
+                            "action_id": "tiyazo_approve_always",
                             "value": session_key,
                         },
                         {
                             "type": "button",
                             "text": {"type": "plain_text", "text": "Deny"},
                             "style": "danger",
-                            "action_id": "hermes_deny",
+                            "action_id": "tiyazo_deny",
                             "value": session_key,
                         },
                     ],
@@ -3367,20 +3367,20 @@ class SlackAdapter(BasePlatformAdapter):
                             "type": "button",
                             "text": {"type": "plain_text", "text": "Approve Once"},
                             "style": "primary",
-                            "action_id": "hermes_confirm_once",
+                            "action_id": "tiyazo_confirm_once",
                             "value": value,
                         },
                         {
                             "type": "button",
                             "text": {"type": "plain_text", "text": "Always Approve"},
-                            "action_id": "hermes_confirm_always",
+                            "action_id": "tiyazo_confirm_always",
                             "value": value,
                         },
                         {
                             "type": "button",
                             "text": {"type": "plain_text", "text": "Cancel"},
                             "style": "danger",
-                            "action_id": "hermes_confirm_cancel",
+                            "action_id": "tiyazo_confirm_cancel",
                             "value": value,
                         },
                     ],
@@ -3493,9 +3493,9 @@ class SlackAdapter(BasePlatformAdapter):
         session_key, confirm_id = value.split("|", 1)
 
         choice_map = {
-            "hermes_confirm_once": "once",
-            "hermes_confirm_always": "always",
-            "hermes_confirm_cancel": "cancel",
+            "tiyazo_confirm_once": "once",
+            "tiyazo_confirm_always": "always",
+            "tiyazo_confirm_cancel": "cancel",
         }
         choice = choice_map.get(action_id, "cancel")
 
@@ -3609,10 +3609,10 @@ class SlackAdapter(BasePlatformAdapter):
 
         # Map action_id to approval choice
         choice_map = {
-            "hermes_approve_once": "once",
-            "hermes_approve_session": "session",
-            "hermes_approve_always": "always",
-            "hermes_deny": "deny",
+            "tiyazo_approve_once": "once",
+            "tiyazo_approve_session": "session",
+            "tiyazo_approve_always": "always",
+            "tiyazo_deny": "deny",
         }
         choice = choice_map.get(action_id, "deny")
 
@@ -3924,7 +3924,7 @@ class SlackAdapter(BasePlatformAdapter):
             # Legacy /hermes <subcommand> [args] routing + free-form questions.
             # Empty slash_name falls into this branch for backward compat
             # with any caller that didn't populate command["command"].
-            from hermes_cli.commands import slack_subcommand_map
+            from tiyazo_cli.commands import slack_subcommand_map
 
             subcommand_map = slack_subcommand_map()
             subcommand_map["compact"] = "/compress"
@@ -3970,7 +3970,7 @@ class SlackAdapter(BasePlatformAdapter):
 
         # Stash the Slack response_url so the first reply for this
         # channel+user can be routed ephemerally (replaces the initial
-        # "Running /cmd…" ack shown by handle_hermes_command).
+        # "Running /cmd…" ack shown by handle_tiyazo_command).
         # Only stash for COMMAND events (text starts with "/") — free-form
         # questions via "/hermes <question>" must produce public replies so
         # the whole channel can see the agent's answer.
@@ -4289,7 +4289,7 @@ class SlackAdapter(BasePlatformAdapter):
 # the per-platform core touchpoints (the ``Platform.SLACK`` elif in
 # ``gateway/run.py``, the ``slack_cfg`` YAML→env block in ``gateway/config.py``,
 # the ``_setup_slack`` wizard + ``_PLATFORMS["slack"]`` static dict in
-# ``hermes_cli/{setup,gateway}.py``, and the ``_send_slack`` dispatch in
+# ``tiyazo_cli/{setup,gateway}.py``, and the ``_send_slack`` dispatch in
 # ``tools/send_message_tool.py``).
 # ──────────────────────────────────────────────────────────────────────────
 
@@ -4372,11 +4372,11 @@ def interactive_setup() -> None:
     Mirrors Discord's ``interactive_setup`` shape: lazy-imports CLI helpers so
     the plugin's import surface stays small, generates and writes the Slack app
     manifest, prompts for the bot + app tokens, captures an allowlist, and
-    offers to set a home channel. Replaces ``hermes_cli/setup.py::_setup_slack``.
+    offers to set a home channel. Replaces ``tiyazo_cli/setup.py::_setup_slack``.
     """
     from pathlib import Path
-    from hermes_cli.config import get_env_value, save_env_value
-    from hermes_cli.cli_output import (
+    from tiyazo_cli.config import get_env_value, save_env_value
+    from tiyazo_cli.cli_output import (
         prompt,
         prompt_yes_no,
         print_header,
@@ -4389,15 +4389,15 @@ def interactive_setup() -> None:
         """Generate the Slack manifest, write it under TIYAZO_HOME, and print
         paste-into-Slack instructions. Failures are non-fatal."""
         try:
-            from hermes_cli.slack_cli import _build_full_manifest
-            from hermes_constants import get_hermes_home
+            from tiyazo_cli.slack_cli import _build_full_manifest
+            from tiyazo_constants import get_tiyazo_home
             import json as _json
 
             manifest = _build_full_manifest(
                 bot_name="Hermes",
                 bot_description="Your Hermes agent on Slack",
             )
-            target = Path(get_hermes_home()) / "slack-manifest.json"
+            target = Path(get_tiyazo_home()) / "slack-manifest.json"
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(
                 _json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
@@ -4522,12 +4522,12 @@ def _apply_yaml_config(yaml_cfg: dict, slack_cfg: dict) -> dict | None:
 def _is_connected(config) -> bool:
     """Slack is considered connected when SLACK_BOT_TOKEN is set.
 
-    Looks up via ``hermes_cli.gateway.get_env_value`` at call time (not via the
+    Looks up via ``tiyazo_cli.gateway.get_env_value`` at call time (not via the
     plugin's own bound import) so tests that patch ``gateway_mod.get_env_value``
     can suppress ambient ``SLACK_BOT_TOKEN`` env vars. Matches what the legacy
     ``Platform.SLACK`` connected-check did before this migration.
     """
-    import hermes_cli.gateway as gateway_mod
+    import tiyazo_cli.gateway as gateway_mod
 
     return bool((gateway_mod.get_env_value("SLACK_BOT_TOKEN") or "").strip())
 
@@ -4547,8 +4547,8 @@ def register(ctx) -> None:
         is_connected=_is_connected,
         required_env=["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN"],
         install_hint="pip install 'tiyazo-agent[slack]'",
-        # Interactive setup wizard — replaces hermes_cli/setup.py::_setup_slack
-        # and the static _PLATFORMS["slack"] dict in hermes_cli/gateway.py.
+        # Interactive setup wizard — replaces tiyazo_cli/setup.py::_setup_slack
+        # and the static _PLATFORMS["slack"] dict in tiyazo_cli/gateway.py.
         setup_fn=interactive_setup,
         # YAML→env config bridge — owns the translation of config.yaml slack:
         # keys (require_mention, strict_mention, allow_bots,

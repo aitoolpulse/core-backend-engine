@@ -757,7 +757,7 @@ agent:
 # If a platform isn't listed here, its built-in default is used.
 #
 # You can use EITHER:
-#   - A preset like "hermes-cli" or "hermes-telegram" (curated tool set)
+#   - A preset like "tiyazo-cli" or "tiyazo-telegram" (curated tool set)
 #   - A list of individual toolsets to compose your own (see list below)
 #
 # Supported platform keys: cli, telegram, discord, whatsapp, slack, qqbot, teams, google_chat
@@ -766,8 +766,8 @@ agent:
 #
 #   # Use presets (same as defaults):
 #   platform_toolsets:
-#     cli: [hermes-cli]
-#     telegram: [hermes-telegram]
+#     cli: [tiyazo-cli]
+#     telegram: [tiyazo-telegram]
 #
 #   # Custom: give Telegram only web + terminal + file + planning:
 #   platform_toolsets:
@@ -782,29 +782,29 @@ agent:
 #     discord: [web, vision, skills, todo]
 #
 # If not set, defaults are:
-#   cli:           hermes-cli            (everything + cronjob management)
-#   telegram:      hermes-telegram       (terminal, file, web, vision, image, tts, browser, skills, todo, cronjob, messaging)
-#   discord:       hermes-discord        (same as telegram)
-#   whatsapp:      hermes-whatsapp       (same as telegram)
-#   slack:         hermes-slack          (same as telegram)
-#   signal:        hermes-signal         (same as telegram)
-#   homeassistant: hermes-homeassistant  (same as telegram)
-#   qqbot:            hermes-qqbot            (same as telegram)
-#   teams:            hermes-teams            (same as telegram)
-#   google_chat:      hermes-google_chat      (same as telegram)
+#   cli:           tiyazo-cli            (everything + cronjob management)
+#   telegram:      tiyazo-telegram       (terminal, file, web, vision, image, tts, browser, skills, todo, cronjob, messaging)
+#   discord:       tiyazo-discord        (same as telegram)
+#   whatsapp:      tiyazo-whatsapp       (same as telegram)
+#   slack:         tiyazo-slack          (same as telegram)
+#   signal:        tiyazo-signal         (same as telegram)
+#   homeassistant: tiyazo-homeassistant  (same as telegram)
+#   qqbot:            tiyazo-qqbot            (same as telegram)
+#   teams:            tiyazo-teams            (same as telegram)
+#   google_chat:      tiyazo-google_chat      (same as telegram)
 #
 platform_toolsets:
-  cli: [hermes-cli]
-  telegram: [hermes-telegram]
-  discord: [hermes-discord]
-  whatsapp: [hermes-whatsapp]
-  slack: [hermes-slack]
-  signal: [hermes-signal]
-  homeassistant: [hermes-homeassistant]
-  qqbot: [hermes-qqbot]
-  yuanbao: [hermes-yuanbao]
-  teams: [hermes-teams]
-  google_chat: [hermes-google_chat]
+  cli: [tiyazo-cli]
+  telegram: [tiyazo-telegram]
+  discord: [tiyazo-discord]
+  whatsapp: [tiyazo-whatsapp]
+  slack: [tiyazo-slack]
+  signal: [tiyazo-signal]
+  homeassistant: [tiyazo-homeassistant]
+  qqbot: [tiyazo-qqbot]
+  yuanbao: [tiyazo-yuanbao]
+  teams: [tiyazo-teams]
+  google_chat: [tiyazo-google_chat]
 
 # =============================================================================
 # Gateway Platform Settings
@@ -869,12 +869,12 @@ platform_toolsets:
 #   cronjob      - cronjob (create/list/update/pause/resume/run/remove scheduled tasks)
 #
 # PRESETS (curated bundles):
-#   hermes-cli       - All of the above except send_message
-#   hermes-telegram  - terminal, file, web, vision, image_gen, tts, browser,
+#   tiyazo-cli       - All of the above except send_message
+#   tiyazo-telegram  - terminal, file, web, vision, image_gen, tts, browser,
 #                      skills, todo, cronjob, send_message
-#   hermes-discord   - Same as hermes-telegram
-#   hermes-whatsapp  - Same as hermes-telegram
-#   hermes-slack     - Same as hermes-telegram
+#   tiyazo-discord   - Same as tiyazo-telegram
+#   tiyazo-whatsapp  - Same as tiyazo-telegram
+#   tiyazo-slack     - Same as tiyazo-telegram
 #
 # COMPOSITE:
 #   debugging    - terminal + web + file
@@ -1259,7 +1259,7 @@ display:
 # stdout the script may return JSON that either blocks the tool call or
 # injects context into the next LLM call.
 #
-# Valid events (mirror hermes_cli.plugins.VALID_HOOKS):
+# Valid events (mirror tiyazo_cli.plugins.VALID_HOOKS):
 #   pre_tool_call, post_tool_call, pre_llm_call, post_llm_call,
 #   pre_api_request, post_api_request, on_session_start, on_session_end,
 #   on_session_finalize, on_session_reset, subagent_stop
@@ -1367,7 +1367,7 @@ updates:
 #     provider: self-hosted
 #     self_hosted:
 #       issuer: "https://auth.example.com/application/o/hermes/"  # required
-#       client_id: "hermes-dashboard"                             # required
+#       client_id: "tiyazo-dashboard"                             # required
 #       scopes: "openid profile email"                            # optional
 #
 #       # OPTIONAL — set ONLY if your IDP registered the client as

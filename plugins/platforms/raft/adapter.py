@@ -192,7 +192,7 @@ def _make_activity_event(
 ) -> Dict[str, Any]:
     event: Dict[str, Any] = {
         "schema": ACTIVITY_EVENT_SCHEMA,
-        "eventId": f"hermes-{uuid.uuid4()}",
+        "eventId": f"tiyazo-{uuid.uuid4()}",
         "sessionId": _safe_scalar(session_id, "unknown") or "unknown",
         "hookEventName": hook_event_name,
         "status": "error" if status == "error" else "ok",
@@ -786,7 +786,7 @@ def interactive_setup() -> None:
     and test contexts. The flow persists ``RAFT_PROFILE`` to the Hermes env
     file so the Raft adapter auto-enables after a gateway restart.
     """
-    from hermes_cli.cli_output import (
+    from tiyazo_cli.cli_output import (
         print_header,
         print_info,
         print_success,
@@ -794,7 +794,7 @@ def interactive_setup() -> None:
         prompt,
         prompt_yes_no,
     )
-    from hermes_cli.config import get_env_value, save_env_value
+    from tiyazo_cli.config import get_env_value, save_env_value
 
     print_header("Raft")
     existing_profile = get_env_value("RAFT_PROFILE")

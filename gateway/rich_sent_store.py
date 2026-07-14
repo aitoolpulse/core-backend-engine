@@ -25,10 +25,10 @@ _MAX_TEXT_CHARS = 2000
 
 
 def _store_path() -> str:
-    # Resolve via get_hermes_home() so the active profile override is honored.
-    from hermes_constants import get_hermes_home
+    # Resolve via get_tiyazo_home() so the active profile override is honored.
+    from tiyazo_constants import get_tiyazo_home
 
-    home = get_hermes_home()
+    home = get_tiyazo_home()
     return os.path.join(str(home), "state", "rich_sent_index.json")
 
 

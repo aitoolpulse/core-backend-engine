@@ -1004,10 +1004,10 @@ class TeamsAdapter(BasePlatformAdapter):
 
         action = ctx.activity.value.action
         data = action.data or {}
-        hermes_action = data.get("hermes_action", "")
+        tiyazo_action = data.get("tiyazo_action", "")
         session_key = data.get("session_key", "")
 
-        if not hermes_action or not session_key:
+        if not tiyazo_action or not session_key:
             return InvokeResponse(
                 status=200,
                 body=AdaptiveCardActionMessageResponse(value="Unknown action."),
@@ -1049,7 +1049,7 @@ class TeamsAdapter(BasePlatformAdapter):
             "approve_always": "always",
             "deny": "deny",
         }
-        choice = choice_map.get(hermes_action)
+        choice = choice_map.get(tiyazo_action)
         if not choice:
             return InvokeResponse(
                 status=200,
@@ -1122,24 +1122,24 @@ class TeamsAdapter(BasePlatformAdapter):
             .with_actions([
                 ExecuteAction(
                     title="Allow Once",
-                    verb="hermes_approve",
-                    data={**btn_data_base, "hermes_action": "approve_once"},
+                    verb="tiyazo_approve",
+                    data={**btn_data_base, "tiyazo_action": "approve_once"},
                     style="positive",
                 ),
                 ExecuteAction(
                     title="Allow Session",
-                    verb="hermes_approve",
-                    data={**btn_data_base, "hermes_action": "approve_session"},
+                    verb="tiyazo_approve",
+                    data={**btn_data_base, "tiyazo_action": "approve_session"},
                 ),
                 ExecuteAction(
                     title="Always Allow",
-                    verb="hermes_approve",
-                    data={**btn_data_base, "hermes_action": "approve_always"},
+                    verb="tiyazo_approve",
+                    data={**btn_data_base, "tiyazo_action": "approve_always"},
                 ),
                 ExecuteAction(
                     title="Deny",
-                    verb="hermes_approve",
-                    data={**btn_data_base, "hermes_action": "deny"},
+                    verb="tiyazo_approve",
+                    data={**btn_data_base, "tiyazo_action": "deny"},
                     style="destructive",
                 ),
             ])
@@ -1338,11 +1338,11 @@ class TeamsAdapter(BasePlatformAdapter):
 
 def interactive_setup() -> None:
     """Guide the user through Teams setup using the Teams CLI."""
-    from hermes_cli.config import (
+    from tiyazo_cli.config import (
         get_env_value,
         save_env_value,
     )
-    from hermes_cli.cli_output import (
+    from tiyazo_cli.cli_output import (
         prompt,
         prompt_yes_no,
         print_info,

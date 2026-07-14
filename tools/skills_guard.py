@@ -131,7 +131,7 @@ THREAT_PATTERNS = [
      "docker_dir_access", "high", "exfiltration",
      "references Docker config (may contain registry creds)"),
     (r'\$HOME/\.tiyazo/\.env|\~/\.tiyazo/\.env',
-     "hermes_env_access", "critical", "exfiltration",
+     "tiyazo_env_access", "critical", "exfiltration",
      "directly references Hermes secrets file"),
     # Match `cat <secrets-file>` (reading credentials) but NOT `cat > <file>`
     # or `cat >> <file>`, which are output redirections that WRITE a file
@@ -457,7 +457,7 @@ THREAT_PATTERNS = [
      "agent_config_mod", "critical", "persistence",
      "references agent config files (could persist malicious instructions across sessions)"),
     (r'\.tiyazo/config\.yaml|\.tiyazo/SOUL\.md',
-     "hermes_config_mod", "critical", "persistence",
+     "tiyazo_config_mod", "critical", "persistence",
      "references Hermes configuration files directly"),
     (r'\.claude/settings|\.codex/config',
      "other_agent_config", "high", "persistence",

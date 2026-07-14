@@ -63,8 +63,8 @@ except ImportError:
 def _get_sessions_dir() -> Path:
     """Return the sessions directory using TIYAZO_HOME."""
     try:
-        from hermes_constants import get_hermes_home
-        return get_hermes_home() / "sessions"
+        from tiyazo_constants import get_tiyazo_home
+        return get_tiyazo_home() / "sessions"
     except ImportError:
         return Path(os.environ.get("TIYAZO_HOME", Path.home() / ".tiyazo")) / "sessions"
 
@@ -72,7 +72,7 @@ def _get_sessions_dir() -> Path:
 def _get_session_db():
     """Get a SessionDB instance for reading message transcripts."""
     try:
-        from hermes_state import SessionDB
+        from tiyazo_state import SessionDB
         return SessionDB()
     except Exception as e:
         logger.debug("SessionDB unavailable: %s", e)
@@ -195,8 +195,8 @@ def _load_sessions_index_from_json() -> dict:
 def _load_channel_directory() -> dict:
     """Load the cached channel directory for available targets."""
     try:
-        from hermes_constants import get_hermes_home
-        directory_file = get_hermes_home() / "channel_directory.json"
+        from tiyazo_constants import get_tiyazo_home
+        directory_file = get_tiyazo_home() / "channel_directory.json"
     except ImportError:
         directory_file = Path(
             os.environ.get("TIYAZO_HOME", Path.home() / ".tiyazo")
@@ -451,8 +451,8 @@ class EventBridge:
         could drop brand-new conversations (#8925).
         """
         try:
-            from hermes_constants import get_hermes_home
-            db_file = get_hermes_home() / "state.db"
+            from tiyazo_constants import get_tiyazo_home
+            db_file = get_tiyazo_home() / "state.db"
         except ImportError:
             db_file = Path(os.environ.get("TIYAZO_HOME", Path.home() / ".tiyazo")) / "state.db"
 

@@ -57,7 +57,7 @@ SKIP_DIRS = {
     "scripts/",
     "skills/",
     "optional-skills/",
-    "hermes_cli/",
+    "tiyazo_cli/",
     "gateway/",
     "cron/",
 }

@@ -43,7 +43,7 @@ await build({
   //     bundle entirely — re-exporting them from entry-exports created a
   //     circular async chain that hung the TUI at startup with only ANSI
   //     reset bytes on screen (#31227).
-  alias: { '@hermes/ink': resolve(root, 'packages/hermes-ink/src/entry-exports.ts') },
+  alias: { '@hermes/ink': resolve(root, 'packages/tiyazo-ink/src/entry-exports.ts') },
   plugins: [stubDevtools],
   // Some transitive deps use CommonJS `require(...)` at runtime. ESM bundles
   // don't get a `require` binding automatically, so we inject one.
@@ -55,7 +55,7 @@ await build({
 
 // esbuild preserves the shebang from src/entry.tsx into the bundle, but Nix's
 // patchShebangs phase mangles `/usr/bin/env -S node --foo --bar` (it strips
-// the `node` token, leaving a broken interpreter). The hermes_cli launcher
+// the `node` token, leaving a broken interpreter). The tiyazo_cli launcher
 // always invokes this file as `node dist/entry.js` anyway, so the shebang is
 // redundant — strip it.
 const body = readFileSync(out, 'utf8')

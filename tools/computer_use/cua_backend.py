@@ -115,7 +115,7 @@ def _cua_telemetry_disabled() -> bool:
     privacy-preserving default of telemetry disabled.
     """
     try:
-        from hermes_cli.config import load_config
+        from tiyazo_cli.config import load_config
 
         cfg = load_config() or {}
         cu = cfg.get("computer_use") or {}
@@ -728,12 +728,12 @@ class _CuaDriverSession:
             # passes but the wrapper times out" reports are undiagnosable
             # from a bare "never reached ready".
             phase = getattr(self, "_startup_phase", "unknown")
-            from hermes_constants import display_hermes_home
+            from tiyazo_constants import display_tiyazo_home
             raise RuntimeError(
                 "cua-driver session never reached ready (timeout 30s; "
                 f"stuck in phase: {phase}). "
                 "Run `hermes computer-use doctor` and check "
-                f"{display_hermes_home()}/logs/agent.log for the phase timings."
+                f"{display_tiyazo_home()}/logs/agent.log for the phase timings."
             )
         # If setup failed, the lifecycle coroutine set _setup_error
         # before setting _ready_event. Re-raise it on the caller's thread.
@@ -1183,7 +1183,7 @@ class CuaDriverBackend(ComputerUseBackend):
         # unknown to the driver (older builds), the tool calls
         # degrade to the anonymous / unsynced path documented in the
         # MCP server instructions.
-        self._session_id: str = f"hermes-{uuid.uuid4().hex[:12]}"
+        self._session_id: str = f"tiyazo-{uuid.uuid4().hex[:12]}"
 
     # ── Lifecycle ──────────────────────────────────────────────────
     def start(self) -> None:

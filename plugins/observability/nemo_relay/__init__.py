@@ -48,11 +48,11 @@ class _Settings:
     adaptive_mode: str = "observe_only"
     atof_enabled: bool = False
     atof_output_directory: str = ""
-    atof_filename: str = "hermes-atof.jsonl"
+    atof_filename: str = "tiyazo-atof.jsonl"
     atof_mode: str = "append"
     atif_enabled: bool = False
     atif_output_directory: str = ""
-    atif_filename_template: str = "hermes-atif-{session_id}.json"
+    atif_filename_template: str = "tiyazo-atif-{session_id}.json"
     atif_subagent_export_mode: str = "embedded"
     atif_agent_name: str = "Hermes Agent"
     atif_agent_version: str = "unknown"
@@ -194,7 +194,7 @@ class _Runtime:
             state.parent_session_id = subagent_parent.parent_session_id
 
         state.handle = self.nemo_relay.scope.push(
-            f"hermes-session-{session_id}",
+            f"tiyazo-session-{session_id}",
             self.nemo_relay.ScopeType.Agent,
             handle=parent_handle,
             data={"session_id": session_id},
@@ -652,11 +652,11 @@ def _load_settings() -> _Settings:
         adaptive_mode=_adaptive_mode(adaptive_config),
         atof_enabled=_env_bool("HERMES_NEMO_RELAY_ATOF_ENABLED"),
         atof_output_directory=_env("HERMES_NEMO_RELAY_ATOF_OUTPUT_DIRECTORY"),
-        atof_filename=_env("HERMES_NEMO_RELAY_ATOF_FILENAME") or "hermes-atof.jsonl",
+        atof_filename=_env("HERMES_NEMO_RELAY_ATOF_FILENAME") or "tiyazo-atof.jsonl",
         atof_mode=_env("HERMES_NEMO_RELAY_ATOF_MODE") or "append",
         atif_enabled=_env_bool("HERMES_NEMO_RELAY_ATIF_ENABLED"),
         atif_output_directory=_env("HERMES_NEMO_RELAY_ATIF_OUTPUT_DIRECTORY"),
-        atif_filename_template=_env("HERMES_NEMO_RELAY_ATIF_FILENAME_TEMPLATE") or "hermes-atif-{session_id}.json",
+        atif_filename_template=_env("HERMES_NEMO_RELAY_ATIF_FILENAME_TEMPLATE") or "tiyazo-atif-{session_id}.json",
         atif_subagent_export_mode=_atif_subagent_export_mode(),
         atif_agent_name=_env("HERMES_NEMO_RELAY_ATIF_AGENT_NAME") or "Hermes Agent",
         atif_agent_version=_env("HERMES_NEMO_RELAY_ATIF_AGENT_VERSION") or "unknown",
@@ -946,7 +946,7 @@ def _resolve_awaitable(value: Any) -> Any:
 
     thread = threading.Thread(
         target=_runner,
-        name="hermes-nemo-relay-awaitable",
+        name="tiyazo-nemo-relay-awaitable",
         daemon=True,
     )
     thread.start()

@@ -44,8 +44,8 @@ nous = NousProfile(
     description="Nous Research — Hermes model family",
     signup_url="https://nousresearch.com/",
     fallback_models=(
-        "hermes-3-405b",
-        "hermes-3-70b",
+        "tiyazo-3-405b",
+        "tiyazo-3-70b",
     ),
     base_url="https://inference.nousresearch.com/v1",
     auth_type="oauth_device_code",

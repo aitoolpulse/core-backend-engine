@@ -20,8 +20,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import IO, Callable, Protocol
 
-from hermes_constants import get_hermes_home
-from hermes_cli._subprocess_compat import windows_hide_flags
+from tiyazo_constants import get_tiyazo_home
+from tiyazo_cli._subprocess_compat import windows_hide_flags
 from tools.interrupt import is_interrupted
 
 logger = logging.getLogger(__name__)
@@ -89,7 +89,7 @@ def get_sandbox_dir() -> Path:
     if custom:
         p = Path(custom)
     else:
-        p = get_hermes_home() / "sandboxes"
+        p = get_tiyazo_home() / "sandboxes"
     p.mkdir(parents=True, exist_ok=True)
     return p
 
@@ -317,8 +317,8 @@ class BaseEnvironment(ABC):
 
         self._session_id = uuid.uuid4().hex[:12]
         temp_dir = self.get_temp_dir().rstrip("/") or "/"
-        self._snapshot_path = f"{temp_dir}/hermes-snap-{self._session_id}.sh"
-        self._cwd_file = f"{temp_dir}/hermes-cwd-{self._session_id}.txt"
+        self._snapshot_path = f"{temp_dir}/tiyazo-snap-{self._session_id}.sh"
+        self._cwd_file = f"{temp_dir}/tiyazo-cwd-{self._session_id}.txt"
         self._cwd_marker = _cwd_marker(self._session_id)
         self._snapshot_ready = False
 
@@ -371,7 +371,7 @@ class BaseEnvironment(ABC):
         # ``C:/Users/...``-shaped paths without glob-splitting the colon or
         # tripping on drive letters.  On POSIX this is a no-op (no colons /
         # special chars in a /tmp path).  Previously unquoted interpolation
-        # caused ``C:/Users/.../hermes-snap-*.sh: No such file or directory``
+        # caused ``C:/Users/.../tiyazo-snap-*.sh: No such file or directory``
         # errors on Windows, leaking via stderr (merged into stdout on Linux
         # backends) into every terminal-tool response.
         _quoted_snap = shlex.quote(self._snapshot_path)
@@ -408,8 +408,8 @@ class BaseEnvironment(ABC):
             # ``declare -f`` with no name args dumps ALL functions, so an empty
             # name list (only private funcs present) would otherwise leak the
             # very functions we meant to drop.
-            f"__hermes_fns=$(declare -F | awk '{{print $3}}' | grep -vE '^_[^_]') || true\n"
-            f"[ -n \"$__hermes_fns\" ] && declare -f $__hermes_fns "
+            f"__tiyazo_fns=$(declare -F | awk '{{print $3}}' | grep -vE '^_[^_]') || true\n"
+            f"[ -n \"$__tiyazo_fns\" ] && declare -f $__tiyazo_fns "
             f">> {_snap_tmp} 2>/dev/null || true\n"
             f"alias -p >> {_snap_tmp}\n"
             f"echo 'shopt -s expand_aliases' >> {_snap_tmp}\n"
@@ -501,7 +501,7 @@ class BaseEnvironment(ABC):
 
         # Run the actual command
         parts.append(f"eval '{escaped}'")
-        parts.append("__hermes_ec=$?")
+        parts.append("__tiyazo_ec=$?")
 
         # Re-dump env vars to snapshot (atomic replacement to avoid races).
         # Chain mv on the export succeeding so a failed/partial dump never
@@ -522,7 +522,7 @@ class BaseEnvironment(ABC):
         parts.append(
             f"printf '\\n{self._cwd_marker}%s{self._cwd_marker}\\n' \"$(pwd -P)\""
         )
-        parts.append("exit $__hermes_ec")
+        parts.append("exit $__tiyazo_ec")
 
         return "\n".join(parts)
 

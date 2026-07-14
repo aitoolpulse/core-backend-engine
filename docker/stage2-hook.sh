@@ -6,7 +6,7 @@
 # Per-service privilege drop happens inside each service's `run` script
 # (and in main-wrapper.sh) via s6-setuidgid, not here.
 #
-# Wired into the image as /etc/cont-init.d/01-hermes-setup by the
+# Wired into the image as /etc/cont-init.d/01-tiyazo-setup by the
 # Dockerfile. The shim at docker/entrypoint.sh forwards to this script
 # so external references to docker/entrypoint.sh still work.
 #
@@ -178,9 +178,9 @@ done
 # host-mounted bind containing unrelated user files; `chown -R` would
 # silently destroy host ownership of those (see issue #19788).
 #
-# The canonical list of hermes-owned subdirs is the same one the s6-setuidgid
+# The canonical list of tiyazo-owned subdirs is the same one the s6-setuidgid
 # mkdir -p block below seeds. Keep them in sync if the seed list changes.
-actual_hermes_uid=$(id -u hermes)
+actual_tiyazo_uid=$(id -u hermes)
 
 path_has_symlink_component() {
     path="$1"
@@ -211,7 +211,7 @@ refuse_symlinked_path() {
     return 1
 }
 
-chown_hermes_tree() {
+chown_tiyazo_tree() {
     target="$1"
     if refuse_symlinked_path "recursive chown" "$target"; then
         return 0
@@ -221,11 +221,11 @@ chown_hermes_tree() {
 }
 
 needs_chown=false
-if [ "$(stat -c %u "$TIYAZO_HOME" 2>/dev/null)" != "$actual_hermes_uid" ]; then
+if [ "$(stat -c %u "$TIYAZO_HOME" 2>/dev/null)" != "$actual_tiyazo_uid" ]; then
     needs_chown=true
 fi
 if [ "$needs_chown" = true ]; then
-    echo "[stage2] Fixing ownership of $TIYAZO_HOME (targeted) to hermes ($actual_hermes_uid)"
+    echo "[stage2] Fixing ownership of $TIYAZO_HOME (targeted) to hermes ($actual_tiyazo_uid)"
     # In rootless Podman the container's "root" is mapped to an
     # unprivileged host UID — chown will fail. That's fine: the volume
     # is already owned by the mapped user on the host side.
@@ -244,7 +244,7 @@ if [ "$needs_chown" = true ]; then
     # -p block below for the canonical list).
     for sub in cron sessions logs hooks memories skills skins plans workspace home profiles pairing platforms/pairing lazy-packages; do
         if [ -e "$TIYAZO_HOME/$sub" ]; then
-            chown_hermes_tree "$TIYAZO_HOME/$sub"
+            chown_tiyazo_tree "$TIYAZO_HOME/$sub"
         fi
     done
 fi
@@ -276,7 +276,7 @@ fi
 # the profiles dir. Idempotent; skipped on rootless containers where
 # chown would fail.
 if [ -d "$TIYAZO_HOME/profiles" ]; then
-    chown_hermes_tree "$TIYAZO_HOME/profiles"
+    chown_tiyazo_tree "$TIYAZO_HOME/profiles"
 fi
 
 # Always reset ownership of $TIYAZO_HOME/cron on every boot for the same
@@ -284,7 +284,7 @@ fi
 # (jobs.json) must stay readable by the unprivileged hermes runtime even
 # after root-context maintenance commands or scheduler writes.
 if [ -d "$TIYAZO_HOME/cron" ]; then
-    chown_hermes_tree "$TIYAZO_HOME/cron"
+    chown_tiyazo_tree "$TIYAZO_HOME/cron"
 fi
 
 # Always reset ownership of pairing data on every boot, same docker-exec/
@@ -297,15 +297,15 @@ fi
 # self-heal. Tiny directory (a handful of small JSON files), so the cost
 # is negligible.
 if [ -d "$TIYAZO_HOME/platforms/pairing" ]; then
-    chown_hermes_tree "$TIYAZO_HOME/platforms/pairing"
+    chown_tiyazo_tree "$TIYAZO_HOME/platforms/pairing"
 fi
 # Legacy location (pre-consolidated layout).
 if [ -d "$TIYAZO_HOME/pairing" ]; then
-    chown_hermes_tree "$TIYAZO_HOME/pairing"
+    chown_tiyazo_tree "$TIYAZO_HOME/pairing"
 fi
 
-# Reset ownership of hermes-owned top-level state files on every boot.
-# The targeted data-volume chown above only covers hermes-owned
+# Reset ownership of tiyazo-owned top-level state files on every boot.
+# The targeted data-volume chown above only covers tiyazo-owned
 # *subdirectories*; loose state files living directly under $TIYAZO_HOME
 # are missed. When those files are created or rewritten by
 # `docker exec <container> hermes …` (root unless `-u` is passed) they
@@ -317,12 +317,12 @@ fi
 # sweep so host-owned files in a bind-mounted $TIYAZO_HOME are never
 # touched — same targeted-ownership contract as the subdir chown above
 # (issue #19788, PR #19795). The list mirrors the top-level *file*
-# entries of hermes_cli.profile_distribution.USER_OWNED_EXCLUDE plus the
+# entries of tiyazo_cli.profile_distribution.USER_OWNED_EXCLUDE plus the
 # runtime lock files; keep them in sync if that set changes.
 for f in \
     auth.json auth.lock .env \
     state.db state.db-shm state.db-wal \
-    hermes_state.db \
+    tiyazo_state.db \
     response_store.db response_store.db-shm response_store.db-wal \
     gateway.pid gateway.lock gateway_state.json processes.json \
     active_profile; do

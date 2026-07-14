@@ -209,7 +209,7 @@ async function getSessionToken(): Promise<string> {
 /**
  * Fetch a single-use ticket for a WebSocket upgrade in gated mode.
  *
- * The dashboard's gated-mode WS auth (``hermes_cli.web_server._ws_auth_ok``)
+ * The dashboard's gated-mode WS auth (``tiyazo_cli.web_server._ws_auth_ok``)
  * rejects the legacy ``?token=<_SESSION_TOKEN>`` path and only accepts
  * ``?ticket=<minted>`` consumed against the in-memory ticket store. Browsers
  * can't set ``Authorization`` on a WS upgrade, so this round-trip via the
@@ -252,7 +252,7 @@ export async function buildWsAuthParam(): Promise<[string, string]> {
  * Auth, in both modes, exactly as ``fetchJSON`` does it:
  *  - loopback / ``--insecure``: attach the ``X-Hermes-Session-Token`` header.
  *  - gated OAuth: no token header (it's absent by design); the
- *    ``hermes_session_at`` cookie rides along via ``credentials: 'include'``.
+ *    ``tiyazo_session_at`` cookie rides along via ``credentials: 'include'``.
  *
  * Unlike ``fetchJSON`` this does NOT parse the body, does NOT throw on
  * non-2xx (the caller decides — a 404 on a download is meaningful), and
@@ -1271,7 +1271,7 @@ export interface SkillHubSource {
   label: string;
   /** GitHub only: whether the API is currently rate-limited. */
   rate_limited?: boolean;
-  /** hermes-index only: whether the centralized index loaded. */
+  /** tiyazo-index only: whether the centralized index loaded. */
   available?: boolean;
 }
 
@@ -1559,7 +1559,7 @@ export interface SystemStats {
   hostname: string;
   python_version: string;
   python_impl: string;
-  hermes_version: string;
+  tiyazo_version: string;
   cpu_count: number | null;
   psutil: boolean;
   cpu_percent?: number;
@@ -1652,7 +1652,7 @@ export interface StatusResponse {
   gateway_running: boolean;
   gateway_state: string | null;
   gateway_updated_at: string | null;
-  hermes_home: string;
+  tiyazo_home: string;
   latest_config_version: number;
   release_date: string;
   version: string;
@@ -1942,7 +1942,7 @@ export interface CronJob {
   id: string;
   profile?: string | null;
   profile_name?: string | null;
-  hermes_home?: string | null;
+  tiyazo_home?: string | null;
   is_default_profile?: boolean;
   name?: string | null;
   prompt?: string | null;

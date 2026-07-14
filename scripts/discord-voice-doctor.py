@@ -176,10 +176,10 @@ def check_env_vars():
 
     # Load .env
     try:
-        from hermes_cli.env_loader import load_hermes_dotenv
+        from tiyazo_cli.env_loader import load_tiyazo_dotenv
 
-        load_hermes_dotenv(
-            hermes_home=ENV_FILE.parent,
+        load_tiyazo_dotenv(
+            tiyazo_home=ENV_FILE.parent,
             project_env=PROJECT_ROOT / ".env",
         )
     except ImportError:

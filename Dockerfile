@@ -111,16 +111,16 @@ WORKDIR /opt/hermes
 # Copy only package manifests first so npm install + Playwright are cached
 # unless the lockfiles themselves change.
 #
-# ui-tui/packages/hermes-ink/ is copied IN FULL (not just its manifests)
+# ui-tui/packages/tiyazo-ink/ is copied IN FULL (not just its manifests)
 # because it is referenced as a `file:` workspace dependency from
 # ui-tui/package.json.  Copying the tree up front lets npm resolve the
 # workspace to real content instead of stopping at a bare package.json.
 COPY package.json package-lock.json ./
 COPY web/package.json web/
 COPY ui-tui/package.json ui-tui/
-COPY ui-tui/packages/hermes-ink/ ui-tui/packages/hermes-ink/
+COPY ui-tui/packages/tiyazo-ink/ ui-tui/packages/tiyazo-ink/
 # apps/shared/ is copied IN FULL because web/package.json references it as a
-# `file:` workspace dependency (same pattern as hermes-ink above).
+# `file:` workspace dependency (same pattern as tiyazo-ink above).
 COPY apps/shared/ apps/shared/
 
 # `npm_config_install_links=false` forces npm to install `file:` deps as
@@ -213,7 +213,7 @@ RUN uv pip install --no-cache-dir --no-deps -e "."
 
 USER root
 RUN mkdir -p /opt/hermes/bin && \
-    cp /opt/hermes/docker/hermes-exec-shim.sh /opt/hermes/bin/hermes && \
+    cp /opt/hermes/docker/tiyazo-exec-shim.sh /opt/hermes/bin/hermes && \
     chmod 0755 /opt/hermes/bin/hermes && \
     printf 'docker\n' > /opt/hermes/.install_method
 # The ``.install_method`` stamp is baked next to the running code (the install
@@ -236,7 +236,7 @@ RUN mkdir -p /opt/hermes/bin && \
 #
 # Fix: write the commit SHA passed via the HERMES_GIT_SHA build-arg to
 # /opt/hermes/.tiyazo_build_sha at build time, and have
-# hermes_cli/build_info.py read it at runtime.  Both `hermes dump` and
+# tiyazo_cli/build_info.py read it at runtime.  Both `hermes dump` and
 # banner.get_git_banner_state() try the baked SHA first, then fall back
 # to live `git rev-parse` for source installs (unchanged behaviour).
 #
@@ -267,13 +267,13 @@ COPY docker/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 # (the /run/service/ scandir is tmpfs and wiped on restart). Phase 4.
 RUN mkdir -p /etc/cont-init.d && \
     printf '#!/command/with-contenv sh\nexec /opt/hermes/docker/stage2-hook.sh\n' \
-        > /etc/cont-init.d/01-hermes-setup && \
-    chmod +x /etc/cont-init.d/01-hermes-setup
+        > /etc/cont-init.d/01-tiyazo-setup && \
+    chmod +x /etc/cont-init.d/01-tiyazo-setup
 COPY --chmod=0755 docker/cont-init.d/015-supervise-perms /etc/cont-init.d/015-supervise-perms
 COPY --chmod=0755 docker/cont-init.d/02-reconcile-profiles /etc/cont-init.d/02-reconcile-profiles
 
 # ---------- Runtime ----------
-ENV HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist
+ENV HERMES_WEB_DIST=/opt/hermes/tiyazo_cli/web_dist
 # Point the TUI launcher at the prebuilt bundle baked at build time (Layer 8:
 # `ui-tui && npm run build`). This makes _make_tui_argv take the prebuilt-bundle
 # fast path (`node --expose-gc /opt/hermes/ui-tui/dist/entry.js`) and skip the

@@ -33,8 +33,8 @@ def _state_dir() -> Path:
     if override:
         return Path(override)
     # Default: $TIYAZO_HOME/watcher-state/, falling back to ~/.tiyazo/watcher-state/.
-    hermes_home = os.environ.get("TIYAZO_HOME") or str(Path.home() / ".tiyazo")
-    return Path(hermes_home) / "watcher-state"
+    tiyazo_home = os.environ.get("TIYAZO_HOME") or str(Path.home() / ".tiyazo")
+    return Path(tiyazo_home) / "watcher-state"
 
 
 class Watermark:

@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from hermes_constants import get_hermes_home
+from tiyazo_constants import get_tiyazo_home
 
 # File + directory layout (under $TIYAZO_HOME):
 #
@@ -37,7 +37,7 @@ from hermes_constants import get_hermes_home
 
 
 def _root() -> Path:
-    return Path(get_hermes_home()) / "workspace" / "meetings"
+    return Path(get_tiyazo_home()) / "workspace" / "meetings"
 
 
 def _active_file() -> Path:

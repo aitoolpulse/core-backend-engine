@@ -203,9 +203,9 @@ class VideoGenProvider(abc.ABC):
 
 def _videos_cache_dir() -> Path:
     """Return ``$TIYAZO_HOME/cache/videos/``, creating parents as needed."""
-    from hermes_constants import get_hermes_home
+    from tiyazo_constants import get_tiyazo_home
 
-    path = get_hermes_home() / "cache" / "videos"
+    path = get_tiyazo_home() / "cache" / "videos"
     path.mkdir(parents=True, exist_ok=True)
     return path
 

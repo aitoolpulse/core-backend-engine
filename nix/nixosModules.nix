@@ -36,7 +36,7 @@
 
     # Deep-merge config type (from 0xrsydn/nix-tiyazo-agent)
     deepConfigType = lib.types.mkOptionType {
-      name = "hermes-config-attrs";
+      name = "tiyazo-config-attrs";
       description = "Hermes YAML config (attrset), merged deeply via lib.recursiveUpdate.";
       check = builtins.isAttrs;
       merge = _loc: defs: lib.foldl' lib.recursiveUpdate { } (map (d: d.value) defs);
@@ -44,7 +44,7 @@
 
     # Generate config.yaml from Nix attrset (YAML is a superset of JSON)
     configJson = builtins.toJSON cfg.settings;
-    generatedConfigFile = pkgs.writeText "hermes-config.yaml" configJson;
+    generatedConfigFile = pkgs.writeText "tiyazo-config.yaml" configJson;
     configFile = if cfg.configFile != null then cfg.configFile else generatedConfigFile;
 
     configMergeScript = pkgs.callPackage ./configMergeScript.nix { };
@@ -60,7 +60,7 @@
       lib.mapAttrsToList (k: v: "${k}=${v}") cfg.environment
     );
     # Build documents derivation (from 0xrsydn)
-    documentDerivation = pkgs.runCommand "hermes-documents" { } (
+    documentDerivation = pkgs.runCommand "tiyazo-documents" { } (
       ''
         mkdir -p $out
       '' + lib.concatStringsSep "\n" (
@@ -84,7 +84,7 @@
     # Runs as root inside the container on every start. Provisions the
     # hermes user + sudo on first boot (writable layer persists), then
     # drops privileges. Supports arbitrary base images (Debian, Alpine, etc).
-    containerEntrypoint = pkgs.writeShellScript "hermes-container-entrypoint" ''
+    containerEntrypoint = pkgs.writeShellScript "tiyazo-container-entrypoint" ''
       set -eu
 
       HERMES_UID="''${HERMES_UID:?HERMES_UID must be set}"
@@ -137,7 +137,7 @@
       # nodejs/npm: writable node so npm i -g works (nix store copies are read-only)
       #   Node 22 via NodeSource — Ubuntu 24.04 ships Node 18 which is EOL.
       # curl: needed for uv installer + NodeSource setup
-      if [ ! -f /var/lib/hermes-tools-provisioned ] && command -v apt-get >/dev/null 2>&1; then
+      if [ ! -f /var/lib/tiyazo-tools-provisioned ] && command -v apt-get >/dev/null 2>&1; then
         echo "First boot: provisioning agent tools..."
         apt-get update -qq
         apt-get install -y -qq sudo curl ca-certificates gnupg
@@ -148,7 +148,7 @@
           > /etc/apt/sources.list.d/nodesource.list
         apt-get update -qq
         apt-get install -y -qq nodejs
-        touch /var/lib/hermes-tools-provisioned
+        touch /var/lib/tiyazo-tools-provisioned
       fi
 
       if command -v sudo >/dev/null 2>&1 && [ ! -f /etc/sudoers.d/hermes ]; then
@@ -285,7 +285,7 @@
         description = ''
           Paths to environment files containing secrets (API keys, tokens).
           Contents are merged into $TIYAZO_HOME/.env at activation time.
-          Hermes reads this file on every startup via load_hermes_dotenv().
+          Hermes reads this file on every startup via load_tiyazo_dotenv().
         '';
       };
 
@@ -490,8 +490,8 @@
           [
             (pkgs.fetchFromGitHub {
               owner = "stephenschoettler";
-              repo = "hermes-lcm";
-              name = "hermes-lcm";
+              repo = "tiyazo-lcm";
+              name = "tiyazo-lcm";
               rev = "v0.7.0";
               hash = "sha256-...";
             })
@@ -505,7 +505,7 @@
         description = ''
           Python packages to add to PYTHONPATH for entry-point plugin discovery.
           These are pip-packaged plugins that register via the
-          hermes_agent.plugins entry-point group. Each package must be built
+          tiyazo_agent.plugins entry-point group. Each package must be built
           with the same Python interpreter as hermes (python312).
         '';
         example = literalExpression ''
@@ -751,7 +751,7 @@
           # Preserves user-added keys (skills, streaming, etc.); Nix keys win.
           # If configFile is user-provided (not generated), overwrite instead of merge.
           # Mode is configYamlMode (0660 under addToSystemPackages so interactive
-          # hermes-group users can save settings via the CLI/TUI, else 0640).
+          # tiyazo-group users can save settings via the CLI/TUI, else 0640).
           ${if cfg.configFile != null then ''
             install -o ${cfg.user} -g ${cfg.group} -m ${configYamlMode} -D ${configFile} ${cfg.stateDir}/.tiyazo/config.yaml
           '' else ''
@@ -774,7 +774,7 @@
     backend=${cfg.container.backend}
     container_name=${containerName}
     exec_user=${cfg.user}
-    hermes_bin=${containerDataDir}/current-package/bin/hermes
+    tiyazo_bin=${containerDataDir}/current-package/bin/hermes
     HERMES_CONTAINER_MODE_EOF
             chown ${cfg.user}:${cfg.group} ${cfg.stateDir}/.tiyazo/.container-mode
             chmod 0644 ${cfg.stateDir}/.tiyazo/.container-mode
@@ -830,7 +830,7 @@
           ''}
 
           # Seed .env from Nix-declared environment + environmentFiles.
-          # Hermes reads $TIYAZO_HOME/.env at startup via load_hermes_dotenv(),
+          # Hermes reads $TIYAZO_HOME/.env at startup via load_tiyazo_dotenv(),
           # so this is the single source of truth for both native and container mode.
           ${lib.optionalString (cfg.environment != {} || cfg.environmentFiles != []) ''
             ENV_FILE="${cfg.stateDir}/.tiyazo/.env"
@@ -892,7 +892,7 @@
             WorkingDirectory = cfg.workingDirectory;
 
             # cfg.environment and cfg.environmentFiles are written to
-            # $TIYAZO_HOME/.env by the activation script. load_hermes_dotenv()
+            # $TIYAZO_HOME/.env by the activation script. load_tiyazo_dotenv()
             # reads them at Python startup — no systemd EnvironmentFile needed.
 
             ExecStart = lib.concatStringsSep " " ([

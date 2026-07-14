@@ -43,7 +43,7 @@ function bundleIsFresh(): boolean {
   try {
     const bundleMtime = statSync(bundlePath).mtimeMs
     const sourceMtime = statSync(
-      resolve(uiTuiRoot, 'packages/hermes-ink/src/entry-exports.ts'),
+      resolve(uiTuiRoot, 'packages/tiyazo-ink/src/entry-exports.ts'),
     ).mtimeMs
     return bundleMtime >= sourceMtime
   } catch {
@@ -92,8 +92,8 @@ describe('TUI bundle (issue #31227)', () => {
   })
 
   it('has the @hermes/ink entry-exports module compiled to sync init', () => {
-    // Sanity check that the alias swap to packages/hermes-ink/src/entry-exports.ts
+    // Sanity check that the alias swap to packages/tiyazo-ink/src/entry-exports.ts
     // is still active and producing the expected synchronous init shape.
-    expect(bundleSrc).toMatch(/var init_entry_exports = __esm\(\{\s*"packages\/hermes-ink\/src\/entry-exports\.ts"\(\)/)
+    expect(bundleSrc).toMatch(/var init_entry_exports = __esm\(\{\s*"packages\/tiyazo-ink\/src\/entry-exports\.ts"\(\)/)
   })
 })

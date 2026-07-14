@@ -10,7 +10,7 @@ This is a library module (not an agent tool). It provides:
   - HubLockFile: Track provenance of installed hub skills
   - Hub state directory management (quarantine, audit log, taps, index cache)
 
-Used by hermes_cli/skills_hub.py for CLI commands and the /skills slash command.
+Used by tiyazo_cli/skills_hub.py for CLI commands and the /skills slash command.
 """
 
 import hashlib
@@ -25,8 +25,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
-from hermes_constants import get_hermes_home
-from hermes_cli._subprocess_compat import windows_hide_flags
+from tiyazo_constants import get_tiyazo_home
+from tiyazo_cli._subprocess_compat import windows_hide_flags
 from agent.skill_utils import is_excluded_skill_path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse, urlunparse
@@ -60,13 +60,13 @@ def _override(name: str):
     return globals().get(name)
 
 
-def _hermes_home() -> Path:
-    return get_hermes_home()
+def _tiyazo_home() -> Path:
+    return get_tiyazo_home()
 
 
 def _skills_dir() -> Path:
     forced = _override("SKILLS_DIR")
-    return Path(forced) if forced is not None else _hermes_home() / "skills"
+    return Path(forced) if forced is not None else _tiyazo_home() / "skills"
 
 
 def _hub_dir() -> Path:
@@ -100,7 +100,7 @@ def _index_cache_dir() -> Path:
 
 
 _DYNAMIC_PATH_RESOLVERS = {
-    "TIYAZO_HOME": _hermes_home,
+    "TIYAZO_HOME": _tiyazo_home,
     "SKILLS_DIR": _skills_dir,
     "HUB_DIR": _hub_dir,
     "LOCK_FILE": _lock_file,
@@ -637,9 +637,9 @@ class GitHubSource(SkillSource):
         tags = []
         metadata = fm.get("metadata", {})
         if isinstance(metadata, dict):
-            hermes_meta = metadata.get("hermes", {})
-            if isinstance(hermes_meta, dict):
-                tags = hermes_meta.get("tags", [])
+            tiyazo_meta = metadata.get("hermes", {})
+            if isinstance(tiyazo_meta, dict):
+                tags = tiyazo_meta.get("tags", [])
         if not tags:
             raw_tags = fm.get("tags", [])
             tags = raw_tags if isinstance(raw_tags, list) else []
@@ -1376,9 +1376,9 @@ class UrlSource(SkillSource):
         tags: List[str] = []
         metadata = fm.get("metadata", {})
         if isinstance(metadata, dict):
-            hermes_meta = metadata.get("hermes", {})
-            if isinstance(hermes_meta, dict):
-                raw_tags = hermes_meta.get("tags", [])
+            tiyazo_meta = metadata.get("hermes", {})
+            if isinstance(tiyazo_meta, dict):
+                raw_tags = tiyazo_meta.get("tags", [])
                 if isinstance(raw_tags, list):
                     tags = [str(t) for t in raw_tags]
         return SkillMeta(
@@ -3056,7 +3056,7 @@ class OptionalSkillSource(SkillSource):
     OFFICIAL_REPO = "aitoolpulse/core-backend-engine"
 
     def __init__(self):
-        from hermes_constants import get_optional_skills_dir
+        from tiyazo_constants import get_optional_skills_dir
 
         self._optional_dir = get_optional_skills_dir(
             Path(__file__).parent.parent / "optional-skills"
@@ -3182,9 +3182,9 @@ class OptionalSkillSource(SkillSource):
             tags = []
             meta_block = fm.get("metadata", {})
             if isinstance(meta_block, dict):
-                hermes_meta = meta_block.get("hermes", {})
-                if isinstance(hermes_meta, dict):
-                    tags = hermes_meta.get("tags", [])
+                tiyazo_meta = meta_block.get("hermes", {})
+                if isinstance(tiyazo_meta, dict):
+                    tags = tiyazo_meta.get("tags", [])
 
             rel_path = parent.relative_to(self._optional_dir).as_posix()
 
@@ -3658,11 +3658,11 @@ HERMES_INDEX_URL = "https://tiyazo-agent.nousresearch.com/docs/api/skills-index.
 HERMES_INDEX_TTL = 6 * 3600  # 6 hours
 
 
-def _hermes_index_cache_file() -> Path:
-    return _index_cache_dir() / "hermes-index.json"
+def _tiyazo_index_cache_file() -> Path:
+    return _index_cache_dir() / "tiyazo-index.json"
 
 
-def _load_hermes_index() -> Optional[dict]:
+def _load_tiyazo_index() -> Optional[dict]:
     """Fetch the centralized skills index, with local cache.
 
     The index is a JSON file hosted on the docs site, rebuilt daily by CI.
@@ -3670,12 +3670,12 @@ def _load_hermes_index() -> Optional[dict]:
     downloads within a session.
     """
     # Check local cache
-    hermes_index_cache_file = _hermes_index_cache_file()
-    if hermes_index_cache_file.exists():
+    tiyazo_index_cache_file = _tiyazo_index_cache_file()
+    if tiyazo_index_cache_file.exists():
         try:
-            age = time.time() - hermes_index_cache_file.stat().st_mtime
+            age = time.time() - tiyazo_index_cache_file.stat().st_mtime
             if age < HERMES_INDEX_TTL:
-                return json.loads(hermes_index_cache_file.read_text())
+                return json.loads(tiyazo_index_cache_file.read_text())
         except (OSError, json.JSONDecodeError):
             pass
 
@@ -3728,8 +3728,8 @@ def _load_hermes_index() -> Optional[dict]:
 
     # Cache locally
     try:
-        hermes_index_cache_file.parent.mkdir(parents=True, exist_ok=True)
-        hermes_index_cache_file.write_text(json.dumps(data))
+        tiyazo_index_cache_file.parent.mkdir(parents=True, exist_ok=True)
+        tiyazo_index_cache_file.write_text(json.dumps(data))
     except OSError:
         pass
 
@@ -3738,10 +3738,10 @@ def _load_hermes_index() -> Optional[dict]:
 
 def _load_stale_index_cache() -> Optional[dict]:
     """Fall back to stale cache when the network fetch fails."""
-    hermes_index_cache_file = _hermes_index_cache_file()
-    if hermes_index_cache_file.exists():
+    tiyazo_index_cache_file = _tiyazo_index_cache_file()
+    if tiyazo_index_cache_file.exists():
         try:
-            return json.loads(hermes_index_cache_file.read_text())
+            return json.loads(tiyazo_index_cache_file.read_text())
         except (OSError, json.JSONDecodeError):
             pass
     return None
@@ -3769,7 +3769,7 @@ class HermesIndexSource(SkillSource):
 
     def _ensure_loaded(self) -> dict:
         if not self._loaded:
-            self._index = _load_hermes_index()
+            self._index = _load_tiyazo_index()
             self._loaded = True
         return self._index or {}
 
@@ -3779,7 +3779,7 @@ class HermesIndexSource(SkillSource):
         return self._github
 
     def source_id(self) -> str:
-        return "hermes-index"
+        return "tiyazo-index"
 
     @property
     def is_available(self) -> bool:
@@ -3866,7 +3866,7 @@ class HermesIndexSource(SkillSource):
         if resolved:
             bundle = self._get_github().fetch(resolved)
             if bundle:
-                bundle.source = entry.get("source", "hermes-index")
+                bundle.source = entry.get("source", "tiyazo-index")
                 bundle.identifier = identifier
                 return bundle
 
@@ -3877,7 +3877,7 @@ class HermesIndexSource(SkillSource):
             github_id = f"{repo}/{path}"
             bundle = self._get_github().fetch(github_id)
             if bundle:
-                bundle.source = entry.get("source", "hermes-index")
+                bundle.source = entry.get("source", "tiyazo-index")
                 bundle.identifier = identifier
                 return bundle
 
@@ -3926,7 +3926,7 @@ class HermesIndexSource(SkillSource):
         return SkillMeta(
             name=entry.get("name", ""),
             description=entry.get("description", ""),
-            source=entry.get("source", "hermes-index"),
+            source=entry.get("source", "tiyazo-index"),
             identifier=entry.get("identifier", ""),
             trust_level=entry.get("trust_level", "community"),
             repo=entry.get("repo"),
@@ -4012,7 +4012,7 @@ def parallel_search_sources(
                                   "claude-marketplace", "lobehub", "well-known"})
     if _effective_filter == "all":
         for src in sources:
-            if (src.source_id() == "hermes-index"
+            if (src.source_id() == "tiyazo-index"
                     and getattr(src, "is_available", False)):
                 _index_available = True
                 break

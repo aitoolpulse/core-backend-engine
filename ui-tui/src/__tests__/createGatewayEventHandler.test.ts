@@ -186,11 +186,11 @@ describe('createGatewayEventHandler', () => {
     const onEvent = createGatewayEventHandler(ctx)
 
     onEvent({
-      payload: { text: "💾 Self-improvement review: Skill 'hermes-release' patched" },
+      payload: { text: "💾 Self-improvement review: Skill 'tiyazo-release' patched" },
       type: 'review.summary'
     } as any)
 
-    expect(ctx.system.sys).toHaveBeenCalledWith("💾 Self-improvement review: Skill 'hermes-release' patched")
+    expect(ctx.system.sys).toHaveBeenCalledWith("💾 Self-improvement review: Skill 'tiyazo-release' patched")
   })
 
   it('ignores review.summary events with empty or missing text', () => {

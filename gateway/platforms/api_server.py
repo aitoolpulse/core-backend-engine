@@ -65,11 +65,11 @@ from agent.redact import redact_sensitive_text
 logger = logging.getLogger(__name__)
 
 
-def _hermes_version() -> str:
+def _tiyazo_version() -> str:
     """Return the tiyazo-agent version string, or "dev" if it can't be resolved.
 
     Tries the installed package metadata first (authoritative for a pip/uv
-    install), then the in-tree ``hermes_cli.__version__`` (covers editable /
+    install), then the in-tree ``tiyazo_cli.__version__`` (covers editable /
     source checkouts where metadata may be stale or absent). Never raises —
     a version probe must not be able to break the health endpoint.
     """
@@ -80,7 +80,7 @@ def _hermes_version() -> str:
     except Exception:
         pass
     try:
-        from hermes_cli import __version__
+        from tiyazo_cli import __version__
 
         return __version__
     except Exception:
@@ -387,8 +387,8 @@ class ResponseStore:
         self._max_size = max_size
         if db_path is None:
             try:
-                from hermes_cli.config import get_hermes_home
-                db_path = str(get_hermes_home() / "response_store.db")
+                from tiyazo_cli.config import get_tiyazo_home
+                db_path = str(get_tiyazo_home() / "response_store.db")
             except Exception:
                 db_path = ":memory:"
         self._db_path: Optional[str] = db_path if db_path != ":memory:" else None
@@ -400,8 +400,8 @@ class ResponseStore:
         # Use shared WAL-fallback helper so response_store.db degrades
         # gracefully on NFS/SMB/FUSE-mounted TIYAZO_HOME (same filesystem
         # issue addressed for state.db/kanban.db — see
-        # hermes_state._WAL_INCOMPAT_MARKERS).
-        from hermes_state import apply_wal_with_fallback
+        # tiyazo_state._WAL_INCOMPAT_MARKERS).
+        from tiyazo_state import apply_wal_with_fallback
         apply_wal_with_fallback(self._conn, db_label="response_store.db")
         self._conn.execute(
             """CREATE TABLE IF NOT EXISTS responses (
@@ -926,7 +926,7 @@ class APIServerAdapter(BasePlatformAdapter):
         """
         default = 10
         try:
-            from hermes_cli.config import cfg_get, load_config
+            from tiyazo_cli.config import cfg_get, load_config
 
             raw = cfg_get(
                 load_config(),
@@ -952,7 +952,7 @@ class APIServerAdapter(BasePlatformAdapter):
         if explicit and explicit.strip():
             return explicit.strip()
         try:
-            from hermes_cli.profiles import get_active_profile_name
+            from tiyazo_cli.profiles import get_active_profile_name
             profile = get_active_profile_name()
             if profile and profile not in {"default", "custom"}:
                 return profile
@@ -1149,7 +1149,7 @@ class APIServerAdapter(BasePlatformAdapter):
         """
         if self._session_db is None:
             try:
-                from hermes_state import SessionDB
+                from tiyazo_state import SessionDB
                 self._session_db = SessionDB()
             except Exception as e:
                 logger.debug("SessionDB unavailable for API server: %s", e)
@@ -1248,7 +1248,7 @@ class APIServerAdapter(BasePlatformAdapter):
         Uses _resolve_runtime_agent_kwargs() to pick up model, api_key,
         base_url, etc. from config.yaml / env vars.  Toolsets are resolved
         from config.yaml platform_toolsets.api_server (same as all other
-        gateway platforms), falling back to the hermes-api-server default.
+        gateway platforms), falling back to the tiyazo-api-server default.
 
         ``gateway_session_key`` is a stable per-channel identifier supplied
         by the client (via ``X-Hermes-Session-Key``).  Unlike ``session_id``
@@ -1270,7 +1270,7 @@ class APIServerAdapter(BasePlatformAdapter):
             _load_gateway_config,
             GatewayRunner,
         )
-        from hermes_cli.tools_config import _get_platform_tools
+        from tiyazo_cli.tools_config import _get_platform_tools
 
         runtime_kwargs = _resolve_runtime_agent_kwargs()
         reasoning_config = GatewayRunner._load_reasoning_config()
@@ -1370,7 +1370,7 @@ class APIServerAdapter(BasePlatformAdapter):
     async def _handle_health(self, request: "web.Request") -> "web.Response":
         """GET /health — simple health check."""
         return web.json_response(
-            {"status": "ok", "platform": "tiyazo-agent", "version": _hermes_version()}
+            {"status": "ok", "platform": "tiyazo-agent", "version": _tiyazo_version()}
         )
 
     async def _handle_health_detailed(self, request: "web.Request") -> "web.Response":
@@ -1400,7 +1400,7 @@ class APIServerAdapter(BasePlatformAdapter):
         return web.json_response({
             "status": "ok",
             "platform": "tiyazo-agent",
-            "version": _hermes_version(),
+            "version": _tiyazo_version(),
             "gateway_state": gw_state,
             "platforms": runtime.get("platforms", {}),
             "active_agents": gw_active,
@@ -1579,8 +1579,8 @@ class APIServerAdapter(BasePlatformAdapter):
             return auth_err
 
         try:
-            from hermes_cli.config import load_config
-            from hermes_cli.tools_config import (
+            from tiyazo_cli.config import load_config
+            from tiyazo_cli.tools_config import (
                 _get_effective_configurable_toolsets,
                 _get_platform_tools,
                 _toolset_has_keys,
@@ -3768,7 +3768,7 @@ class APIServerAdapter(BasePlatformAdapter):
         trips NAS's HTTP timeout. The store CAS claim inside fire_due guards
         against double-fire on a NAS/scheduler retry.
         """
-        from hermes_cli.config import cfg_get, load_config
+        from tiyazo_cli.config import cfg_get, load_config
         from plugins.cron_providers.chronos.verify import get_fire_verifier
 
         auth = request.headers.get("Authorization", "")
@@ -4719,7 +4719,7 @@ class APIServerAdapter(BasePlatformAdapter):
             return False
 
         try:
-            from hermes_cli.auth import has_usable_secret
+            from tiyazo_cli.auth import has_usable_secret
             if not has_usable_secret(self._api_key, min_length=16):
                 logger.error(
                     "[%s] Refusing to start: API_SERVER_KEY is a "
@@ -4825,13 +4825,13 @@ class APIServerAdapter(BasePlatformAdapter):
             # Loud warning when a network-accessible API server runs against an
             # unsandboxed local terminal backend. The API server can drive the
             # agent's terminal/file tools as the host user; on a public bind
-            # that is the exact surface the hermes-0day campaign abused to write
+            # that is the exact surface the tiyazo-0day campaign abused to write
             # ~/.tiyazo/config.yaml and plant persistence. Sandboxing (Docker /
             # remote backend) contains the blast radius. Warn, don't refuse —
             # the operator may have an external firewall / strong key.
             if is_network_accessible(self._host):
                 try:
-                    from hermes_cli.config import load_config as _load_cfg
+                    from tiyazo_cli.config import load_config as _load_cfg
                     _backend = (
                         ((_load_cfg() or {}).get("terminal") or {}).get(
                             "backend", "local"

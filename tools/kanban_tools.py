@@ -34,9 +34,9 @@ import os
 from typing import Any, Optional
 
 from agent.redact import redact_sensitive_text
-from hermes_cli.goals import judge_goal
+from tiyazo_cli.goals import judge_goal
 from tools.registry import registry, tool_error
-from hermes_cli.config import cfg_get, load_config
+from tiyazo_cli.config import cfg_get, load_config
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ def _profile_has_kanban_toolset() -> bool:
     # negligible overhead. The check_fn results are further TTL-cached
     # (~30s) by the tool registry.
     try:
-        from hermes_cli.config import load_config
+        from tiyazo_cli.config import load_config
         cfg = load_config()
         toolsets = cfg.get("toolsets", [])
         return "kanban" in toolsets
@@ -175,7 +175,7 @@ def _connect(board: Optional[str] = None):
     → ``default``). Per-tool ``board`` lets a Telegram-side agent override
     the env-pinned active board without restarting Hermes.
     """
-    from hermes_cli import kanban_db as kb
+    from tiyazo_cli import kanban_db as kb
     return kb, kb.connect(board=board)
 
 
@@ -811,7 +811,7 @@ def _handle_comment(args: dict, **kw) -> str:
     # into the next worker's system prompt by ``build_worker_context``
     # as ``**{author}** (timestamp): {body}`` — accepting an
     # ``args["author"]`` override let a worker forge a comment from
-    # an authoritative-looking name like ``hermes-system`` and poison
+    # an authoritative-looking name like ``tiyazo-system`` and poison
     # the future-worker context with what reads as a system directive.
     # Cross-task commenting itself remains unrestricted (see #19713) —
     # comments are the deliberate handoff channel between tasks.
@@ -1033,7 +1033,7 @@ def _maybe_auto_subscribe(conn: Any, task_id: str) -> bool:
         )
 
         # Lazy-import to keep the module-level dependency light
-        from hermes_cli import kanban_db as _kb
+        from tiyazo_cli import kanban_db as _kb
         _kb.add_notify_sub(
             conn, task_id=task_id,
             platform=platform, chat_id=chat_id,

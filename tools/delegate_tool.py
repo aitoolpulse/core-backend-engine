@@ -34,7 +34,7 @@ from toolsets import TOOLSETS
 
 # Sentinel value used by the runtime provider system for providers that are
 # not natively known (named custom providers, third-party aggregators, etc.).
-# Must match hermes_cli.runtime_provider.RUNTIME_PROVIDER_TYPE_CUSTOM.
+# Must match tiyazo_cli.runtime_provider.RUNTIME_PROVIDER_TYPE_CUSTOM.
 _RUNTIME_PROVIDER_CUSTOM = "custom"
 from tools import file_state
 from tools.terminal_tool import set_approval_callback as _set_subagent_approval_cb
@@ -544,10 +544,10 @@ def _is_mcp_toolset_name(name: str) -> bool:
 def _expand_parent_toolsets(parent_toolsets: set) -> set:
     """Expand composite toolsets so individual toolset names are recognized.
 
-    When a parent uses a composite toolset like ``hermes-cli`` (which bundles
+    When a parent uses a composite toolset like ``tiyazo-cli`` (which bundles
     all core tools), the child may request individual toolsets such as ``web``
     or ``terminal``.  A simple name-based intersection would reject them
-    because ``"web" != "hermes-cli"``.
+    because ``"web" != "tiyazo-cli"``.
 
     This helper collects the tool names from each parent toolset, then adds
     the names of any individual toolsets whose tools are a *subset* of the
@@ -1118,7 +1118,7 @@ def _build_child_agent(
 
     if toolsets:
         # Intersect with parent — subagent must not gain tools the parent lacks.
-        # Expand composite toolsets (e.g. hermes-cli) so that individual
+        # Expand composite toolsets (e.g. tiyazo-cli) so that individual
         # toolset names (e.g. web, terminal) are recognised during intersection.
         expanded_parent = _expand_parent_toolsets(parent_toolsets)
         child_toolsets = [t for t in toolsets if t in expanded_parent]
@@ -1258,7 +1258,7 @@ def _build_child_agent(
         # instead of disabling thinking for children.
         delegation_effort = delegation_cfg.get("reasoning_effort")
         if delegation_effort or delegation_effort is False:
-            from hermes_constants import parse_reasoning_effort
+            from tiyazo_constants import parse_reasoning_effort
 
             parsed = parse_reasoning_effort(delegation_effort)
             if parsed is not None:
@@ -1380,7 +1380,7 @@ def _build_child_agent(
             logger.debug("spawn_requested relay failed: %s", exc)
 
     try:
-        from hermes_cli.plugins import invoke_hook as _invoke_hook
+        from tiyazo_cli.plugins import invoke_hook as _invoke_hook
         _invoke_hook(
             "subagent_start",
             parent_session_id=getattr(parent_agent, "session_id", None),
@@ -1418,13 +1418,13 @@ def _dump_subagent_timeout_diagnostic(
     Returns the absolute path to the diagnostic file, or None on failure.
     """
     try:
-        from hermes_constants import get_hermes_home
+        from tiyazo_constants import get_tiyazo_home
         import datetime as _dt
         import sys as _sys
         import traceback as _traceback
 
-        hermes_home = get_hermes_home()
-        logs_dir = hermes_home / "logs"
+        tiyazo_home = get_tiyazo_home()
+        logs_dir = tiyazo_home / "logs"
         try:
             logs_dir.mkdir(parents=True, exist_ok=True)
         except Exception:
@@ -1552,10 +1552,10 @@ def _spill_summary_to_file(task_index: int, summary: str) -> Optional[str]:
     the trimmed head+tail is still returned to the parent regardless).
     """
     try:
-        from hermes_constants import get_hermes_dir
+        from tiyazo_constants import get_tiyazo_dir
         import datetime as _dt
 
-        cache_dir = get_hermes_dir("cache/delegation", "delegation_cache")
+        cache_dir = get_tiyazo_dir("cache/delegation", "delegation_cache")
         cache_dir.mkdir(parents=True, exist_ok=True)
         ts = _dt.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         path = cache_dir / f"subagent-summary-{task_index}-{ts}.txt"
@@ -2688,7 +2688,7 @@ def delegate_task(
         # child was closed.
         _parent_session_id = getattr(parent_agent, "session_id", None)
         try:
-            from hermes_cli.plugins import invoke_hook as _invoke_hook
+            from tiyazo_cli.plugins import invoke_hook as _invoke_hook
         except Exception:
             _invoke_hook = None
         # Aggregate child spend here so the parent's footer/UI reflect the true
@@ -3025,7 +3025,7 @@ def _resolve_delegation_credentials(cfg: dict, parent_agent) -> dict:
         # proxies — pick the right transport automatically. Without this,
         # subagents would default to chat_completions and hit 404s on endpoints
         # that only speak the Anthropic Messages protocol. Fixes #10213.
-        from hermes_cli.runtime_provider import _detect_api_mode_for_url
+        from tiyazo_cli.runtime_provider import _detect_api_mode_for_url
 
         base_lower = configured_base_url.lower()
         provider = "custom"
@@ -3068,7 +3068,7 @@ def _resolve_delegation_credentials(cfg: dict, parent_agent) -> dict:
 
     # Provider is configured — resolve full credentials
     try:
-        from hermes_cli.runtime_provider import resolve_runtime_provider
+        from tiyazo_cli.runtime_provider import resolve_runtime_provider
 
         runtime = resolve_runtime_provider(requested=configured_provider, target_model=configured_model)
     except Exception as exc:
@@ -3101,7 +3101,7 @@ def _load_config() -> dict:
     """Load delegation config from CLI_CONFIG or persistent config.
 
     Checks the runtime config (cli.py CLI_CONFIG) first, then falls back
-    to the persistent config (hermes_cli/config.py load_config()) so that
+    to the persistent config (tiyazo_cli/config.py load_config()) so that
     ``delegation.model`` / ``delegation.provider`` are picked up regardless
     of the entry point (CLI, gateway, cron).
     """
@@ -3114,7 +3114,7 @@ def _load_config() -> dict:
     except Exception:
         pass
     try:
-        from hermes_cli.config import load_config
+        from tiyazo_cli.config import load_config
 
         full = load_config()
         return full.get("delegation") or {}
