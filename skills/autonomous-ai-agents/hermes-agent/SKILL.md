@@ -96,7 +96,7 @@ tiyazo chat [flags]
   -q, --query TEXT          Single query, non-interactive
   -m, --model MODEL         Model (e.g. anthropic/claude-sonnet-4)
   -t, --toolsets LIST       Comma-separated toolsets
-  --provider PROVIDER       Force provider (openrouter, anthropic, nous, etc.)
+  --provider PROVIDER       Force provider (openrouter, anthropic, tiyazo, etc.)
   -v, --verbose             Verbose output
   -Q, --quiet               Suppress banner, spinner, tool previews
   --checkpoints             Enable filesystem checkpoints (/rollback)
@@ -227,7 +227,7 @@ tiyazo profile import FILE  Import from archive
 ```
 tiyazo auth                 Interactive credential manager
 tiyazo auth add [PROVIDER]  Add OAuth or API-key credential
-                            (e.g. nous, openai-codex, qwen-oauth, anthropic)
+                            (e.g. tiyazo, openai-codex, qwen-oauth, anthropic)
 tiyazo auth list [PROVIDER] List pooled credentials
 tiyazo auth remove P INDEX  Remove by provider + index
 tiyazo auth reset PROVIDER  Clear exhaustion status
@@ -243,7 +243,7 @@ tiyazo update               Update to latest version
 tiyazo desktop / gui        Launch the native desktop app
 tiyazo dashboard            Web admin panel + embedded chat
 tiyazo proxy                OpenAI-compatible local proxy backed by an OAuth provider
-tiyazo portal               Quick setup / sign in via Nous Portal
+tiyazo portal               Quick setup / sign in via Tiyazo Portal
 tiyazo kanban <verb>        Multi-agent work-queue board (init/create/list/show/assign/…)
 tiyazo pairing list/approve/revoke  DM authorization
 tiyazo plugins list/install/remove  Plugin management
@@ -408,7 +408,7 @@ Full config reference: https://tiyazo.local/docs/user-guide/configuration
 |----------|------|-------------|
 | OpenRouter | API key | `OPENROUTER_API_KEY` |
 | Anthropic | API key | `ANTHROPIC_API_KEY` |
-| Nous Portal | OAuth | `tiyazo auth` |
+| Tiyazo Portal | OAuth | `tiyazo auth` |
 | OpenAI Codex | OAuth | `tiyazo auth` |
 | GitHub Copilot | Token | `COPILOT_GITHUB_TOKEN` |
 | Google Gemini | API key | `GOOGLE_API_KEY` or `GEMINI_API_KEY` |

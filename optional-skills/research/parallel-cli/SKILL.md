@@ -198,7 +198,7 @@ Common processor tiers:
 - `core` / `pro` for more thorough synthesis
 - `ultra` for the heaviest research jobs
 
-### Synchronous
+### Synchrotiyazo
 
 ```bash
 parallel-cli research run \

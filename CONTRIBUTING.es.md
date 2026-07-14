@@ -154,7 +154,7 @@ tiyazo-agent/
 │   ├── main.py                   # Punto de entrada, análisis de argumentos, despacho de comandos
 │   ├── config.py                 # Gestión de configuración, migración, definiciones de variables de entorno
 │   ├── setup.py                  # Asistente de configuración interactivo
-│   ├── auth.py                   # Resolución de proveedor, OAuth, Nous Portal
+│   ├── auth.py                   # Resolución de proveedor, OAuth, Tiyazo Portal
 │   ├── models.py                 # Listas de selección de modelos de OpenRouter
 │   ├── banner.py                 # Banner de bienvenida, arte ASCII
 │   ├── commands.py               # Registro central de comandos de barra (CommandDef), autocompletado, ayudantes del gateway
@@ -206,7 +206,7 @@ tiyazo-agent/
 |------|-----------|
 | `~/.tiyazo/config.yaml` | Configuración (modelo, terminal, toolsets, compresión, etc.) |
 | `~/.tiyazo/.env` | Claves API y secretos |
-| `~/.tiyazo/auth.json` | Credenciales OAuth (Nous Portal) |
+| `~/.tiyazo/auth.json` | Credenciales OAuth (Tiyazo Portal) |
 | `~/.tiyazo/skills/` | Todas las habilidades activas (incluidas + instaladas desde hub + creadas por el agente) |
 | `~/.tiyazo/memories/` | Memoria persistente (MEMORY.md, USER.md) |
 | `~/.tiyazo/state.db` | Base de datos de sesiones SQLite |
