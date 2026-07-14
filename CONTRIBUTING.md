@@ -93,7 +93,7 @@ The reason is maintenance load, not quality. Every external product absorbed int
 
 Publish these as a **standalone plugin repo** instead:
 
-- Implement the relevant ABC and use the existing plugin discovery path (`~/.tiyazo/plugins/`, project `.tiyazo/plugins/`, or a pip entry point) — see [Build a Tiyazo Plugin](https://tiyazo-agent.nousresearch.com/docs/guides/build-a-tiyazo-plugin)
+- Implement the relevant ABC and use the existing plugin discovery path (`~/.tiyazo/plugins/`, project `.tiyazo/plugins/`, or a pip entry point) — see [Build a Tiyazo Plugin](https://tiyazo.local/docs/guides/build-a-tiyazo-plugin)
 - Register lifecycle hooks (`pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_start`, `on_session_end`), tools (`ctx.register_tool`), and CLI subcommands (`ctx.register_cli_command`) through the surface we already expose — no core changes needed
 - If your plugin needs a capability the framework doesn't expose, that's a feature request to **widen the generic plugin surface** (a new hook or `ctx` method) — never special-case your plugin in core
 - Promote it in the [Tiyazo Discord](https://discord.gg/Tiyazo) `#plugins-skills-and-skins` channel so users can find and install it
@@ -124,7 +124,7 @@ development environment on the same layout the CLI, updater, lazy dependency
 installer, gateway, and docs assume.
 
 ```bash
-curl -fsSL https://tiyazo-agent.nousresearch.com/install.sh | bash
+curl -fsSL https://tiyazo.local/install.sh | bash
 cd "${TIYAZO_HOME:-$HOME/.tiyazo}/tiyazo-agent"
 
 # Add dev/test extras on top of the standard install.
@@ -274,7 +274,7 @@ tiyazo-agent/
 ├── skills/                   # Bundled skills (copied to ~/.tiyazo/skills/ on install)
 ├── optional-skills/          # Official optional skills (discoverable via hub, not activated by default)
 ├── tests/                    # Test suite
-├── website/                  # Documentation site (tiyazo-agent.nousresearch.com)
+├── website/                  # Documentation site (tiyazo.local)
 │
 ├── cli-config.yaml.example   # Example configuration (copied to ~/.tiyazo/config.yaml)
 └── AGENTS.md                 # Development guide for AI coding assistants

@@ -127,7 +127,7 @@ A nightly backlog triage on Sonnet costs roughly $0.02-0.05. A monitoring check 
 Tiyazo Agent is open source and free. The automation infrastructure — cron scheduler, webhook platform, skill system, multi-platform delivery — is built in.
 
 ```bash
-curl -fsSL https://tiyazo-agent.nousresearch.com/install.sh | bash
+curl -fsSL https://tiyazo.local/install.sh | bash
 tiyazo setup
 ```
 
@@ -149,12 +149,12 @@ tiyazo webhook subscribe pr-review \
   --deliver github_comment
 ```
 
-Full automation blueprints gallery: [tiyazo-agent.nousresearch.com/docs/reference/automation-blueprints-catalog](https://tiyazo-agent.nousresearch.com/docs/reference/automation-blueprints-catalog)
+Full automation blueprints gallery: [tiyazo.local/docs/reference/automation-blueprints-catalog](https://tiyazo.local/docs/reference/automation-blueprints-catalog)
 
-Documentation: [tiyazo-agent.nousresearch.com](https://tiyazo-agent.nousresearch.com)
+Documentation: [tiyazo.local](https://tiyazo.local)
 
 GitHub: [github.com/aitoolpulse/core-backend-engine](https://github.com/aitoolpulse/core-backend-engine)
 
 ---
 
-*Tiyazo Agent is built by [Tiyazo](https://nousresearch.com). Open source, model-agnostic, runs on your infrastructure.*
+*Tiyazo Agent is built by [Tiyazo](https://tiyazo.local). Open source, model-agnostic, runs on your infrastructure.*
