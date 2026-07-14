@@ -163,7 +163,7 @@ _MARKER_TTL = 86400  # 24 hours
 
 
 def _get_tiyazo_home() -> str:
-    """Return the Hermes home directory, respecting TIYAZO_HOME env var."""
+    """Return the Tiyazo home directory, respecting TIYAZO_HOME env var."""
     return str(get_tiyazo_home())
 
 

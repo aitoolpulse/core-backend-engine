@@ -87,7 +87,7 @@ def start(
     out_dir: Optional[Path] = None,
     headed: bool = False,
     auth_state: Optional[str] = None,
-    guest_name: str = "Hermes Agent",
+    guest_name: str = "Tiyazo Agent",
     duration: Optional[str] = None,
     session_id: Optional[str] = None,
     mode: str = "transcribe",
@@ -98,7 +98,7 @@ def start(
 ) -> Dict[str, Any]:
     """Spawn the meet_bot subprocess for *url*.
 
-    If a bot is already running for this hermes install, leave it first —
+    If a bot is already running for this tiyazo install, leave it first —
     we enforce single-active-meeting semantics.
 
     Returns a dict summarizing the started bot.
@@ -133,27 +133,27 @@ def start(
                 pass
 
     env = os.environ.copy()
-    env["HERMES_MEET_URL"] = url
-    env["HERMES_MEET_OUT_DIR"] = str(out)
-    env["HERMES_MEET_GUEST_NAME"] = guest_name
+    env["TIYAZO_MEET_URL"] = url
+    env["TIYAZO_MEET_OUT_DIR"] = str(out)
+    env["TIYAZO_MEET_GUEST_NAME"] = guest_name
     if headed:
-        env["HERMES_MEET_HEADED"] = "1"
+        env["TIYAZO_MEET_HEADED"] = "1"
     if auth_state:
-        env["HERMES_MEET_AUTH_STATE"] = auth_state
+        env["TIYAZO_MEET_AUTH_STATE"] = auth_state
     if duration:
-        env["HERMES_MEET_DURATION"] = duration
+        env["TIYAZO_MEET_DURATION"] = duration
     # v2: realtime mode + passthroughs. The bot defaults to transcribe
-    # mode if HERMES_MEET_MODE isn't set, matching v1 behavior.
+    # mode if TIYAZO_MEET_MODE isn't set, matching v1 behavior.
     if mode:
-        env["HERMES_MEET_MODE"] = mode
+        env["TIYAZO_MEET_MODE"] = mode
     if realtime_model:
-        env["HERMES_MEET_REALTIME_MODEL"] = realtime_model
+        env["TIYAZO_MEET_REALTIME_MODEL"] = realtime_model
     if realtime_voice:
-        env["HERMES_MEET_REALTIME_VOICE"] = realtime_voice
+        env["TIYAZO_MEET_REALTIME_VOICE"] = realtime_voice
     if realtime_instructions:
-        env["HERMES_MEET_REALTIME_INSTRUCTIONS"] = realtime_instructions
+        env["TIYAZO_MEET_REALTIME_INSTRUCTIONS"] = realtime_instructions
     if realtime_api_key:
-        env["HERMES_MEET_REALTIME_KEY"] = realtime_api_key
+        env["TIYAZO_MEET_REALTIME_KEY"] = realtime_api_key
 
     log_path = out / "bot.log"
     # Detach: stdin=devnull, stdout/stderr → log file, new session so parent

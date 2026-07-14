@@ -1,10 +1,10 @@
 """
-Backup and import commands for hermes CLI.
+Backup and import commands for tiyazo CLI.
 
-`hermes backup` creates a zip archive of the entire ~/.tiyazo/ directory
+`tiyazo backup` creates a zip archive of the entire ~/.tiyazo/ directory
 (excluding the tiyazo-agent repo and transient files).
 
-`hermes import` restores from a backup zip, overlaying onto the current
+`tiyazo import` restores from a backup zip, overlaying onto the current
 TIYAZO_HOME root.
 """
 
@@ -88,7 +88,7 @@ _EXCLUDED_NAMES = {
     "cron.pid",
 }
 
-# File names that ``hermes import`` must never overwrite, matched by basename so
+# File names that ``tiyazo import`` must never overwrite, matched by basename so
 # they're caught for the root profile (``gateway_state.json``) and for named
 # profiles alike (``profiles/<name>/gateway_state.json``).
 #
@@ -209,7 +209,7 @@ def _iter_external_files(base: Path) -> List[Path]:
 
 
 def _should_exclude(rel_path: Path) -> bool:
-    """Return True if *rel_path* (relative to hermes root) should be skipped."""
+    """Return True if *rel_path* (relative to tiyazo root) should be skipped."""
     parts = rel_path.parts
 
     for part in parts:
@@ -290,11 +290,11 @@ def _format_size(nbytes: int) -> str:
 
 
 def run_backup(args) -> None:
-    """Create a zip backup of the Hermes home directory."""
+    """Create a zip backup of the Tiyazo home directory."""
     tiyazo_root = get_default_tiyazo_root()
 
     if not tiyazo_root.is_dir():
-        print(f"Error: Hermes home directory not found at {tiyazo_root}")
+        print(f"Error: Tiyazo home directory not found at {tiyazo_root}")
         sys.exit(1)
 
     # Determine output path
@@ -461,7 +461,7 @@ def run_backup(args) -> None:
         if len(errors) > 10:
             print(f"  ... and {len(errors) - 10} more")
 
-    print(f"\nRestore with: hermes import {out_path.name}")
+    print(f"\nRestore with: tiyazo import {out_path.name}")
 
 
 # ---------------------------------------------------------------------------
@@ -469,7 +469,7 @@ def run_backup(args) -> None:
 # ---------------------------------------------------------------------------
 
 def _validate_backup_zip(zf: zipfile.ZipFile) -> tuple[bool, str]:
-    """Check that a zip looks like a Hermes backup.
+    """Check that a zip looks like a Tiyazo backup.
 
     Returns (ok, reason).
     """
@@ -477,7 +477,7 @@ def _validate_backup_zip(zf: zipfile.ZipFile) -> tuple[bool, str]:
     if not names:
         return False, "zip archive is empty"
 
-    # Look for telltale files that a hermes home would have
+    # Look for telltale files that a tiyazo home would have
     markers = {"config.yaml", ".env", "state.db"}
     found = set()
     for n in names:
@@ -488,7 +488,7 @@ def _validate_backup_zip(zf: zipfile.ZipFile) -> tuple[bool, str]:
 
     if not found:
         return False, (
-            "zip does not appear to be a Hermes backup "
+            "zip does not appear to be a Tiyazo backup "
             "(no config.yaml, .env, or state databases found)"
         )
 
@@ -512,15 +512,15 @@ def _detect_prefix(zf: zipfile.ZipFile) -> str:
     first_parts = {p[0] for p in parts_list if len(p) > 1}
     if len(first_parts) == 1:
         prefix = first_parts.pop()
-        # Only strip if it looks like a hermes dir name
-        if prefix in {".tiyazo", "hermes"}:
+        # Only strip if it looks like a tiyazo dir name
+        if prefix in {".tiyazo", "tiyazo"}:
             return prefix + "/"
 
     return ""
 
 
 def run_import(args) -> None:
-    """Restore a Hermes backup from a zip file."""
+    """Restore a Tiyazo backup from a zip file."""
     zip_path = Path(args.zipfile).expanduser().resolve()
 
     if not zip_path.is_file():
@@ -556,7 +556,7 @@ def run_import(args) -> None:
 
         if (has_config or has_env) and not args.force:
             print()
-            print("Warning: Target directory already has Hermes configuration.")
+            print("Warning: Target directory already has Tiyazo configuration.")
             print("Importing will overwrite existing files with backup contents.")
             print()
             try:
@@ -722,25 +722,25 @@ def run_import(args) -> None:
                 # tiyazo_cli.profiles might not be available (fresh install)
                 if any(profiles_dir.iterdir()):
                     print("\n  Profiles detected but aliases could not be created.")
-                    print("  Run: hermes profile list  (after installing hermes)")
+                    print("  Run: tiyazo profile list  (after installing tiyazo)")
 
         # Guidance
         print()
         if not (tiyazo_root / "tiyazo-agent").is_dir():
             print("Note: The tiyazo-agent codebase was not included in the backup.")
-            print("  If this is a fresh install, run: hermes update")
+            print("  If this is a fresh install, run: tiyazo update")
 
         if restored_profiles:
             gw_profiles = [n for n, _ in restored_profiles]
             print("\nTo re-enable gateway services for profiles:")
             for pname in gw_profiles:
-                print(f"  hermes -p {pname} gateway install")
+                print(f"  tiyazo -p {pname} gateway install")
 
-        print("Done. Your Hermes configuration has been restored.")
+        print("Done. Your Tiyazo configuration has been restored.")
 
 
 # ---------------------------------------------------------------------------
-# Quick state snapshots (used by /snapshot slash command and hermes backup --quick)
+# Quick state snapshots (used by /snapshot slash command and tiyazo backup --quick)
 # ---------------------------------------------------------------------------
 
 # Critical state files to include in quick snapshots (relative to TIYAZO_HOME).
@@ -750,7 +750,7 @@ def run_import(args) -> None:
 # Entries may be individual files OR directories.  Directories are captured
 # recursively; missing entries are silently skipped.  Pairing data lives in
 # platform-specific JSON blobs outside state.db, so it's listed here explicitly
-# — `hermes update` snapshots this set before pulling so approved-user lists
+# — `tiyazo update` snapshots this set before pulling so approved-user lists
 # are recoverable if anything goes wrong (issue #15733).
 _QUICK_STATE_FILES = (
     "state.db",
@@ -1026,7 +1026,7 @@ def restore_cron_jobs_if_emptied(
     snapshot_id: str,
     tiyazo_home: Optional[Path] = None,
 ) -> Optional[Dict[str, Any]]:
-    """Safety net for silent cron-job loss across ``hermes update``.
+    """Safety net for silent cron-job loss across ``tiyazo update``.
 
     Config-version migrations have been observed to leave ``cron/jobs.json``
     valid-but-empty after an update, silently dropping every scheduled job
@@ -1047,7 +1047,7 @@ def restore_cron_jobs_if_emptied(
     Args:
         snapshot_id: The pre-update quick-snapshot id (from
             :func:`create_quick_snapshot`).
-        tiyazo_home: Override for the Hermes home directory (tests).
+        tiyazo_home: Override for the Tiyazo home directory (tests).
 
     Returns:
         ``None`` when no action was taken (the common, healthy path). On a
@@ -1129,7 +1129,7 @@ def prune_quick_snapshots(
 
 
 def run_quick_backup(args) -> None:
-    """CLI entry point for hermes backup --quick."""
+    """CLI entry point for tiyazo backup --quick."""
     label = getattr(args, "label", None)
     snap_id = create_quick_snapshot(label=label)
     if snap_id:
@@ -1275,7 +1275,7 @@ def create_pre_update_backup(
 
     Returns the path to the created zip, or ``None`` if no files were
     found or the backup could not be created.  Never raises — the caller
-    (``hermes update``) should continue even if the backup fails.
+    (``tiyazo update``) should continue even if the backup fails.
     """
     tiyazo_root = tiyazo_home or get_default_tiyazo_root()
     if not tiyazo_root.is_dir():
@@ -1300,7 +1300,7 @@ def create_pre_update_backup(
 
 
 # ---------------------------------------------------------------------------
-# Pre-migration auto-backup (used by `hermes claw migrate`)
+# Pre-migration auto-backup (used by `tiyazo claw migrate`)
 # ---------------------------------------------------------------------------
 
 _PRE_MIGRATION_PREFIX = "pre-migration-"
@@ -1340,11 +1340,11 @@ def create_pre_migration_backup(
     keep: int = _PRE_MIGRATION_DEFAULT_KEEP,
 ) -> Optional[Path]:
     """Create a full zip backup of TIYAZO_HOME under ``backups/`` before a
-    ``hermes claw migrate`` apply.
+    ``tiyazo claw migrate`` apply.
 
     Shares implementation with :func:`create_pre_update_backup` via
     ``_write_full_zip_backup`` — same exclusions, same SQLite safe-copy,
-    restorable with ``hermes import <archive>``.  Writes to
+    restorable with ``tiyazo import <archive>``.  Writes to
     ``<TIYAZO_HOME>/backups/pre-migration-<timestamp>.zip`` and auto-prunes
     old pre-migration backups.
 
@@ -1356,7 +1356,7 @@ def create_pre_migration_backup(
     if not tiyazo_root.is_dir():
         return None
 
-    # Reuses the shared backups/ directory so `hermes import` and the
+    # Reuses the shared backups/ directory so `tiyazo import` and the
     # update-backup listing pick up pre-migration archives too.
     backup_dir = _pre_update_backup_dir(tiyazo_root)
     try:

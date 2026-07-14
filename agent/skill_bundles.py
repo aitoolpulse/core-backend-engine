@@ -36,7 +36,7 @@ Public API
 - :func:`resolve_bundle_command_key` — map a user-typed command to its slug
 - :func:`build_bundle_invocation_message` — produce the full user message
 - :func:`reload_bundles` — re-scan disk and return a diff
-- :func:`list_bundles` — return rich info for display (``hermes bundles``)
+- :func:`list_bundles` — return rich info for display (``tiyazo bundles``)
 - :func:`save_bundle` / :func:`delete_bundle` — file-level operations
 """
 
@@ -66,10 +66,10 @@ _bundles_cache_mtime: Optional[float] = None
 def _bundles_dir() -> Path:
     """Return the canonical bundles directory under TIYAZO_HOME.
 
-    Honors ``HERMES_BUNDLES_DIR`` for tests; falls back to
+    Honors ``TIYAZO_BUNDLES_DIR`` for tests; falls back to
     ``<TIYAZO_HOME>/skill-bundles``.
     """
-    override = os.environ.get("HERMES_BUNDLES_DIR")
+    override = os.environ.get("TIYAZO_BUNDLES_DIR")
     if override:
         return Path(override).expanduser()
     return get_tiyazo_home() / "skill-bundles"
@@ -369,7 +369,7 @@ def build_bundle_invocation_message(
 
 
 # ---------------------------------------------------------------------------
-# File-level CRUD helpers — used by `hermes bundles` CLI subcommand.
+# File-level CRUD helpers — used by `tiyazo bundles` CLI subcommand.
 # ---------------------------------------------------------------------------
 
 

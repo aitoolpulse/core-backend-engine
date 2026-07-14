@@ -1,4 +1,4 @@
-"""Relay/connector support package for the Hermes gateway.
+"""Relay/connector support package for the Tiyazo gateway.
 
 EXPERIMENTAL. This package implements the gateway side of the "Gateway Gateway"
 relay design: a generic ``RelayAdapter`` plus the wire-serializable
@@ -124,7 +124,7 @@ def relay_platform_identity() -> tuple[str, str]:
 def relay_connection_auth() -> tuple[Optional[str], Optional[str]]:
     """The (gateway_id, upgrade_secret) this gateway authenticates the WS upgrade with.
 
-    Both come from enrollment (``hermes gateway enroll`` writes them to
+    Both come from enrollment (``tiyazo gateway enroll`` writes them to
     ``~/.tiyazo/.env``): ``GATEWAY_RELAY_ID`` identifies the enrolled instance,
     ``GATEWAY_RELAY_SECRET`` is the per-gateway signing secret. Either absent ->
     ``(None, None)`` and the transport dials unauthenticated (dev/test, or a
@@ -153,7 +153,7 @@ def relay_endpoint() -> Optional[str]:
     verified tenant, so a dishonest gateway can only misdirect its OWN inbound).
     The *source* of the value differs by deployment but the code path is uniform:
     a self-hosted operator sets ``GATEWAY_RELAY_ENDPOINT`` (mirrors how they set
-    ``HERMES_DASHBOARD_PUBLIC_URL``); a hosted/NAS container has the same var
+    ``TIYAZO_DASHBOARD_PUBLIC_URL``); a hosted/NAS container has the same var
     stamped in (NAS knows the public URL only in that case). Absent -> the
     gateway provisions outbound-only (no inbound routes written).
 
@@ -233,7 +233,7 @@ def relay_wake_url() -> Optional[str]:
     delivery-leg backlog. The value's *source* differs by deployment but the code
     path is uniform: a managed/NAS container has ``GATEWAY_RELAY_WAKE_URL`` stamped
     in (NAS knows the Fly autostart / dashboard hostname); a self-hosted operator
-    sets it explicitly (or passes ``--wake-url`` to ``hermes gateway enroll``).
+    sets it explicitly (or passes ``--wake-url`` to ``tiyazo gateway enroll``).
 
     Gateway-asserted but safely scoped: the org/tenant stays token-verified, so a
     dishonest gateway can only register a wake target for ITS OWN instance — the
@@ -450,14 +450,14 @@ def self_provision_relay() -> bool:
 
     The trigger is deliberately NOT ``is_managed()``: that means
     "package-manager/NixOS-managed" and is False on a NAS-hosted Fly agent (which
-    sets neither ``HERMES_MANAGED`` nor a ``.managed`` marker), so gating on it
+    sets neither ``TIYAZO_MANAGED`` nor a ``.managed`` marker), so gating on it
     blocked the exact hosted case this is for. The real signal is "you pointed me
     at a connector and didn't pin a secret" — which is both NAS-independent and
     self-guarding:
 
       - A NAS-hosted agent: has ``GATEWAY_RELAY_URL``, no pinned secret, and a
         bootstrapped NAS token -> self-provisions.
-      - A self-hosted operator who ran ``hermes gateway enroll``: has a PINNED
+      - A self-hosted operator who ran ``tiyazo gateway enroll``: has a PINNED
         ``GATEWAY_RELAY_SECRET`` -> skipped (the secret-present guard below).
       - A self-hosted box with a relay URL but no NAS identity:
         ``resolve_nous_access_token()`` fails -> graceful no-op.
@@ -506,7 +506,7 @@ def self_provision_relay() -> bool:
         host = socket.gethostname().strip()
     except Exception:  # noqa: BLE001
         host = ""
-    gateway_id = os.environ.get("GATEWAY_RELAY_ID", "").strip() or f"gw-{host or 'hermes'}"
+    gateway_id = os.environ.get("GATEWAY_RELAY_ID", "").strip() or f"gw-{host or 'tiyazo'}"
     endpoint = relay_endpoint()
     route_keys = relay_route_keys()
     instance_id = relay_instance_id()

@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "@hermes/ink": ["src/types/tiyazo-ink.d.ts"]
+      "@tiyazo/ink": ["src/types/tiyazo-ink.d.ts"]
     }
   }
 }

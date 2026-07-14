@@ -1,4 +1,4 @@
-"""``hermes gateway`` and ``hermes proxy`` subcommand parsers.
+"""``tiyazo gateway`` and ``tiyazo proxy`` subcommand parsers.
 
 Extracted verbatim from ``tiyazo_cli/main.py:main()`` (god-file Phase 2).
 Both parsers are built together because they shared one inline block (the
@@ -79,7 +79,7 @@ def build_gateway_parser(
             "Inside the s6-overlay Docker image, normally `gateway run` is "
             "automatically redirected to the supervised s6 service (so the "
             "gateway gets auto-restart on crash, plus a supervised dashboard "
-            "if HERMES_DASHBOARD is set). Pass --no-supervise to opt out and "
+            "if TIYAZO_DASHBOARD is set). Pass --no-supervise to opt out and "
             "get the historical pre-s6 foreground behavior: the gateway is "
             "the container's main process and the container exits with the "
             "gateway's exit code. No effect outside an s6 container."
@@ -216,10 +216,10 @@ def build_gateway_parser(
     # gateway migrate-legacy
     gateway_migrate_legacy = gateway_subparsers.add_parser(
         "migrate-legacy",
-        help="Remove legacy hermes.service units from pre-rename installs",
+        help="Remove legacy tiyazo.service units from pre-rename installs",
         description=(
-            "Stop, disable, and remove legacy Hermes gateway unit files "
-            "(e.g. hermes.service) left over from older installs. Profile "
+            "Stop, disable, and remove legacy Tiyazo gateway unit files "
+            "(e.g. tiyazo.service) left over from older installs. Profile "
             "units (tiyazo-gateway-<profile>.service) and unrelated "
             "third-party services are never touched."
         ),
@@ -252,7 +252,7 @@ def build_gateway_parser(
             "authoritative tenant from it), mints this gateway's per-gateway secret "
             "and per-tenant delivery key, and writes GATEWAY_RELAY_ID / "
             "GATEWAY_RELAY_SECRET / GATEWAY_RELAY_DELIVERY_KEY into ~/.tiyazo/.env. "
-            "Requires being logged in (hermes setup). Not available in managed installs."
+            "Requires being logged in (tiyazo setup). Not available in managed installs."
         ),
     )
     gateway_enroll.add_argument(
@@ -321,7 +321,7 @@ def build_gateway_parser(
     proxy_start.add_argument(
         "--provider",
         default="nous",
-        help="Upstream provider: nous or xai (default: nous). See `hermes proxy providers`.",
+        help="Upstream provider: nous or xai (default: nous). See `tiyazo proxy providers`.",
     )
     proxy_start.add_argument(
         "--host",

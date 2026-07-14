@@ -1,4 +1,4 @@
-"""``hermes pairing`` subcommand parser.
+"""``tiyazo pairing`` subcommand parser.
 
 Extracted from ``tiyazo_cli/main.py:main()`` (god-file Phase 2 follow-up).
 Handler injected to avoid importing ``main``.

@@ -229,7 +229,7 @@ def _setup_platform(tiyazo_home: str, config: dict, flags: dict[str, str]) -> No
     schema = [
         {"key": "api_key", "description": "Mem0 Platform API key", "secret": True, "required": True, "env_var": "MEM0_API_KEY", "url": "https://app.mem0.ai"},
         {"key": "user_id", "description": "User identifier", "default": "tiyazo-user"},
-        {"key": "agent_id", "description": "Agent identifier", "default": "hermes"},
+        {"key": "agent_id", "description": "Agent identifier", "default": "tiyazo"},
         {"key": "rerank", "description": "Enable reranking for recall", "default": "true", "choices": ["true", "false"]},
     ]
 
@@ -349,7 +349,7 @@ def _setup_oss(tiyazo_home: str, config: dict, flags: dict[str, str]) -> None:
 
     if env_writes:
         _write_env(Path(tiyazo_home) / ".env", env_writes)
-    _save_mem0_json(tiyazo_home, {"mode": "oss", "user_id": user_id, "agent_id": "hermes", "oss": oss_config})
+    _save_mem0_json(tiyazo_home, {"mode": "oss", "user_id": user_id, "agent_id": "tiyazo", "oss": oss_config})
 
     _install_provider_deps(llm_id, embedder_id, vector_id)
 
@@ -387,7 +387,7 @@ def _prompt_api_key(label: str, env_var: str, tiyazo_home: str) -> str:
 
 _PGVECTOR_CONTAINER = "tiyazo-pgvector"
 _PGVECTOR_IMAGE = "pgvector/pgvector:pg17"
-_PGVECTOR_PASSWORD = "hermes"
+_PGVECTOR_PASSWORD = "tiyazo"
 
 
 def _ensure_pgvector(host: str = "localhost", port: int = 5432) -> dict | None:
@@ -672,8 +672,8 @@ def _setup_oss_interactive(tiyazo_home: str, config: dict) -> None:
     user_id = input(f"  User ID [{os.getenv('USER', 'tiyazo-user')}]: ").strip()
     user_id = user_id or os.getenv("USER", "tiyazo-user")
 
-    agent_id = input("  Agent ID [hermes]: ").strip()
-    agent_id = agent_id or "hermes"
+    agent_id = input("  Agent ID [tiyazo]: ").strip()
+    agent_id = agent_id or "tiyazo"
 
     flags = {
         "oss_llm": llm_id,
@@ -826,7 +826,7 @@ def _check_min_dep_version() -> None:
 
 
 def post_setup(tiyazo_home: str, config: dict) -> None:
-    """Entry point called by hermes memory setup framework.
+    """Entry point called by tiyazo memory setup framework.
 
     Only intercepts when OSS mode is requested (via --mode oss flag or
     interactive picker). For platform mode, returns without action so the

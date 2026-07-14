@@ -83,7 +83,7 @@ HINDSIGHT = MemoryProvider(
             label="Mode",
             kind=KIND_SELECT,
             default="cloud",
-            description="How Hermes connects to Hindsight.",
+            description="How Tiyazo connects to Hindsight.",
             options=(
                 ProviderFieldOption(
                     "cloud",
@@ -117,7 +117,7 @@ HINDSIGHT = MemoryProvider(
             key="bank_id",
             label="Bank ID",
             kind=KIND_TEXT,
-            default="hermes",
+            default="tiyazo",
             aliases=("bankId",),
         ),
         ProviderField(

@@ -95,20 +95,20 @@ def current_secret_scope() -> Optional[Mapping[str, str]]:
 # Membership test is by exact name OR prefix (see _is_global_env). Keep this
 # list tight: when in doubt a value is a profile secret, not a global.
 _GLOBAL_ENV_EXACT = frozenset({
-    # Hermes runtime / deployment
-    "TIYAZO_HOME", "HERMES_PROFILE", "HERMES_GATEWAY_LOCK_DIR",
-    "HERMES_MAX_ITERATIONS", "HERMES_MAX_TOKENS", "HERMES_API_TIMEOUT",
-    "HERMES_REDACT_SECRETS", "HERMES_NOUS_TIMEOUT_SECONDS",
-    "_HERMES_GATEWAY",
+    # Tiyazo runtime / deployment
+    "TIYAZO_HOME", "TIYAZO_PROFILE", "TIYAZO_GATEWAY_LOCK_DIR",
+    "TIYAZO_MAX_ITERATIONS", "TIYAZO_MAX_TOKENS", "TIYAZO_API_TIMEOUT",
+    "TIYAZO_REDACT_SECRETS", "TIYAZO_NOUS_TIMEOUT_SECONDS",
+    "_TIYAZO_GATEWAY",
     # OS / interpreter
     "PATH", "HOME", "USER", "LANG", "LC_ALL", "TZ", "PWD", "SHELL", "TMPDIR",
     "VIRTUAL_ENV", "PYTHONPATH", "SSL_CERT_FILE",
     # Kanban paths (per-board, not per-profile-secret)
-    "HERMES_KANBAN_DB", "HERMES_KANBAN_WORKSPACES_ROOT", "HERMES_KANBAN_BOARD",
+    "TIYAZO_KANBAN_DB", "TIYAZO_KANBAN_WORKSPACES_ROOT", "TIYAZO_KANBAN_BOARD",
 })
 _GLOBAL_ENV_PREFIXES = (
-    "HERMES_KANBAN_",
-    "HERMES_TELEGRAM_",   # tuning knobs (batch delays, fallback toggles) — NOT the token
+    "TIYAZO_KANBAN_",
+    "TIYAZO_TELEGRAM_",   # tuning knobs (batch delays, fallback toggles) — NOT the token
     "TERMINAL_",          # terminal/sandbox backend settings
 )
 

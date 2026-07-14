@@ -52,8 +52,8 @@ def _tiyazo_meta(fm: dict[str, Any]) -> dict[str, Any]:
     """``metadata.tiyazo`` as a dict, tolerant of the string-valued frontmatter
     that ``parse_frontmatter``'s malformed-YAML fallback produces."""
     meta = fm.get("metadata")
-    hermes = meta.get("hermes") if isinstance(meta, dict) else None
-    return hermes if isinstance(hermes, dict) else {}
+    tiyazo = meta.get("tiyazo") if isinstance(meta, dict) else None
+    return tiyazo if isinstance(tiyazo, dict) else {}
 
 
 def _related(fm: dict[str, Any]) -> list[str]:

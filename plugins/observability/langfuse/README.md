@@ -21,9 +21,9 @@ tiyazo plugins enable observability/langfuse
 Set these in `~/.tiyazo/.env` (or via `tiyazo tools`):
 
 ```bash
-HERMES_LANGFUSE_PUBLIC_KEY=pk-lf-...
-HERMES_LANGFUSE_SECRET_KEY=sk-lf-...
-HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com   # or your self-hosted URL
+TIYAZO_LANGFUSE_PUBLIC_KEY=pk-lf-...
+TIYAZO_LANGFUSE_SECRET_KEY=sk-lf-...
+TIYAZO_LANGFUSE_BASE_URL=https://cloud.langfuse.com   # or your self-hosted URL
 ```
 
 Without the SDK or credentials the hooks no-op silently — the plugin fails
@@ -39,11 +39,11 @@ tiyazo chat -q "hello"              # then check Langfuse for a "Tiyazo turn" tr
 ## Optional tuning
 
 ```bash
-HERMES_LANGFUSE_ENV=production       # environment tag
-HERMES_LANGFUSE_RELEASE=v1.0.0       # release tag
-HERMES_LANGFUSE_SAMPLE_RATE=0.5      # sample 50% of traces
-HERMES_LANGFUSE_MAX_CHARS=12000      # max chars per field (default: 12000)
-HERMES_LANGFUSE_DEBUG=true           # verbose plugin logging
+TIYAZO_LANGFUSE_ENV=production       # environment tag
+TIYAZO_LANGFUSE_RELEASE=v1.0.0       # release tag
+TIYAZO_LANGFUSE_SAMPLE_RATE=0.5      # sample 50% of traces
+TIYAZO_LANGFUSE_MAX_CHARS=12000      # max chars per field (default: 12000)
+TIYAZO_LANGFUSE_DEBUG=true           # verbose plugin logging
 ```
 
 ## Disable

@@ -237,7 +237,7 @@ Add a named toolset for your platform:
 ```python
 "tiyazo-your-platform": {
     "description": "Your Platform bot toolset",
-    "tools": _HERMES_CORE_TOOLS,
+    "tools": _TIYAZO_CORE_TOOLS,
     "includes": []
 },
 ```

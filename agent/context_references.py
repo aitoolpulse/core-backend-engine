@@ -20,7 +20,7 @@ REFERENCE_PATTERN = re.compile(
 )
 TRAILING_PUNCTUATION = ",.;!?"
 _SENSITIVE_HOME_DIRS = (".ssh", ".aws", ".gnupg", ".kube", ".docker", ".azure", ".config/gh")
-_SENSITIVE_HERMES_DIRS = (Path("skills") / ".hub",)
+_SENSITIVE_TIYAZO_DIRS = (Path("skills") / ".hub",)
 _SENSITIVE_HOME_FILES = (
     Path(".ssh") / "authorized_keys",
     Path(".ssh") / "id_rsa",
@@ -369,7 +369,7 @@ def _ensure_reference_path_allowed(path: Path) -> None:
     blocked_exact = {home / rel for rel in _SENSITIVE_HOME_FILES}
     blocked_exact.add(tiyazo_home / ".env")
     blocked_dirs = [home / rel for rel in _SENSITIVE_HOME_DIRS]
-    blocked_dirs.extend(tiyazo_home / rel for rel in _SENSITIVE_HERMES_DIRS)
+    blocked_dirs.extend(tiyazo_home / rel for rel in _SENSITIVE_TIYAZO_DIRS)
 
     if path in blocked_exact:
         raise ValueError("path is a sensitive credential file and cannot be attached")
@@ -379,7 +379,7 @@ def _ensure_reference_path_allowed(path: Path) -> None:
             path.relative_to(blocked_dir)
         except ValueError:
             continue
-        raise ValueError("path is a sensitive credential or internal Hermes path and cannot be attached")
+        raise ValueError("path is a sensitive credential or internal Tiyazo path and cannot be attached")
 
     # Anchor to the canonical read deny-list (agent/file_safety.get_read_block_error),
     # the single source of truth used by the file/terminal read path. The narrow
@@ -396,7 +396,7 @@ def _ensure_reference_path_allowed(path: Path) -> None:
 
         if get_read_block_error(str(path)) is not None:
             raise ValueError(
-                "path is a sensitive credential or internal Hermes path and cannot be attached"
+                "path is a sensitive credential or internal Tiyazo path and cannot be attached"
             )
     except ValueError:
         raise

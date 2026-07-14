@@ -28,7 +28,7 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
-logger = logging.getLogger("hermes.security_audit")
+logger = logging.getLogger("tiyazo.security_audit")
 
 # Sentinel so the audit only runs once per process even if both the CLI and
 # gateway startup paths call it.
@@ -52,7 +52,7 @@ def _running_as_root() -> Optional[str]:
     return (
         "Running as ROOT. The agent's terminal/file tools execute with full "
         "root privileges — a single prompt-injection or exposed endpoint is a "
-        "full host compromise. Run Hermes as an unprivileged user (or in a "
+        "full host compromise. Run Tiyazo as an unprivileged user (or in a "
         "sandboxed terminal backend / container with a non-root user)."
     )
 
@@ -116,7 +116,7 @@ def _in_container() -> bool:
     """Best-effort container detection (Docker / Podman / generic OCI)."""
     if os.path.exists("/.dockerenv"):
         return True
-    if os.environ.get("HERMES_DESKTOP_CHILD_PID"):
+    if os.environ.get("TIYAZO_DESKTOP_CHILD_PID"):
         return False  # desktop child, not a server container
     try:
         cgroup = Path("/proc/1/cgroup").read_text(encoding="utf-8", errors="replace")

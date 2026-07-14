@@ -27,16 +27,16 @@ def build_user_agent() -> str:
 
     Format::
 
-        QQBotAdapter/<qqbot_version> (Python/<py_version>; <os>; Hermes/<tiyazo_version>)
+        QQBotAdapter/<qqbot_version> (Python/<py_version>; <os>; Tiyazo/<tiyazo_version>)
 
     Example::
 
-        QQBotAdapter/1.0.0 (Python/3.11.15; darwin; Hermes/0.9.0)
+        QQBotAdapter/1.0.0 (Python/3.11.15; darwin; Tiyazo/0.9.0)
     """
     py_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
     os_name = platform.system().lower()
     tiyazo_version = _get_tiyazo_version()
-    return f"QQBotAdapter/{QQBOT_VERSION} (Python/{py_version}; {os_name}; Hermes/{tiyazo_version})"
+    return f"QQBotAdapter/{QQBOT_VERSION} (Python/{py_version}; {os_name}; Tiyazo/{tiyazo_version})"
 
 
 def get_api_headers() -> Dict[str, str]:

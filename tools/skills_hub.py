@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Skills Hub — Source adapters and hub state management for the Hermes Skills Hub.
+Skills Hub — Source adapters and hub state management for the Tiyazo Skills Hub.
 
 This is a library module (not an agent tool). It provides:
   - GitHubAuth: Shared GitHub API authentication (PAT, gh CLI, GitHub App)
@@ -637,7 +637,7 @@ class GitHubSource(SkillSource):
         tags = []
         metadata = fm.get("metadata", {})
         if isinstance(metadata, dict):
-            tiyazo_meta = metadata.get("hermes", {})
+            tiyazo_meta = metadata.get("tiyazo", {})
             if isinstance(tiyazo_meta, dict):
                 tags = tiyazo_meta.get("tags", [])
         if not tags:
@@ -1376,7 +1376,7 @@ class UrlSource(SkillSource):
         tags: List[str] = []
         metadata = fm.get("metadata", {})
         if isinstance(metadata, dict):
-            tiyazo_meta = metadata.get("hermes", {})
+            tiyazo_meta = metadata.get("tiyazo", {})
             if isinstance(tiyazo_meta, dict):
                 raw_tags = tiyazo_meta.get("tags", [])
                 if isinstance(raw_tags, list):
@@ -2844,7 +2844,7 @@ class LobeHubSource(SkillSource):
             f"name: {identifier}",
             f"description: {description[:500]}",
             "metadata:",
-            "  hermes:",
+            "  tiyazo:",
             f"    tags: [{', '.join(str(t) for t in tag_list)}]",
             "  lobehub:",
             "    source: lobehub",
@@ -3182,7 +3182,7 @@ class OptionalSkillSource(SkillSource):
             tags = []
             meta_block = fm.get("metadata", {})
             if isinstance(meta_block, dict):
-                tiyazo_meta = meta_block.get("hermes", {})
+                tiyazo_meta = meta_block.get("tiyazo", {})
                 if isinstance(tiyazo_meta, dict):
                     tags = tiyazo_meta.get("tags", [])
 
@@ -3651,11 +3651,11 @@ def check_for_skill_updates(
 
 
 # ---------------------------------------------------------------------------
-# Hermes centralized index source
+# Tiyazo centralized index source
 # ---------------------------------------------------------------------------
 
-HERMES_INDEX_URL = "https://tiyazo-agent.nousresearch.com/docs/api/skills-index.json"
-HERMES_INDEX_TTL = 6 * 3600  # 6 hours
+TIYAZO_INDEX_URL = "https://tiyazo-agent.nousresearch.com/docs/api/skills-index.json"
+TIYAZO_INDEX_TTL = 6 * 3600  # 6 hours
 
 
 def _tiyazo_index_cache_file() -> Path:
@@ -3666,7 +3666,7 @@ def _load_tiyazo_index() -> Optional[dict]:
     """Fetch the centralized skills index, with local cache.
 
     The index is a JSON file hosted on the docs site, rebuilt daily by CI.
-    We cache it locally for HERMES_INDEX_TTL seconds to avoid repeated
+    We cache it locally for TIYAZO_INDEX_TTL seconds to avoid repeated
     downloads within a session.
     """
     # Check local cache
@@ -3674,7 +3674,7 @@ def _load_tiyazo_index() -> Optional[dict]:
     if tiyazo_index_cache_file.exists():
         try:
             age = time.time() - tiyazo_index_cache_file.stat().st_mtime
-            if age < HERMES_INDEX_TTL:
+            if age < TIYAZO_INDEX_TTL:
                 return json.loads(tiyazo_index_cache_file.read_text())
         except (OSError, json.JSONDecodeError):
             pass
@@ -3696,13 +3696,13 @@ def _load_tiyazo_index() -> Optional[dict]:
     for accept_encoding in ("gzip, deflate", "identity"):
         try:
             resp = httpx.get(
-                HERMES_INDEX_URL,
+                TIYAZO_INDEX_URL,
                 timeout=15,
                 follow_redirects=True,
                 headers={"Accept-Encoding": accept_encoding},
             )
             if resp.status_code != 200:
-                logger.debug("Hermes index fetch returned %d", resp.status_code)
+                logger.debug("Tiyazo index fetch returned %d", resp.status_code)
                 return _load_stale_index_cache()
             data = resp.json()
             break
@@ -3710,13 +3710,13 @@ def _load_tiyazo_index() -> Optional[dict]:
             # Content-Encoding decode failed — retry once uncompressed before
             # giving up on the network path entirely.
             logger.debug(
-                "Hermes index decode failed (Accept-Encoding=%s): %s",
+                "Tiyazo index decode failed (Accept-Encoding=%s): %s",
                 accept_encoding,
                 e,
             )
             continue
         except (httpx.HTTPError, json.JSONDecodeError) as e:
-            logger.debug("Hermes index fetch failed: %s", e)
+            logger.debug("Tiyazo index fetch failed: %s", e)
             return _load_stale_index_cache()
 
     if data is None:
@@ -3747,8 +3747,8 @@ def _load_stale_index_cache() -> Optional[dict]:
     return None
 
 
-class HermesIndexSource(SkillSource):
-    """Skill source backed by the centralized Hermes Skills Index.
+class TiyazoIndexSource(SkillSource):
+    """Skill source backed by the centralized Tiyazo Skills Index.
 
     The index is a JSON catalog published to the docs site and rebuilt
     daily by CI.  It contains metadata + resolved GitHub paths for every
@@ -3949,7 +3949,7 @@ def create_source_router(auth: Optional[GitHubAuth] = None) -> List[SkillSource]
 
     sources: List[SkillSource] = [
         OptionalSkillSource(),        # Official optional skills (highest priority)
-        HermesIndexSource(auth=auth), # Centralized index (search + resolved install paths)
+        TiyazoIndexSource(auth=auth), # Centralized index (search + resolved install paths)
         SkillsShSource(auth=auth),
         WellKnownSkillSource(),
         UrlSource(),                  # Direct HTTP(S) URL to a SKILL.md file

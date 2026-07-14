@@ -144,7 +144,7 @@ def ensure_dependency(
             "-ExecutionPolicy", "Bypass",
             "-File", str(script),
             "-Ensure", dep,
-            "-HermesHome", str(get_tiyazo_home()),
+            "-TiyazoHome", str(get_tiyazo_home()),
         ]
     else:
         cmd = ["bash", str(script), "--ensure", dep]
